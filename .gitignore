@@ -30,7 +30,13 @@ nosetests.xml
 # Translations
 *.mo
 
-# Mr Developer
+# Development
+*~
+.idea
 .mr.developer.cfg
 .project
 .pydevproject
+
+# Deployment
+env
+logs
