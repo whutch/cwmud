@@ -1,42 +1,18 @@
+# Python cache and bytecode
 *.py[cod]
-
-# C extensions
-*.so
-
-# Packages
-*.egg
-*.egg-info
-dist
-build
-eggs
-parts
-bin
-var
-sdist
-develop-eggs
-.installed.cfg
-lib
-lib64
-__pycache__
-
-# Installer logs
-pip-log.txt
-
-# Unit test / coverage reports
-.coverage
-.tox
-nosetests.xml
-
-# Translations
-*.mo
+__pycache__/
 
 # Development
 *~
-.idea
-.mr.developer.cfg
-.project
-.pydevproject
+.idea/
+.coverage
+.tox
+
+# Building
+dist/
+build/
+docs/.build/
 
 # Deployment
-env
-logs
+.env
+logs/
