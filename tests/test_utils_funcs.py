@@ -70,3 +70,12 @@ def test_is_iterable():
     assert funcs.is_iterable("test") is True
     assert funcs.is_iterable([1, 2, 3]) is True
     assert funcs.is_iterable(0) is False
+
+
+def test_is_hashable():
+    """Test that we can determine if an object is hashable."""
+    assert funcs.is_hashable("test") is True
+    assert funcs.is_hashable(0) is True
+    assert funcs.is_hashable((1, 2)) is True
+    assert funcs.is_hashable([1, 2]) is False
+    assert funcs.is_hashable({"1": 2}) is False

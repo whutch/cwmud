@@ -86,3 +86,19 @@ def is_iterable(obj):
         return False
     else:
         return True
+
+
+def is_hashable(obj):
+    """Determine if an object is hashable.
+
+    :param any obj: The object to test
+    :return: Whether it is hashable or not
+    :rtype: bool
+
+    """
+    try:
+        hash(obj)
+    except TypeError:
+        return False
+    else:
+        return True
