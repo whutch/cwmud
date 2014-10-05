@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Tests for logging"""
+"""Tests for logging."""
 # Part of Atria MUD Server (https://github.com/whutch/atria)
 # :copyright: (c) 2008 - 2014 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
@@ -13,16 +13,14 @@ from atria.core.logs import _Formatter, get_logger
 
 class TestFormatter:
 
-    """Tests for our custom Formatter class.
-
-    The console and file formats are hard-coded here instead of pulled from
-    settings, so it doesn't test errors in your custom formats if they differ,
-    it only tests that the formatTime method of our Formatter class is working.
-
-    """
+    """A collection of tests for our log formatter."""
 
     record = logging.LogRecord(None, None, "", 0, "", (), None, None)
     formatter = _Formatter()
+    # The console and file formats are hard-coded here instead of pulled
+    # from settings, so this doesn't test errors in your custom formats
+    # if they differ, it only tests that the formatTime method of our
+    # formatter class is working.
     console_format = "%H:%M:%S,%F"
     file_format = "%Y-%m-%d %a %H:%M:%S,%F"
 

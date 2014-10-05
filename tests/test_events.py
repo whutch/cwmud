@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Tests for event handling"""
+"""Tests for event handling."""
 # Part of Atria MUD Server (https://github.com/whutch/atria)
 # :copyright: (c) 2008 - 2014 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
@@ -8,7 +8,12 @@ from atria.core.events import EventManager
 
 
 def test_create_event_manager():
-    """Test that we can create an event manager."""
+    """Test that we can create an event manager.
+
+    This is currently redundant, importing the events package already creates
+    one, but we can keep the it for symmetry and in case that isn't always so.
+
+    """
     events = EventManager()
     assert events
 
@@ -22,7 +27,7 @@ def test_create_event():
 
 class TestHooking:
 
-    """Tests for event hooking."""
+    """A collection of tests for event hooking."""
 
     events = EventManager()
     event = events.get_or_make("test")

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Tests for scheduling and timer management"""
+"""Tests for scheduling and timer management."""
 # Part of Atria MUD Server (https://github.com/whutch/atria)
 # :copyright: (c) 2008 - 2014 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
@@ -41,8 +41,9 @@ def test_pulses_to_pulses():
 def test_create_timer_manager():
     """Test that we can create a timer manager.
 
-    This is currently redundant, importing already creates one, but
-    we can keep the test for symmetry and in case that isn't always so.
+    This is currently redundant, importing the timing package already creates
+    one, but we can keep it for symmetry and in case that isn't always so.
+
     """
     timers = TimerManager()
     assert timers
@@ -50,7 +51,7 @@ def test_create_timer_manager():
 
 class TestTimerManager:
 
-    """Tests for timer managers and their timers."""
+    """A collection of tests for timer managers and their timers."""
 
     timers = TimerManager()
     _timer = []

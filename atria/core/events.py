@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Event handling"""
+"""Event handling."""
 # Part of Atria MUD Server (https://github.com/whutch/atria)
 # :copyright: (c) 2008 - 2014 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
@@ -12,7 +12,7 @@ log = get_logger("events")
 
 class EventManager:
 
-    """Event registration and management handler.
+    """A manager for event registration and handling.
 
     Events are lazily created, when you call ``hook`` or ``fire``, if the
     target event doesn't already exist, it is implicitly created for you.
@@ -23,7 +23,7 @@ class EventManager:
     """
 
     def __init__(self):
-        """Create a new EventManager."""
+        """Create a new event manager."""
         self._events = {}
 
     def get_or_make(self, event_name):

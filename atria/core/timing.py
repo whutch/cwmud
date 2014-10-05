@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Scheduling and timer management"""
+"""Scheduling and timer management."""
 # Part of Atria MUD Server (https://github.com/whutch/atria)
 # :copyright: (c) 2008 - 2014 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
@@ -70,7 +70,7 @@ def duration_to_pulses(duration):
 
 class TimerManager:
 
-    """Timer creation and management handler."""
+    """A manager for timer creation and handling."""
 
     def __init__(self):
         """Create a new timer manager."""

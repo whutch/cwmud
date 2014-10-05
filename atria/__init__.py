@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""A modular MUD server"""
+"""A modular MUD server."""
 # Part of Atria MUD Server (https://github.com/whutch/atria)
 # :copyright: (c) 2008 - 2014 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
