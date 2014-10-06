@@ -21,12 +21,18 @@
 # Report any bugs in this implementation to me (email above)
 #------------------------------------------------------------------------------
 
-import logging
+#import logging
 import socket
 import select
 import sys
 import re
 import time
+
+
+# Don't want to use the global logging without configuration -WH
+from ..core.logs import get_logger
+logging = get_logger("miniboa")
+
 
 #---[ Telnet Notes ]-----------------------------------------------------------
 # (See RFC 854 for more information)
@@ -844,6 +850,11 @@ class TelnetServer(object):
                     self.clients[sock_fileno].socket_recv()
                 except ConnectionLost:
                     self.clients[sock_fileno].deactivate()
+                    # Don't wait another poll to do this.. -WH
+                    self.on_disconnect(self.clients[sock_fileno])
+                    del self.clients[sock_fileno]
+                    if sock_fileno in slist:
+                        slist.remove(sock_fileno)
 
         ## Process sockets with data to send
         for sock_fileno in slist:
