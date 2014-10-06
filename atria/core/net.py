@@ -46,7 +46,7 @@ class SocketManager:
         :param int port: The port to listen for new connections on
         :param callable on_connect: A callback for when a socket is opened
         :param callable on_disconnect: A callback for when a socket is closed
-        :return SocketManager: None
+        :returns: None
         :raises TypeError: if on_connect or on_disconnect aren't callable
 
         """

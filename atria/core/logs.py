@@ -28,8 +28,7 @@ class _Formatter(logging.Formatter):
 
         :param LogRecord record: The record to be formatted
         :param str datefmt: A formatting string to be passed to strftime
-        :return: A formatted time string
-        :rtype: str
+        :returns str: A formatted time string
 
         If *datefmt* is provided, it will be used to convert the time through
         datetime.strftime. If not, it falls back to the formatTime method of
@@ -104,8 +103,7 @@ def get_logger(*args, **kwargs):
 
     :param sequence args: Positional arguments passed on to logging.getLogger
     :param mapping kwargs: Keyword arguments passed on to logging.getLogger
-    :return: A logging.Logger instance
-    :rtype: logging.Logger
+    :returns logging.Logger: A Logger instance
 
     """
     logger = logging.getLogger(*args, **kwargs)

@@ -47,8 +47,7 @@ def duration_to_pulses(duration):
     converted into pulses.
 
     :param str|int duration: The amount of time to convert
-    :return: The converted amount of pulses
-    :rtype: int
+    :returns int: The converted amount of pulses
     :raises ValueError: if duration could not be parsed
 
     """
@@ -111,9 +110,8 @@ class TimerManager:
                            to repeat until killed)
         :param bool save: Whether this timer should be saved between reboots
         :param function callback: Optional, a callback for the timer
-        :return: A timer instance if a callback was provided, otherwise
-                 a decorator to create the timer
-        :rtype: TimerManager._Timer or function
+        :returns _Timer|function: A timer instance if a callback was provided,
+                                  otherwise a decorator to create the timer
         :raises AlreadyExists: if name is provided and that name already exists
         :raises KeyError: if name is provided and is not hashable
         :raises TypeError: if callback or decorated object is not callable
@@ -147,7 +145,7 @@ class TimerManager:
         """Destroy a timer if it exists, by name or reference.
 
         :param str|_Timer timer: The timer to kill
-        :return: None
+        :returns: None
 
         """
         if timer in self._timers:
@@ -163,7 +161,7 @@ class TimerManager:
         If ``wait`` is True, this will block until the next pulse.
 
         :param bool wait: Whether to wait until the next pulse or not
-        :return: None
+        :returns: None
 
         """
         self._time = now()

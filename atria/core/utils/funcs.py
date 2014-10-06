@@ -13,8 +13,7 @@ def joins(*parts, sep=" "):
 
     :param sequence parts: A sequence of items to join
     :param str sep: The separator to join them with
-    :return: The newly joined string
-    :rtype: str
+    :returns str: The newly joined string
 
     """
     if not parts or not any(parts):
@@ -28,8 +27,7 @@ def type_name(obj):
     This is a cosmetic shortcut. I find the normal method very ugly.
 
     :param any obj: The object you want the type name of
-    :return: The type name
-    :rtype: str
+    :returns str: The type name
 
     """
     return type(obj).__name__
@@ -43,8 +41,7 @@ def class_name(obj):
     a row just feels wrong.
 
     :param any obj: The object you want the class name of
-    :return: The class name
-    :rtype: str
+    :returns str: The class name
 
     """
     if type_name(obj) == "type":
@@ -59,8 +56,7 @@ def can_be_index(obj):
     """Determine if an object can be used as the index of a sequence.
 
     :param any obj: The object to test
-    :return: Whether it can be an index or not
-    :rtype: bool
+    :returns bool: Whether it can be an index or not
 
     """
     try:
@@ -75,8 +71,7 @@ def is_iterable(obj):
     """Determine if an object is iterable.
 
     :param any obj: The object to test
-    :return: Whether it is iterable or not
-    :rtype: bool
+    :returns bool: Whether it is iterable or not
 
     """
     try:
@@ -92,8 +87,7 @@ def is_hashable(obj):
     """Determine if an object is hashable.
 
     :param any obj: The object to test
-    :return: Whether it is hashable or not
-    :rtype: bool
+    :returns bool: Whether it is hashable or not
 
     """
     try:

@@ -30,8 +30,7 @@ class EventManager:
         """Fetch an event, implicitly creating it if necessary.
 
         :param str event_name: The name of the event to get or create
-        :return: The existing or newly created event
-        :rtype: _Event
+        :returns _Event: The existing or newly created event
 
         """
         event = self._events.get(event_name)
@@ -53,9 +52,8 @@ class EventManager:
         :param str namespace: Optional, a namespace for the hook
         :param function callback: Optional, a callback for the hook
         :param bool pre: Optional, whether to pre- or post-hook the event
-        :return: A decorator to register an event hook callback
-                 or None if callback was provided
-        :rtype: function or None
+        :returns function|None: A decorator to register an event hook callback
+                                or None if callback was provided
 
         """
         def _inner(func):
@@ -86,7 +84,7 @@ class EventManager:
                                wildcard, or "*" for a total wildcard
         :param str namespace: Optional, a namespace to filter by
         :param function callback: Optional, a function to filter by
-        :return: None
+        :returns: None
 
         """
         if event_name == "*":
@@ -140,8 +138,7 @@ class EventManager:
         :param str event_name: The name of the event to hook
         :param sequence args: Optional, arguments passed to the event callbacks
         :param mapping opts: Optional, options passed to the event context
-        :return: A context manager for the event
-        :rtype: _EventContext
+        :returns _EventContext: A context manager for the event
 
         """
         event = self.get_or_make(event_name)
