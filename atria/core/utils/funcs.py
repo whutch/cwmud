@@ -96,3 +96,21 @@ def is_hashable(obj):
         return False
     else:
         return True
+
+
+def find_by_attr(collection, attr, value):
+    """Find objects in a collection that have an attribute equal to a value.
+
+    :param iterable collection: The collection to search through
+    :param str attr: The attribute to search by
+    :param any value: The value to search for
+    :returns list: A list of any matching objects
+
+    """
+    unset = object()
+    matches = []
+    for obj in collection:
+        match = getattr(obj, attr, unset)
+        if match is not unset and (match is value or match == value):
+            matches.append(obj)
+    return matches

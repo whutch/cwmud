@@ -52,10 +52,10 @@ def test_class_name():
     class _TestClass:
         pass
 
-    test_instance = _TestClass()
+    instance = _TestClass()
 
     assert (funcs.class_name(_TestClass) ==
-            funcs.class_name(test_instance) ==
+            funcs.class_name(instance) ==
             "_TestClass")
 
 
@@ -79,3 +79,21 @@ def test_is_hashable():
     assert funcs.is_hashable((1, 2)) is True
     assert funcs.is_hashable([1, 2]) is False
     assert funcs.is_hashable({"1": 2}) is False
+
+
+def test_find_by_attr():
+
+    """Test that we can find an object in a collection by attribute."""
+
+    class _TestClass:
+
+        def __init__(self, value):
+            self.value = value
+
+    instances = [_TestClass(n) for n in (1, 1, 2, 3, 4, 4, 4)]
+
+    assert funcs.find_by_attr(instances, "value", 0) == []
+    assert funcs.find_by_attr(instances, "value", 2)
+    assert len(funcs.find_by_attr(instances, "value", 1)) == 2
+    assert len(funcs.find_by_attr(instances, "value", 4)) == 3
+    assert not funcs.find_by_attr(instances, "fake_value", None)
