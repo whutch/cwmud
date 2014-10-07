@@ -155,25 +155,24 @@ class TimerManager:
             # mindful of an infinite loop.
             timer.kill()
 
-    def poll(self, wait=False):
-        """Loop once through all timers.
+    def pulse(self):
+        """Pulse each timer once."""
+        for timer in self._timers.values():
+            timer.pulse()
 
-        If ``wait`` is True, this will block until the next pulse.
+    def sleep_excess(self, pulses=1):
+        """Sleep away the excess time of a number of pulses.
 
-        :param bool wait: Whether to wait until the next pulse or not
+        :param int pulses: The number of pulses to sleep through
         :returns: None
 
         """
-        self._time = now()
-        if self._time < self._next_pulse:
-            if not wait:
-                return
-            # We want to wait until it's time for the next pulse
-            sleep(self._next_pulse - self.time)
-        with EVENTS.fire("time_pulse", self._time):
-            self._next_pulse += _PULSE_TIME
-            for timer in self._timers.values():
-                timer.pulse()
+        for n in range(pulses):
+            self._time = now()
+            if self._time < self._next_pulse:
+                sleep(self._next_pulse - self.time)
+            with EVENTS.fire("time_pulse", self._time):
+                self._next_pulse += _PULSE_TIME
 
 
 class _Timer:

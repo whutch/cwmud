@@ -6,11 +6,12 @@
 
 import pytest
 
+# noinspection PyProtectedMember
 from atria.core.timing import (_PULSE_TIME, PULSE_PER_SECOND, AlreadyExists,
                                duration_to_pulses, TimerManager)
 
 
-dtp = duration_to_pulses  # For brevity
+dtp = duration_to_pulses  # For brevity.
 
 
 def test_seconds_to_pulses():
@@ -54,13 +55,12 @@ class TestTimerManager:
     """A collection of tests for timer managers and their timers."""
 
     timers = TimerManager()
-    _timer = []
-    called = []
+    timer = None
+    calls = 0
 
-    @property
-    def timer(self):
-        """A shortcut to get to our timer between tests."""
-        return self._timer[0] if self._timer else None
+    @classmethod
+    def _callback(cls):
+        cls.calls += 1
 
     def test_timer_manager_properties(self):
         """Test that the properties on a timer manager return something."""
@@ -70,9 +70,8 @@ class TestTimerManager:
 
     def test_create_timer_unnamed(self):
         """Test that we can create an unnamed timer."""
-        timer = self.timers.create(1, callback=lambda: None)
-        assert timer
-        self._timer.append(timer)
+        type(self).timer = self.timers.create(1, callback=lambda: None)
+        assert self.timer
 
     def test_create_timer_named(self):
         """Test that we can create a named timer."""
@@ -131,18 +130,19 @@ class TestTimerManager:
     def test_timer_pulse(self):
         """Test that pulsing a timer correctly updates it."""
         timer = self.timers["test2"]
-        timer.callback = lambda: self.called.append(self.timers.time)
+        timer.callback = self._callback
         assert timer.pulses == 2
         assert timer.count == 0 and timer.repeat == 2
         timer.pulse()
         assert timer.count == 1 and timer.repeat == 2
-        assert self.called == []
+        assert self.calls == 0
         timer.pulse()
         assert timer.count == 0 and timer.repeat == 1
-        assert self.called and self.called[-1] == self.timers.time
+        assert self.calls == 1
 
     def test_timer_kill_from_manager(self):
         """Test that we can kill a timer from its manager."""
+        # noinspection PyTypeChecker
         self.timers.kill(self.timer)
         assert not self.timer.live
         assert self.timer not in self.timers
@@ -156,67 +156,62 @@ class TestTimerManager:
 
     def test_dead_timer_wont_pulse(self):
         """Test that a dead timer won't pulse anymore."""
-        self.timer.callback = lambda: self.called.append("oops")
+        self.timer.callback = self._callback
         assert not self.timer.live
         assert self.timer not in self.timers
         assert self.timer.count == 0 and self.timer.repeat == 0
+        assert self.calls == 1
         self.timer.pulse()
-        assert self.called[-1] != "oops"
         assert self.timer.count == 0 and self.timer.repeat == 0
+        assert self.calls == 1
 
-    def test_timer_manager_poll(self):
-        """Test polling a timer manager."""
+    def test_timer_manager_pulse(self):
+        """Test pulsing a timer manager."""
         timer = self.timers["test2"]
         assert timer.count == 0 and timer.repeat == 1
-        next_pulse = self.timers._next_pulse
-        # Poll once, ensuring that we get the next pulse.
-        self.timers.poll(wait=True)
-        # Our timer should have counted and the next pulse updated.
-        next_pulse += _PULSE_TIME
-        assert next_pulse == self.timers._next_pulse
+        self.timers.pulse()
         assert timer.count == 1 and timer.repeat == 1
-        # Poll again but don't wait for next pulse.
-        self.timers._next_pulse += 1000  # Bump up the next pulse to ensure we
-        # don't accidentally hit it anyway without waiting (likely since all
-        # these tests have taken way longer than a single pulse time).
-        self.timers.poll()
-        self.timers._next_pulse -= 1000  # Bring it back down.
-        # Nothing should have changed.
-        assert next_pulse == self.timers._next_pulse
-        assert timer.count == 1 and timer.repeat == 1
-        # Do it again, and wait this time.
-        self.timers.poll(wait=True)
-        # Our timer should have rolled over and the next pulse updated.
-        next_pulse += _PULSE_TIME
-        assert next_pulse == self.timers._next_pulse
+        assert self.calls == 1
+        self.timers.pulse()
         assert timer.count == 0 and timer.repeat == 0
-        assert self.called and self.called[-1] == self.timers.time
+        assert self.calls == 2
 
     def test_timer_pulse_kill(self):
         """Test that a timer dies when it runs its course."""
         timer = self.timers["test2"]
         assert timer.count == 0 and timer.repeat == 0
-        self.timers.poll(wait=True)
+        self.timers.pulse()
         assert timer.count == 1 and timer.repeat == 0  # Almost there!
-        # Alas, this is the final poll for our brave little timer.
-        self.timers.poll(wait=True)
+        assert self.calls == 2
+        # Alas, this is the final pulse for our brave little timer.
+        self.timers.pulse()
         assert timer.count == 2 and timer.repeat == 0
-        assert self.called and self.called[-1] == self.timers.time
-        assert not timer.live
+        assert self.calls == 3
+        assert not timer.live  # RIP
         assert not timer.key in self.timers
 
     def test_timer_repeat_forever(self):
         """Test that a timer can repeat forever."""
-        timer = self.timers.create(1, repeat=-1, callback=
-                                   lambda: self.called.append(1))
+        timer = self.timers.create(1, repeat=-1, callback=self._callback)
         assert timer.live
         assert timer.count == 0 and timer.repeat == -1
-        was_called = len(self.called)
+        was_called = self.calls
         for n in range(1, 10):
-            timer.pulse()
+            self.timers.pulse()
             assert timer.live
             assert timer.count == 0 and timer.repeat == -1
-            assert len(self.called) == was_called + n
+            assert self.calls == was_called + n
         timer.kill()
         assert not timer.live
         assert not timer.key in self.timers
+
+    def test_timer_manager_sleep(self):
+        """Test sleeping a timer manager until the next pulse."""
+        next_pulse = self.timers._next_pulse
+        self.timers.sleep_excess()
+        next_pulse += _PULSE_TIME
+        assert next_pulse == self.timers._next_pulse
+        self.timers.sleep_excess(pulses=2)
+        next_pulse += _PULSE_TIME
+        next_pulse += _PULSE_TIME
+        assert next_pulse == self.timers._next_pulse
