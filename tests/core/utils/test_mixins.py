@@ -37,9 +37,9 @@ class TestHasFlags:
         self.instance.flags.add(1, 2)
         assert 1 in self.instance.flags and 2 in self.instance.flags
 
-    def test_all_flags(self):
+    def test_flags_as_tuple(self):
         """Test that the all property returns the current flags."""
-        assert set(self.instance.flags.all) == {"test", 1, 2}
+        assert set(self.instance.flags.as_tuple) == {"test", 1, 2}
 
     def test_iter_flags(self):
         """Test that we can iterate through the flag set."""
@@ -88,3 +88,8 @@ class TestHasFlags:
         assert not self.instance.flags.has("test", 1, 2)
         self.instance.flags.toggle(1, 2)
         assert self.instance.flags.has("test", 1, 2)
+
+    def test_has_any_flags(self):
+        """Test that we can pass a check function to the has method."""
+        assert not self.instance.flags.has_any("nope", 3, 4)
+        assert self.instance.flags.has_any("test", 3, 4)

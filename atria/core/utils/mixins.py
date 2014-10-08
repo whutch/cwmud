@@ -26,7 +26,7 @@ class _FlagSet:
         return bool(self._flags)
 
     @property
-    def all(self):
+    def as_tuple(self):
         """Return the current set of flags as a tuple."""
         return tuple(self._flags)
 
@@ -38,6 +38,15 @@ class _FlagSet:
 
         """
         return all((True if flag in self._flags else False for flag in flags))
+
+    def has_any(self, *flags):
+        """Return whether this set contains one or more of the given flags.
+
+        :param hashable flags: The flags to check for
+        :returns bool: Whether this flag set contains some of the given flags
+
+        """
+        return any((True if flag in self._flags else False for flag in flags))
 
     def add(self, *flags):
         """Add one or more flags to this set.
