@@ -66,7 +66,8 @@ class _FlagSet:
 
         """
         for flag in flags:
-            self._flags.remove(flag)
+            if flag in self._flags:
+                self._flags.remove(flag)
 
     def toggle(self, *flags):
         """Toggle whether one or more flags are in this set.
