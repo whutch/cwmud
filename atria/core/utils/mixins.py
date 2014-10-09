@@ -4,6 +4,8 @@
 # :copyright: (c) 2008 - 2014 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
+from .decorators import weak_property
+
 
 class _FlagSet:
 
@@ -95,3 +97,47 @@ class HasFlags:
     def flags(self):
         """Return this object's flag set."""
         return self._flag_set
+
+
+class HasParent:
+
+    """A mix-in to allow objects to link themselves to a parent object.
+
+    Parents are stored with weak references via the weak_properties decorator,
+    so a child object will not keep the parent object from being deleted if
+    its last strong reference is deleted.
+
+    """
+
+    def __init__(self):
+        super().__init__()
+
+    # noinspection PyDocstring,PyUnusedLocal
+    @weak_property
+    def parent(self, old, new):
+        """Validate that this object's lineage doesn't link back to itself."""
+        parent = new
+        while parent:
+            if parent is self:
+                raise ValueError("invalid parent due to circular lineage")
+            parent = parent.parent
+
+    def get_lineage(self):
+        """Return a generator to iterate through this objects lineage.
+
+        Unless an object has the "parent first" flag, it will be yielded first
+        in the lineage, before its parent, and so on through the line.
+
+        """
+        if hasattr(self, "flags"):
+            parent_first = ("parent first" in self.flags)
+        else:
+            parent_first = False
+        parent = self.parent
+        if parent and parent_first:
+            for obj in parent.get_lineage():
+                yield obj
+        yield self
+        if parent and not parent_first:
+            for obj in parent.get_lineage():
+                yield obj

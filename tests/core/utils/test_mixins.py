@@ -4,7 +4,9 @@
 # :copyright: (c) 2008 - 2014 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
-from atria.core.utils.mixins import HasFlags
+import pytest
+
+from atria.core.utils.mixins import HasFlags, HasParent
 
 
 class TestHasFlags:
@@ -90,6 +92,51 @@ class TestHasFlags:
         assert self.instance.flags.has("test", 1, 2)
 
     def test_has_any_flags(self):
-        """Test that we can pass a check function to the has method."""
+        """Test that we can check for flags through the has_any method."""
         assert not self.instance.flags.has_any("nope", 3, 4)
         assert self.instance.flags.has_any("test", 3, 4)
+
+
+class TestHasParent:
+
+    """A collection of tests for parents mix-in class."""
+
+    class _TestClass(HasFlags, HasParent):
+
+        def __init__(self):
+            super().__init__()
+            self.some_attribute = 5
+
+    grandparent = _TestClass()
+    parent = _TestClass()
+    child = _TestClass()
+
+    def test_get_parent(self):
+        """Test that we can get the parent of an object."""
+        assert self.child.parent is None
+
+    def test_set_parent(self):
+        """Test that we can set the parent of an object."""
+        self.child.parent = self.parent
+        assert self.child.parent is self.parent
+        self.parent.parent = self.grandparent
+        assert self.parent.parent is self.grandparent
+        assert self.child.parent.parent is self.grandparent
+
+    def test_set_parent_circular(self):
+        """Test that trying to set a circular lineage fails."""
+        assert not self.grandparent.parent
+        with pytest.raises(ValueError):
+            self.grandparent.parent = self.child
+        assert not self.grandparent.parent
+
+    def test_get_lineage(self):
+        """Test that we can get an objects lineage through the parents."""
+        assert (tuple(self.child.get_lineage()) ==
+                (self.child, self.parent, self.grandparent))
+
+    def test_get_lineage_parent_first(self):
+        """Test that we can get an objects lineage with a parent first flag."""
+        self.child.flags.add("parent first")
+        assert (tuple(self.child.get_lineage()) ==
+                (self.parent, self.grandparent, self.child))
