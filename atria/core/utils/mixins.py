@@ -4,7 +4,7 @@
 # :copyright: (c) 2008 - 2014 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
-from .decorators import weak_property
+from weakref import ref
 
 
 class _FlagSet:
@@ -99,28 +99,69 @@ class HasFlags:
         return self._flag_set
 
 
-class HasParent:
+class HasWeaks:
+
+    """A mix-in to allow objects to store weak references to other objects."""
+
+    def __init__(self):
+        super().__init__()
+        self._weak_refs = {}
+
+    def _get_weak(self, name):
+        weak = self._weak_refs.get(name)
+        return weak() if weak else None
+
+    def _set_weak(self, name, obj):
+        if obj is None:
+            self._del_weak(name)
+        else:
+            self._weak_refs[name] = ref(obj)
+
+    def _del_weak(self, name):
+        if name in self._weak_refs:
+            del self._weak_refs[name]
+
+
+class HasParent(HasWeaks):
 
     """A mix-in to allow objects to link themselves to a parent object.
 
-    Parents are stored with weak references via the weak_properties decorator,
-    so a child object will not keep the parent object from being deleted if
-    its last strong reference is deleted.
+    Parents are stored with weak references via the HasWeaks mix-in, so a
+    child object will not keep the parent object from being deleted if its
+    last strong reference is deleted.
 
     """
 
     def __init__(self):
         super().__init__()
 
-    # noinspection PyDocstring,PyUnusedLocal
-    @weak_property
-    def parent(self, old, new):
-        """Validate that this object's lineage doesn't link back to itself."""
-        parent = new
-        while parent:
-            if parent is self:
-                raise ValueError("invalid parent due to circular lineage")
-            parent = parent.parent
+    @property
+    def parent(self):
+        """Get the parent of this object."""
+        return self._get_weak("parent")
+
+    @parent.setter
+    def parent(self, obj):
+        """Set the parent of this object.
+
+        :param HasParent obj: The new parent; must subclass HasParent
+        :returns: None
+        :raises TypeError: If ``obj`` cannot be a parent
+        :raises ValueError: If this parent results in a circular lineage
+
+        """
+        if obj is not None:
+            # Check that this object can be a parent
+            if not hasattr(obj, "parent"):
+                raise TypeError("given object cannot be a parent")
+            # Check for a circular lineage through this parent
+            check_obj = obj
+            while check_obj:
+                if check_obj is self:
+                    raise ValueError("invalid parent due to circular lineage")
+                check_obj = check_obj.parent
+        # Lineage is good
+        self._set_weak("parent", obj)
 
     def get_lineage(self):
         """Return a generator to iterate through this objects lineage.

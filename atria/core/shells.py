@@ -7,7 +7,6 @@
 import re
 
 from .logs import get_logger
-from .utils.decorators import weak_property
 from .utils.exceptions import AlreadyExists
 from .utils.funcs import joins
 from .utils.mixins import HasFlags, HasParent
@@ -108,10 +107,20 @@ class Shell(HasFlags, HasParent):
     def __init__(self):
         super().__init__()
 
-    # noinspection PyDocstring
-    @weak_property
-    def session(self, old, new):
-        pass
+    @property
+    def session(self):
+        """Return this shell's current session."""
+        return self._get_weak("session")
+
+    @session.setter
+    def session(self, new_session):
+        """Set the current shell for this session.
+
+        :param _Session new_session: The session tied to this shell
+        :returns: None
+
+        """
+        self._set_weak("session", new_session)
 
     # noinspection PyMethodMayBeStatic
     def init(self):

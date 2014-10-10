@@ -6,7 +6,7 @@
 
 import pytest
 
-from atria.core.utils.mixins import HasFlags, HasParent
+from atria.core.utils.mixins import HasFlags, HasParent, HasWeaks
 
 
 class TestHasFlags:
@@ -97,6 +97,72 @@ class TestHasFlags:
         assert self.instance.flags.has_any("test", 3, 4)
 
 
+class TestHasWeaks:
+
+    """A collection of tests for weak properties."""
+
+    class _TestClass(HasWeaks):
+
+        instances = 0
+
+        def __init__(self):
+            super().__init__()
+            type(self).instances += 1
+
+        def __del__(self):
+            type(self).instances -= 1
+
+        @property
+        def weak_ref(self):
+            """Get this object's weak reference."""
+            return self._get_weak("weak_ref")
+
+        @weak_ref.setter
+        def weak_ref(self, obj):
+            """Set this object's weak reference.
+
+            :param any obj: The object we want to weakly reference
+            :returns: None
+
+            """
+            self._set_weak("weak_ref", obj)
+
+    def test_weak_ref_one_way(self):
+        """Test linking an object to another through a weak property."""
+        assert self._TestClass.instances == 0
+        one = self._TestClass()
+        two = self._TestClass()
+        assert self._TestClass.instances == 2
+        one.weak_ref = two
+        assert one.weak_ref is two
+        del two
+        assert not one.weak_ref
+        assert self._TestClass.instances == 1
+
+    def test_weak_ref_both_ways(self):
+        """Test linking two objects to each other through weak properties."""
+        assert self._TestClass.instances == 0
+        one = self._TestClass()
+        two = self._TestClass()
+        assert self._TestClass.instances == 2
+        one.weak_ref = two
+        two.weak_ref = one
+        assert one.weak_ref is two and two.weak_ref is one
+        del one
+        del two
+        assert self._TestClass.instances == 0
+
+    def test_weak_ref_to_self(self):
+        """Test linking an object to itself through a weak property."""
+        assert self._TestClass.instances == 0
+        one = self._TestClass()
+        assert self._TestClass.instances == 1
+        one.weak_ref = one
+        assert one.weak_ref is one
+        del one
+        assert self._TestClass.instances == 0
+
+
 class TestHasParent:
 
     """A collection of tests for parents mix-in class."""
@@ -123,6 +189,11 @@ class TestHasParent:
         assert self.parent.parent is self.grandparent
         assert self.child.parent.parent is self.grandparent
 
+    def test_set_parent_invalid_parent(self):
+        """Test that trying to set an invalid parent fails."""
+        with pytest.raises(TypeError):
+            self.grandparent.parent = "yeah"
+
     def test_set_parent_circular(self):
         """Test that trying to set a circular lineage fails."""
         assert not self.grandparent.parent
@@ -140,3 +211,11 @@ class TestHasParent:
         self.child.flags.add("parent first")
         assert (tuple(self.child.get_lineage()) ==
                 (self.parent, self.grandparent, self.child))
+
+    def test_unset_parent(self):
+        """Test that we can unset the parent of an object."""
+        self.child.parent = None
+        assert self.child.parent is None
+        # And just for the hell of it..
+        self.grandparent.parent = self.child
+        assert self.parent.parent.parent is self.child
