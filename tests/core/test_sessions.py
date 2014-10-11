@@ -4,11 +4,14 @@
 # :copyright: (c) 2008 - 2014 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
+import pytest
+
 from atria import settings
 from atria.core.sessions import SessionManager
+from atria.core.shells import EchoShell
 
 
-class TestSessionManager:
+class TestSessions:
 
     """A collection of tests for session management."""
 
@@ -72,10 +75,6 @@ class TestSessionManager:
         """Test that we can find a session by its socket."""
         assert self.sessions.find_by_socket(self.socket) is self.session
 
-    def test_session_properties(self):
-        """Test that the properties of a session return something."""
-        assert self.session.active and self.session.address
-
     def test_session_active(self):
         """Test that we can determine if a session should be closed."""
         assert self.session.active
@@ -86,6 +85,30 @@ class TestSessionManager:
         assert not self.session.active
         self.session.flags.toggle("close")
         assert self.session.active
+
+    def test_session_address(self):
+        """Test that we can get the host address of the session."""
+        assert self.session.address
+
+    def test_session_set_shell(self):
+        """Test that we can set a session's current shell."""
+        self.session.shell = EchoShell()
+        assert self.session._shell
+        assert isinstance(self.session._shell, EchoShell)
+        self.session.shell = None
+        assert self.session._shell is None
+        with pytest.raises(TypeError):
+            self.session.shell = 0
+        # Setting it to Shell or one of its subclasses instead of an instance
+        # will implicitly instantiate the class and set it to the new instance.
+        self.session.shell = EchoShell
+        assert self.session._shell
+        assert isinstance(self.session._shell, EchoShell)
+
+    def test_session_get_shell(self):
+        """Test that we can get a session's current shell."""
+        assert self.session.shell
+        assert isinstance(self.session.shell, EchoShell)
 
     def test_session_get_prompt(self):
         """Test that we can generate the prompt for a session."""
@@ -146,8 +169,8 @@ class TestSessionManager:
         """Test that we can poll a session manager to poll all its sessions."""
         # Create a couple more sessions to test with.
         sessions = [self.session,
-                    self.sessions.create(self._FakeSocket()),
-                    self.sessions.create(self._FakeSocket())]
+                    self.sessions.create(self._FakeSocket(), EchoShell),
+                    self.sessions.create(self._FakeSocket(), EchoShell)]
         # Change them around a bit and then poll them all.
         sessions[0]._socket._commands.append("test")
         sessions[1]._socket._commands.append("test")
