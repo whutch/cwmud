@@ -1,0 +1,11 @@
+machine:
+  python:
+    version: 3.3.3
+
+dependencies:
+  pre:
+    - pip install -r requirements-dev.txt
+
+test:
+  override:
+    - py.test tests
