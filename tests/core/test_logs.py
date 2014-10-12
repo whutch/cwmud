@@ -11,7 +11,7 @@ from atria import settings
 from atria.core.logs import _Formatter, get_logger
 
 
-class TestFormatter:
+class XTestFormatter:
 
     """A collection of tests for our log formatter."""
 
