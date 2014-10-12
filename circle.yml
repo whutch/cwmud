@@ -1,3 +1,7 @@
+general:
+  artifacts:
+    - ".coverage-html/"
+
 machine:
   python:
     version: 3.3.3
@@ -8,4 +12,4 @@ dependencies:
 
 test:
   override:
-    - py.test tests
+    - py.test --cov-report html --cov atria tests

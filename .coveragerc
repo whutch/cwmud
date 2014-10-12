@@ -1,0 +1,6 @@
+[run]
+omit =
+    atria/libs/*
+
+[html]
+directory = .coverage-html
