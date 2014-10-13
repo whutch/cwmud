@@ -92,14 +92,14 @@ class TestShells:
 
     def test_shell_generate_arguments(self):
         """Test that we can parse arguments from input."""
-        assert self.shell.get_arguments("test") == ["test"]
-        assert (self.shell.get_arguments('`testing` 1 ``2 "3"') ==
+        assert self.shell._get_arguments("test") == ["test"]
+        assert (self.shell._get_arguments('`testing` 1 ``2 "3"') ==
                 ["testing", "1", "2", "3"])
-        assert (self.shell.get_arguments("hi blah blah blah", max_args=1) ==
-                ["hi", "blah blah blah"])
-        assert (self.shell.get_arguments("this is 'a test'", max_args=50) ==
+        assert (self.shell._get_arguments("hi blah blah blah", max_args=1) ==
+                ["hi", " blah blah blah"])
+        assert (self.shell._get_arguments("this is 'a test'", max_args=50) ==
                 ["this", "is", "a test"])
-        assert (self.shell.get_arguments("test test test", max_args=0) ==
+        assert (self.shell._get_arguments("test test test", max_args=0) ==
                 ["test test test"])
 
     def test_shell_parse(self):

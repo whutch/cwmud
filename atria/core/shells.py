@@ -4,8 +4,6 @@
 # :copyright: (c) 2008 - 2014 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
-import re
-
 from .logs import get_logger
 from .utils.exceptions import AlreadyExists
 from .utils.funcs import joins
@@ -84,25 +82,15 @@ class Shell(HasFlags, HasParent):
     """A shell for processing client input."""
 
     commands = None
-    pattern = re.compile(r"""
-            # Because we're using a delimiter group, we need
-            # to wrap the whole thing in a group, otherwise
-            # re.findall will only return the subgroup
-            (
-                # First try and match text between a pair of
-                # delimiters (", ', or `)
-                (["'`]).*?\2
-            |
-                # Otherwise match anything not whitespace
-                [^\s]+
-            )
-            # An re.findall of this will return tuple pairs
-            # consisting of either a single word argument or
-            # a delimited string (with delimiter) as the first
-            # value and either an empty string (if single word)
-            # or the delimiter (if delimited) as the second
-        """, re.VERBOSE)
     state = STATES.connected
+
+    # Delimiters should be a pair of equal-length strings that contain
+    # opening and closing delimiter characters. A delimiter at any given index
+    # in the first string will be the opening delimiter that will pair with a
+    # closing delimiter at the same index in the second string. This allows
+    # shells to delimit arguments using non-equal pairs such as braces,
+    # brackets, and parentheses.
+    delimiters = ("\"'`", "\"'`")
 
     def __init__(self):
         super().__init__()
@@ -137,7 +125,64 @@ class Shell(HasFlags, HasParent):
         """Generate the current prompt for this shell."""
         return "^y>^~ "
 
-    def get_arguments(self, data, max_args=-1):
+    @classmethod
+    def _one_argument(cls, data):
+        """Parse a single argument from data.
+
+        This always returns exactly two values; if there is no remaining data
+        after parsing one argument, the second value will be an empty string.
+        If there was no data worth parsing, both values will be empty strings.
+
+        :param str data: The data to get an argument from.
+        :returns str,str: The parsed argument and any remaining data
+
+        """
+        # Dump leading whitespace.
+        data = data.lstrip()
+        # Is there anything left to parse?
+        if not data:
+            return "", ""
+        if data[0] in cls.delimiters[0]:
+            # This is a delimited string, so read until it ends or data does.
+            delimiter = cls.delimiters[0].index(data[0])
+            delimiter_end = cls.delimiters[1][delimiter]
+            closed = False
+            try:
+                # Does this delimited string have a closing delimiter?
+                end = data.index(delimiter_end, 1)
+                closed = True
+            except ValueError:
+                # No it doesn't, so read everything.
+                end = len(data)
+            arg = data[1:end]
+            if closed:
+                end += 1
+            if not arg:
+                # It was an empty delimited string, start over and
+                # look for a new argument.
+                return cls._one_argument(data[end:])
+        else:
+            # Not a delimited string, so read until whitespace or a delimiter.
+            end = 1
+            data_end = len(data)
+            stop_on = " \n\r\t" + cls.delimiters[0]
+            while end < data_end:
+                if data[end] in stop_on:
+                    break
+                end += 1
+            arg = data[:end]
+        # One way or another, we found an argument.
+        return arg, data[end:]
+
+    @classmethod
+    def _iter_arguments(cls, data):
+        while data:
+            arg, data = cls._one_argument(data)
+            if arg:
+                yield arg
+
+    @classmethod
+    def _get_arguments(cls, data, max_args=-1):
         """Parse data into a list of arguments.
 
         Any un-parsed arguments (either because max was reached or because a
@@ -150,31 +195,15 @@ class Shell(HasFlags, HasParent):
         :returns list: The parsed arguments
 
         """
-        # Dump leading and trailing whitespace
-        data = data.strip()
-        # Is there anything left?
-        if not data:
-            return []
-        if max_args == 0:
-            return [data]
         args = []
-        matches = self.pattern.finditer(data)
-        last_match = None
-        for match in matches:
-            arg, delimiter = match.groups()
-            if delimiter:
-                arg = arg[1:-1]
+        while data and max_args != 0:
+            arg, data = cls._one_argument(data)
             if arg:
                 args.append(arg)
-            last_match = match
             if max_args > 0:
                 max_args -= 1
-            if max_args == 0:
-                break
-        if last_match:
-            rest = data[last_match.end():].strip()
-            if rest:
-                args.append(rest)
+        if data:
+            args.append(data)
         return args
 
     def parse(self, data):
