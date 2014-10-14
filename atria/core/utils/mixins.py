@@ -163,22 +163,50 @@ class HasParent(HasWeaks):
         # Lineage is good
         self._set_weak("parent", obj)
 
-    def get_lineage(self):
-        """Return a generator to iterate through this objects lineage.
+    def get_lineage(self, priority=0):
+        """Return a generator to iterate through this object's lineage.
 
         Unless an object has the "parent first" flag, it will be yielded first
         in the lineage, before its parent, and so on through the line.
+
+        :param int priority: If zero, this will iterate over the full lineage;
+                             if positive, this will only iterate over objects
+                             that have priority over this object; if negative,
+                             this will only iterate over objects that this
+                             object has priority over
+        :returns generator: An iterator through this object's lineage
 
         """
         if hasattr(self, "flags"):
             parent_first = ("parent first" in self.flags)
         else:
             parent_first = False
-        parent = self.parent
-        if parent and parent_first:
+        parent = self.parent  # Save a bunch of weakref de-referencing.
+        if parent and parent_first and priority >= 0:
             for obj in parent.get_lineage():
                 yield obj
-        yield self
-        if parent and not parent_first:
+        if priority == 0:
+            yield self
+        if parent and not parent_first and priority <= 0:
             for obj in parent.get_lineage():
                 yield obj
+
+    def get_ancestors(self):
+        """Return a generator to iterate through this object's ancestors.
+
+        :returns generator: An iterator through this object's ancestry
+
+        """
+        if self.parent:
+            yield self.parent
+            for obj in self.parent.get_ancestors():
+                yield obj
+
+    def has_ancestor(self, obj):
+        """Return whether this object has another object as an ancestor.
+
+        :param HasParent obj: The object to search for
+        :returns bool: Whether the object was found in this object's ancestry
+
+        """
+        return obj in self.get_ancestors()

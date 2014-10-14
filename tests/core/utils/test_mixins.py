@@ -206,11 +206,33 @@ class TestHasParent:
         assert (tuple(self.child.get_lineage()) ==
                 (self.child, self.parent, self.grandparent))
 
+    def test_get_lineage_higher_priority(self):
+        """Test that we can get the higher priority objects in a lineage."""
+        assert (tuple(self.child.get_lineage(priority=1)) == ())
+
+    def test_get_lineage_lower_priority(self):
+        """Test that we can get the lower priority objects in a lineage."""
+        assert (tuple(self.child.get_lineage(priority=-1)) ==
+                (self.parent, self.grandparent))
+
     def test_get_lineage_parent_first(self):
         """Test that we can get an objects lineage with a parent first flag."""
         self.child.flags.add("parent first")
         assert (tuple(self.child.get_lineage()) ==
                 (self.parent, self.grandparent, self.child))
+        assert (tuple(self.child.get_lineage(priority=1)) ==
+                (self.parent, self.grandparent))
+        assert (tuple(self.child.get_lineage(priority=-11)) == ())
+
+    def test_get_ancestors(self):
+        """Test that we can get the ancestors of an object."""
+        assert (tuple(self.child.get_ancestors()) ==
+                (self.parent, self.grandparent))
+
+    def test_has_ancestor(self):
+        """Test that we can see if an object has an ancestor."""
+        assert self.child.has_ancestor(self.grandparent)
+        assert not self.grandparent.has_ancestor(self.child)
 
     def test_unset_parent(self):
         """Test that we can unset the parent of an object."""
