@@ -30,12 +30,9 @@ class ShellManager:
 
     """A manager for shell registration.
 
-    Unlike the other object managers in the core modules, this manager is not
-    required for the game to function. All of the functionality of shells can
-    be achieved by subclassing, instantiating, and references shells directly,
-    but having the manager allows for easy passing of shells between modules
-    (the modules only need to import SHELLS instead of importing other modules
-    directly to get to their shells).
+    This is a convenience manager and is not required for the server to
+    function. All if its functionality can be achieved by subclassing,
+    instantiating, and referencing shells directly.
 
     """
 
@@ -58,6 +55,7 @@ class ShellManager:
         :param Shell shell: Optional, the shell to be registered
         :returns Shell|function: The registered shell if a shell was provided,
                                   otherwise a decorator to register the shell
+        :raises AlreadyExists: If a shell with that class name already exists
         :raises TypeError: If the supplied or decorated class is not a
                            subclass of Shell.
 
@@ -71,7 +69,7 @@ class ShellManager:
                 raise AlreadyExists(name, self._shells[name], shell_class)
             self._shells[name] = shell_class
             return shell_class
-        if shell:
+        if shell is not None:
             return _inner(shell)
         else:
             return _inner
@@ -93,22 +91,28 @@ class Shell(HasFlags, HasParent):
     delimiters = ("\"'`", "\"'`")
 
     def __init__(self):
+        """Create a new shell."""
         super().__init__()
 
     @property
     def session(self):
-        """Return this shell's current session."""
+        """Return the current session for this shell."""
         return self._get_weak("session")
 
     @session.setter
     def session(self, new_session):
-        """Set the current shell for this session.
+        """Set the current session for this shell.
+
+        If ``new_session`` is not None, this shell's init method
+        will be called.
 
         :param _Session new_session: The session tied to this shell
         :returns: None
 
         """
         self._set_weak("session", new_session)
+        if new_session is not None:
+            self.init()
 
     # noinspection PyMethodMayBeStatic
     def init(self):
@@ -239,6 +243,6 @@ class EchoShell(Shell):
         """
         if data.strip() == "quit":
             self.session.close("Okay, goodbye!",
-                               log_msg=joins(self, "has quit"))
+                               log_msg=joins(self.session, "has quit"))
         else:
             self.session.send("You sent:", data)

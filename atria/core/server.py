@@ -31,8 +31,8 @@ def _close_socket(socket):
 
 
 @EVENTS.hook("socket_opened")
-def _hook_server_boot(socket):
     session = SESSIONS.create(socket)
+def _hook_socket_opened(socket):
     with EVENTS.fire("session_started", session):
         session.send(SESSIONS.greeting)
 

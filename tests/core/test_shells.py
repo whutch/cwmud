@@ -40,7 +40,6 @@ class TestShells:
         type(self).shells = ShellManager()
         assert self.shells
 
-    # noinspection PyUnusedLocal
     def test_shell_manager_register(self):
 
         """Test that we can register a new shell through a shell manager."""

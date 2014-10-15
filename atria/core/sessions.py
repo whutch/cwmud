@@ -85,8 +85,9 @@ class _Session(HasFlags):
             self.shell = shell
 
     def __del__(self):
-        self._socket.sock.close()
-        self._socket.active = False
+        if self._socket:
+            self._socket.sock.close()
+            self._socket.active = False
 
     def __repr__(self):
         return joins("Session<", self._address, ">", sep="")
@@ -126,19 +127,9 @@ class _Session(HasFlags):
             elif not isinstance(shell, Shell):
                 raise TypeError("argument must be shell class or instance")
             self._shell = shell
-            ### The order of these is important, as assigning the shell's
-            ### session will call its init() method.
+            # The order of these is important, as assigning the shell's
+            # session will call its init() method.
             shell.session = self
-            shell.init()
-
-    def change_shell(self):
-        pass
-
-    def add_shell(self):
-        pass
-
-    def drop_shell(self):
-        pass
 
     def _check_idle(self):
         """Check if this session is idle."""
