@@ -73,6 +73,9 @@ class Command(HasFlags, HasWeaks):
 
     """A command for performing actions through a shell."""
 
+    # Whether this command receives its arguments un-parsed.
+    no_parse = False
+
     def __init__(self, session, args):
         """Create a new command instance."""
         super(Command, self).__init__()
@@ -94,7 +97,7 @@ class Command(HasFlags, HasWeaks):
         """
         self._set_weak("session", new_session)
 
-    def process(self):
+    def execute(self):
         """Validate conditions and then perform this command's action."""
         if not self.session:
             return

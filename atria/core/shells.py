@@ -4,7 +4,10 @@
 # :copyright: (c) 2008 - 2014 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
+from weakref import WeakValueDictionary
+
 from .logs import get_logger
+from .commands import Command
 from .utils.exceptions import AlreadyExists
 from .utils.funcs import joins
 from .utils.mixins import HasFlags, HasParent
@@ -79,8 +82,13 @@ class Shell(HasFlags, HasParent):
 
     """A shell for processing client input."""
 
-    commands = None
     state = STATES.connected
+
+    # If you want to add or remove verbs from a subclass of Shell, you must
+    # redefine your own _verbs attribute as a new WeakValueDictionary. The
+    # verbs of the parent class will still be accessible with find_verb
+    # because it iterates through the shell lineage.
+    _verbs = WeakValueDictionary()
 
     # Delimiters should be a pair of equal-length strings that contain
     # opening and closing delimiter characters. A delimiter at any given index
@@ -128,6 +136,101 @@ class Shell(HasFlags, HasParent):
     def get_prompt(self):
         """Generate the current prompt for this shell."""
         return "^y>^~ "
+
+    @classmethod
+    def inherited_verbs(cls):
+        """Return whether this shell inherited its verbs through subclassing.
+
+        This is an important distinction, as you cannot add or remove verbs
+        from a shell that inherited its verb store, as that would affect the
+        store of the parent and any of that parent's other subclasses that
+        also inherit the store.
+
+        """
+        if cls is Shell or cls._verbs is None:
+            return False
+        # noinspection PyUnresolvedReferences,PyProtectedMember
+        if super(cls, cls)._verbs is cls._verbs:
+            # We have the same verb store as our parent class.
+            return True
+        # We must have declared our own, good on us.
+        return False
+
+    @staticmethod
+    def _validate_verb(verb):
+        if not verb or not isinstance(verb, str):
+            raise ValueError(joins("invalid verb:", repr(verb)))
+        if len(verb) == 1:
+            # This is a shortcut verb, it can't be a letter
+            if verb.isalpha():
+                raise ValueError("single-character verbs cannot be letters")
+        else:
+            if not verb.isalpha():
+                raise ValueError("verbs can only contain letters")
+
+    @classmethod
+    def add_verbs(cls, command, *verbs):
+        """Add verbs to this shell that trigger a given command.
+
+        :param Command command: The command that will be executed
+        :param *str verbs: A sequence of verbs that trigger the command
+        :returns: None
+        :raises KeyError: If this shell inherited its verb store
+        :raises TypeError: If the given command is not a Command subclass
+        :raises ValueError: If any of the verbs are not valid verbs
+
+        """
+        if cls.inherited_verbs():
+            raise KeyError("cannot add verbs without explicit verb store")
+        if not issubclass(command, Command):
+            raise TypeError("cannot add verbs for non-Command")
+        for verb in verbs:
+            cls._validate_verb(verb)
+            if verb in cls._verbs:
+                raise AlreadyExists(verb, cls._verbs[verb], command)
+        for verb in verbs:
+            cls._verbs[verb.lower()] = command
+
+    @classmethod
+    def remove_verbs(cls, *verbs):
+        """Remove verbs from this shell.
+
+        :param *str verbs: A sequence of verbs to remove
+        :returns: None
+        :raises KeyError: If this shell inherited its verb store
+
+        """
+        if cls.inherited_verbs():
+            raise KeyError("cannot remove verbs without explicit verb store")
+        for verb in verbs:
+            if verb in cls._verbs:
+                del cls._verbs[verb]
+
+    @classmethod
+    def get_command(cls, verb):
+        """Get a command in this shell by its verb.
+
+        :param str verb: The verb of the command to get
+        :returns Command|None: The command with that verb or None
+
+        """
+        return cls._verbs.get(verb)
+
+    def find_command(self, verb):
+        """Find a command in this shell's lineage by its verb.
+
+        Will return the first command found, as multiple stores may have
+        different commands using the same verb.
+
+        :param str verb: The verb of the command to search for
+        :returns Command|None: The command with that verb or None
+
+        """
+        for shell in self.get_lineage():
+            command = shell.get_command(verb)
+            if command:
+                return command
+        return None
 
     @classmethod
     def _one_argument(cls, data):
@@ -217,8 +320,34 @@ class Shell(HasFlags, HasParent):
         :returns: None
 
         """
-        # Placeholder until commands are added
-        self.session.send("Huh?")
+        if not data:
+            return
+        command = None
+        if not data[0].isalpha():
+            # Check for verb shortcuts
+            command = self.find_command(data[0])
+        if command:
+            # We found a shortcut, everything else is args
+            data = data[1:]
+        else:
+            # No shortcut, so find a verb
+            arg, data = self._one_argument(data)
+            command = self.find_command(arg)
+        if command:
+            if command.no_parse:
+                # Let this command do its own argument parsing
+                args = [data]
+            else:
+                args = self._get_arguments(data)
+            try:
+                # noinspection PyCallingNonCallable
+                instance = command(self.session, args)
+                instance.execute()
+            except:
+                # To be expanded later with some checking and logging
+                raise
+        else:
+            self.session.send("Huh?")
 
 
 # We create a global ShellManager here for convenience, and while the server

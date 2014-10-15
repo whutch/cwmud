@@ -8,14 +8,52 @@ from os.path import exists, join
 
 from .. import __version__
 from .. import settings
+from .commands import COMMANDS, Command
 from .events import EVENTS
 from .logs import get_logger
 from .net import SOCKETS
 from .sessions import SESSIONS
+from .shells import STATES, SHELLS, Shell, WeakValueDictionary
 from .timing import TIMERS
+from .utils.funcs import joins
 
 
 log = get_logger("server")
+
+
+@SHELLS.register
+class BaseShell(Shell):
+
+    """A basic command shell."""
+
+    _verbs = WeakValueDictionary()
+    state = STATES.playing
+
+
+@COMMANDS.register
+class QuitCommand(Command):
+
+    """A command for quitting the server."""
+
+    def _action(self):
+        self.session.close("Okay, goodbye!",
+                           log_msg=joins(self.session, "has quit"))
+
+
+@COMMANDS.register
+class SayCommand(Command):
+
+    """A command for saying stuff on the server."""
+
+    no_parse = True
+
+    def _action(self):
+        message = self.args[0].strip()
+        self.session.send(joins("You say, '", message, "'.", sep=""))
+
+
+BaseShell.add_verbs(QuitCommand, "quit")
+BaseShell.add_verbs(SayCommand, "say", "'")
 
 
 def _open_socket(socket):
@@ -31,8 +69,8 @@ def _close_socket(socket):
 
 
 @EVENTS.hook("socket_opened")
-    session = SESSIONS.create(socket)
 def _hook_socket_opened(socket):
+    session = SESSIONS.create(socket, BaseShell)
     with EVENTS.fire("session_started", session):
         session.send(SESSIONS.greeting)
 
