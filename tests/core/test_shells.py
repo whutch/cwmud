@@ -72,16 +72,32 @@ class TestShells:
         with pytest.raises(KeyError):
             self.shells["SomeNonExistentShell"].init()
 
-    def test_shell_session_property(self):
-        """Test that we can get and set the session property of a shell."""
+    def test_shell_create(self):
+        """Test that we can create a new shell instance."""
         # noinspection PyCallingNonCallable
         type(self).shell = self.shell_class()
-        self.shell.session = self.session
-        assert self.shell.session is self.session
+        assert self.shell
 
     def test_shell_init(self):
         """Test that we can initialize a shell for its session."""
+        self.shell._set_weak("session", self.session)
         self.shell.init()
+        assert self.session._output.pop() == "you just inited me!\n"
+        assert not self.session._output
+
+    def test_shell_get_session(self):
+        """Test that we can get the session property of a shell."""
+        assert self.shell.session is self.session
+
+    def test_shell_set_session_and_init(self):
+        """Test that we can set the session property of a shell and init it."""
+        assert not self.session._output
+        # Setting the session to None should not init the shell
+        self.shell.session = None
+        assert not self.session._output
+        # And setting it to a session should init the shell
+        self.shell.session = self.session
+        assert self.shell.session is self.session
         assert self.session._output.pop() == "you just inited me!\n"
         assert not self.session._output
 
