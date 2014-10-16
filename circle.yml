@@ -9,7 +9,10 @@ machine:
 dependencies:
   pre:
     - pip install -r requirements-dev.txt
+    - pip install coveralls
 
 test:
   override:
     - py.test --cov-report html --cov atria tests
+  post:
+    - coveralls
