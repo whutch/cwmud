@@ -33,8 +33,8 @@ class TestShells:
         """Test that we can create a shell manager.
 
         This is currently redundant, importing the shells package already
-        creates one, but we can keep the it for symmetry and in case
-        that isn't always so.
+        creates one, but we can keep it for symmetry and in case that
+        isn't always so.
 
         """
         type(self).shells = ShellManager()

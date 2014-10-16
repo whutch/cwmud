@@ -12,22 +12,11 @@ import pytest
 from atria.core.net import SocketManager
 
 
-def test_create_socket_manager():
-    """Test that we can create a socket manager.
-
-    This is currently redundant, importing the net package already creates one,
-    but we can keep the it for symmetry and in case that isn't always so.
-
-    """
-    sockets = SocketManager()
-    assert sockets
-
-
 class TestSockets:
 
     """A collection of tests for sockets and network communication."""
 
-    sockets = SocketManager()
+    sockets = None
     opened_sockets = []
     client = Telnet()
     address = "localhost"
@@ -42,6 +31,17 @@ class TestSockets:
     @classmethod
     def _on_disconnect(cls, socket):
         cls.opened_sockets.remove(socket)
+
+    def test_create_socket_manager(self):
+        """Test that we can create a new socket manager.
+
+        This is currently redundant, importing the net package already
+        creates one, but we can keep it for symmetry and in case that
+        isn't always so.
+
+        """
+        type(self).sockets = SocketManager()
+        assert self.sockets
 
     def test_listen_bad_callback(self):
         """Test that opening the listener with a bad callback fails."""

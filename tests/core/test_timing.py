@@ -39,28 +39,28 @@ def test_pulses_to_pulses():
             dtp("5 p") == dtp("5 pulse") == dtp("5 pulses") == 5)
 
 
-def test_create_timer_manager():
-    """Test that we can create a timer manager.
-
-    This is currently redundant, importing the timing package already creates
-    one, but we can keep it for symmetry and in case that isn't always so.
-
-    """
-    timers = TimerManager()
-    assert timers
-
-
 class TestTimerManager:
 
     """A collection of tests for timer managers and their timers."""
 
-    timers = TimerManager()
+    timers = None
     timer = None
     calls = 0
 
     @classmethod
     def _callback(cls):
         cls.calls += 1
+
+    def test_create_timer_manager(self):
+        """Test that we can create a new timer manager.
+
+        This is currently redundant, importing the timing package already
+        creates one, but we can keep it for symmetry and in case that
+        isn't always so.
+
+        """
+        type(self).timers = TimerManager()
+        assert self.timers
 
     def test_timer_manager_properties(self):
         """Test that the properties on a timer manager return something."""

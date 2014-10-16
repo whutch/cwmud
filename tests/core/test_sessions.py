@@ -59,8 +59,8 @@ class TestSessions:
         """Test that we can create a session manager.
 
         This is currently redundant, importing the sessions package already
-        creates one, but we can keep the it for symmetry and in case
-        that isn't always so.
+        creates one, but we can keep it for symmetry and in case that
+        isn't always so.
 
         """
         type(self).sessions = SessionManager()

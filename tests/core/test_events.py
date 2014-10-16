@@ -7,34 +7,36 @@
 from atria.core.events import EventManager
 
 
-def test_create_event_manager():
-    """Test that we can create an event manager.
-
-    This is currently redundant, importing the events package already creates
-    one, but we can keep the it for symmetry and in case that isn't always so.
-
-    """
-    events = EventManager()
-    assert events
-
-
-def test_create_event():
-    """Test that we can create an event."""
-    events = EventManager()
-    event = events.get_or_make("test")
-    assert event
-
-
 class TestHooking:
 
     """A collection of tests for event hooking."""
 
-    events = EventManager()
-    event = events.get_or_make("test")
+    events = None
+    event = None
 
     @staticmethod
     def _dummy_func():
         pass
+
+    def test_create_event_manager(self):
+        """Test that we can create a new event manager.
+
+        This is currently redundant, importing the events package already
+        creates one, but we can keep it for symmetry and in case that
+        isn't always so.
+
+        """
+        type(self).events = EventManager()
+        assert self.events
+
+    def test_create_event(self):
+        """Test that we can create a new event."""
+        type(self).event = self.events.get_or_make("test")
+        assert self.event
+
+    def test_get_event(self):
+        """Test that we can get an already made event."""
+        assert self.events.get_or_make("test") is self.event
 
     def test_pre_hook(self):
         """Test pre-hooking through a decorator."""
