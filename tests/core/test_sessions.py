@@ -7,7 +7,7 @@
 import pytest
 
 from atria import settings
-from atria.core.sessions import SessionManager
+from atria.core.sessions import AlreadyExists, SessionManager
 from atria.core.shells import EchoShell
 
 
@@ -71,6 +71,11 @@ class TestSessions:
         type(self).session = self.sessions.create(self.socket)
         assert self.session
 
+    def test_session_create_already_exists(self):
+        """Test that trying to create a session with the same socket fails."""
+        with pytest.raises(AlreadyExists):
+            self.sessions.create(self.socket)
+
     def test_session_find_by_socket(self):
         """Test that we can find a session by its socket."""
         assert self.sessions.find_by_socket(self.socket) is self.session
@@ -115,6 +120,13 @@ class TestSessions:
         type(self).prompt = self.session._get_prompt()
         assert self.prompt
 
+    def test_session_get_prompt_no_shell(self):
+        """Test that a session with no shell returns the default prompt."""
+        shell = self.session.shell
+        self.session.shell = None
+        assert self.session._get_prompt() == "^y>^~ "
+        self.session.shell = shell
+
     def test_session_send(self):
         """Test that we can send output to a session."""
         self.session.send("This", "is a", "test.")
@@ -131,6 +143,16 @@ class TestSessions:
         assert self.session._output_queue.popleft() == "You sent: beep beep\n"
         assert not self.session._output_queue
 
+    def test_session_parse_input_unhandled(self):
+        """Test that unhandled session input gets logged."""
+        shell = self.session.shell
+        self.session.shell = None
+        self.session._parse_input("test")
+        with open(settings.LOG_PATH) as log_file:
+            last_line = log_file.readlines()[-1]
+            assert "Input not handled" in last_line.rstrip()
+        self.session.shell = shell
+
     def test_session_poll(self):
         """Test that we can poll a session to process its queued IO."""
         self.socket._commands.append("test")
@@ -138,6 +160,14 @@ class TestSessions:
         self.session.poll()
         assert not self.socket.cmd_ready
         assert self.socket._output.pop(0) == "You sent: test\n"
+        assert self.socket._output.pop(0) == self.prompt
+        assert not self.socket._output
+
+    def test_session_poll_no_command(self):
+        """Test that sending to a session with no input sends a newline."""
+        self.session.send("Hello!")
+        self.session.poll()
+        assert self.socket._output.pop(0) == "\nHello!\n"
         assert self.socket._output.pop(0) == self.prompt
         assert not self.socket._output
 

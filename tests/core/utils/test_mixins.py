@@ -168,10 +168,10 @@ class TestHasParent:
     """A collection of tests for parents mix-in class."""
 
     class _TestClass(HasFlags, HasParent):
+        pass
 
-        def __init__(self):
-            super().__init__()
-            self.some_attribute = 5
+    class _AnotherTestClass(HasParent):
+        pass
 
     grandparent = _TestClass()
     parent = _TestClass()
@@ -205,6 +205,13 @@ class TestHasParent:
         """Test that we can get an objects lineage through the parents."""
         assert (tuple(self.child.get_lineage()) ==
                 (self.child, self.parent, self.grandparent))
+
+    def test_get_lineage_no_flags(self):
+        """Test that an object doesn't need flags to get its lineage."""
+        another = self._AnotherTestClass()
+        another.parent = self.child
+        assert (tuple(another.get_lineage()) ==
+                (another, self.child, self.parent, self.grandparent))
 
     def test_get_lineage_higher_priority(self):
         """Test that we can get the higher priority objects in a lineage."""
