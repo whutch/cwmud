@@ -27,7 +27,7 @@ class TestHasFlags:
 
     def test_contains_flag(self):
         """Test that we can check if the set contains a flag."""
-        assert not "test" in self.instance.flags
+        assert "test" not in self.instance.flags
 
     def test_add_flag(self):
         """Test that we can add one flag to the flag set."""

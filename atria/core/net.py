@@ -65,7 +65,8 @@ class SocketManager:
 
     def close(self):
         """Stop the telnet server."""
-        log.info("Closing listener from %s on port %s", self.address, self.port)
+        log.info("Closing listener from %s on port %s",
+                 self.address, self.port)
         self._listener.stop()
         self._listener = None
         self._address = ""

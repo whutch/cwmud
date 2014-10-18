@@ -64,7 +64,7 @@ class TestShells:
     def test_shell_manager_contains(self):
         """Test that we can see if a shell manager contains a shell."""
         assert "TestShell" in self.shells
-        assert not "SomeNonExistentShell" in self.shells
+        assert "SomeNonExistentShell" not in self.shells
 
     def test_shell_manager_get_shell(self):
         """Test that we can get a shell from a shell manager."""

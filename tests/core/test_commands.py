@@ -40,7 +40,7 @@ class TestCommands:
 
     def test_command_manager_register(self):
 
-        """Test that we can register a new command through a command manager."""
+        """Test that we can register new commands through a command manager."""
 
         @self.commands.register
         class TestCommand(Command):
@@ -71,8 +71,8 @@ class TestCommands:
         """Test that we can see if a command manager contains a command."""
         assert "TestCommand" in self.commands
         assert Command in self.commands
-        assert not "some_nonexistent_command" in self.commands
-        assert not CommandManager in self.commands
+        assert "some_nonexistent_command" not in self.commands
+        assert CommandManager not in self.commands
 
     def test_command_manager_get_command(self):
         """Test that we can get a command from a command manager."""

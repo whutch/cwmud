@@ -188,7 +188,7 @@ class TestTimerManager:
         assert timer.count == 2 and timer.repeat == 0
         assert self.calls == 3
         assert not timer.live  # RIP
-        assert not timer.key in self.timers
+        assert timer.key not in self.timers
 
     def test_timer_repeat_forever(self):
         """Test that a timer can repeat forever."""
@@ -203,7 +203,7 @@ class TestTimerManager:
             assert self.calls == was_called + n
         timer.kill()
         assert not timer.live
-        assert not timer.key in self.timers
+        assert timer.key not in self.timers
 
     def test_timer_manager_sleep(self):
         """Test sleeping a timer manager until the next pulse."""

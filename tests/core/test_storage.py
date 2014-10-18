@@ -83,7 +83,7 @@ class TestDataStores:
     def test_store_manager_contains(self):
         """Test that we can see if a store manager contains a store."""
         assert "TestStore" in self.stores
-        assert not "SomeNonExistentStore" in self.stores
+        assert "SomeNonExistentStore" not in self.stores
 
     def test_store_manager_get_store(self):
         """Test that we can get a store from a store manager."""
