@@ -78,6 +78,12 @@ class TestTimerManager:
         timer = self.timers.create(1, "test", callback=lambda: None)
         assert timer
 
+    def test_timer_call(self):
+        """Test that trying to call a timer fails."""
+        with pytest.raises(SyntaxError):
+            # noinspection PyCallingNonCallable
+            self.timer()
+
     def test_create_timer_duplicate_name(self):
         """Test that creating a named timer with an existing name fails."""
         with pytest.raises(AlreadyExists):
@@ -215,3 +221,14 @@ class TestTimerManager:
         next_pulse += _PULSE_TIME
         next_pulse += _PULSE_TIME
         assert next_pulse == self.timers._next_pulse
+
+    def test_timer_create_with_decorator(self):
+        """Test that we can create a timer with a decorator."""
+        # noinspection PyUnusedLocal
+        @self.timers.create(1, "decorated")
+        def _timer():
+            pass
+        timer = self.timers["decorated"]
+        assert timer
+        assert timer is _timer
+        timer.kill()
