@@ -4,6 +4,8 @@
 # :copyright: (c) 2008 - 2014 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
+import pytest
+
 from atria.core.events import EventManager
 
 
@@ -13,6 +15,7 @@ class TestHooking:
 
     events = None
     event = None
+    array = []
 
     @staticmethod
     def _dummy_func():
@@ -50,6 +53,13 @@ class TestHooking:
         self.events.hook("test", callback=self._dummy_func)
         assert (self._dummy_func, False) in self.event.hooks
 
+    def test_unhook_bad_event_name(self):
+        """Test unhooking a non-existent event."""
+        events = self.events._events
+        self.events.unhook("yeah")
+        assert self.events._events == events
+        assert self.event.hooks
+
     def test_unhook(self):
         """Test unhooking by callback."""
         assert self.event.hooks
@@ -80,7 +90,22 @@ class TestHooking:
         assert "test_namespace" not in self.event.named_hooks
         assert (self._dummy_func, False) not in self.event.hooks
 
-    def test_unhook_namespace_by_callback(self):
+    def test_unhook_namespace_and_callback(self):
+        """Test unhooking by both namespace and callback."""
+        other_callback = lambda: None
+        self.events.hook("test", "test_namespace", callback=self._dummy_func)
+        self.events.hook("test", "test_namespace", callback=other_callback)
+        assert (self._dummy_func, False) in self.event.hooks
+        assert (other_callback, False) in self.event.hooks
+        assert "test_namespace" in self.event.named_hooks
+        self.events.unhook("test", "test_namespace", callback=self._dummy_func)
+        assert self.event.hooks == [(other_callback, False)]
+        assert "test_namespace" in self.event.named_hooks
+        self.events.unhook("test", "test_namespace", callback=other_callback)
+        assert not self.event.hooks
+        assert not self.event.named_hooks
+
+    def test_unhook_namespace_by_callback_only(self):
         """Test unhooking by callback where namespace points to callback.
 
         We want to ensure that if we are unhooking by callback, that any
@@ -150,13 +175,22 @@ class TestHooking:
         assert not self.event.hooks
         assert not self.event.named_hooks
 
+    def test_event_fire(self):
+        """Test firing an event."""
+        self.events.hook("test", callback=lambda: self.array.append(1),
+                         pre=True)
+        self.events.hook("test", callback=lambda: self.array.append(3))
+        with self.events.fire("test"):
+            self.array.append(2)
+        assert self.array == [1, 2, 3]
 
-def test_fire_event():
-    """Test firing an event."""
-    events = EventManager()
-    array = []
-    events.hook("test", callback=lambda: array.append(1), pre=True)
-    events.hook("test", callback=lambda: array.append(3))
-    with events.fire("test"):
-        array.append(2)
-    assert array == [1, 2, 3]
+    def test_event_fire_now(self):
+        """Test firing an event with the `now` method."""
+        self.events.fire("test").now()
+        assert self.array == [1, 2, 3, 1, 3]
+
+    def test_event_fire_exception(self):
+        """Test that exceptions from an event firing are re-raised."""
+        with pytest.raises(SyntaxError):
+            with self.events.fire("test"):
+                raise SyntaxError()
