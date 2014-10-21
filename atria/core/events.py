@@ -113,12 +113,16 @@ class EventManager:
                 # Unhook by namespace, with or without a callback
                 if namespace in event.named_hooks:
                     hooks = event.named_hooks[namespace]
-                    event.hooks = [(cb, pre) for cb, pre in event.hooks
-                                   if cb not in hooks
-                                   and (cb is callback or callback is None)]
                     if callback:
+                        event.hooks = [(cb, pre) for cb, pre in event.hooks
+                                       if cb is not callback]
                         hooks = [hook for hook in hooks
                                  if hook is not callback]
+                    else:
+                        event.hooks = [(cb, pre) for cb, pre in event.hooks
+                                       if cb not in hooks]
+                        hooks = []
+                    if hooks:
                         event.named_hooks[namespace] = hooks
                     else:
                         del event.named_hooks[namespace]
