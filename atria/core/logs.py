@@ -16,7 +16,9 @@ from .. import settings
 
 # Make sure the folder where our log will go exists.
 if not exists(dirname(settings.LOG_PATH)):
-    makedirs(dirname(settings.LOG_PATH))
+    # We can't test this without reload the module and doing so breaks
+    # a bunch of other tests that rely on logging.
+    makedirs(dirname(settings.LOG_PATH))  # pragma: no cover
 
 
 class _Formatter(logging.Formatter):
