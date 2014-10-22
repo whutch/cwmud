@@ -54,19 +54,14 @@ class CommandManager:
                            subclass of Command.
 
         """
-        def _inner(command_class):
-            if (not isinstance(command_class, type) or
-                    not issubclass(command_class, Command)):
-                raise TypeError("must be subclass of Command to register")
-            name = command_class.__name__
-            if name in self._commands:
-                raise AlreadyExists(name, self._commands[name], command_class)
-            self._commands[name] = command_class
-            return command_class
-        if command is not None:
-            return _inner(command)
-        else:
-            return _inner
+        if (not isinstance(command, type) or
+                not issubclass(command, Command)):
+            raise TypeError("must be subclass of Command to register")
+        name = command.__name__
+        if name in self._commands:
+            raise AlreadyExists(name, self._commands[name], command)
+        self._commands[name] = command
+        return command
 
 
 class Command(HasFlags, HasWeaks):
@@ -106,7 +101,7 @@ class Command(HasFlags, HasWeaks):
     # noinspection PyMethodMayBeStatic
     def _action(self):
         """Do something; override this to add your functionality."""
-        pass
+        pass  # pragma: no cover
 
 
 # We create a global CommandManager here for convenience, and while the server

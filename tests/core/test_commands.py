@@ -47,7 +47,12 @@ class TestCommands:
 
             """A test command."""
 
-            pass
+            def __init__(self, session, args):
+                super().__init__(session, args)
+                self.called = False
+
+            def _action(self):
+                self.called = True
 
         type(self).command_class = TestCommand
         assert "TestCommand" in self.commands
@@ -80,10 +85,24 @@ class TestCommands:
         with pytest.raises(KeyError):
             self.commands["some_nonexistent_command"].process()
 
-    def test_command_session_property(self):
-        """Test that we can get and set the session property of a command."""
+    def test_command_instance(self):
+        """Test that we can create a command instance."""
         # noinspection PyCallingNonCallable
         type(self).command = self.command_class(None, ())
+        assert self.command
+
+    def test_command_execute_no_session(self):
+        """Test that a command instance without a session won't execute."""
+        self.command.execute()
+        assert not self.command.called
+
+    def test_command_session_property(self):
+        """Test that we can get and set the session property of a command."""
         assert self.command.session is None
         self.command.session = self.session
         assert self.command.session is self.session
+
+    def test_command_execute(self):
+        """Test that we can execute a command."""
+        self.command.execute()
+        assert self.command.called
