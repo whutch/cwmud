@@ -63,19 +63,13 @@ class ShellManager:
                            subclass of Shell.
 
         """
-        def _inner(shell_class):
-            if (not isinstance(shell_class, type) or
-                    not issubclass(shell_class, Shell)):
-                raise TypeError("must be subclass of Shell to register")
-            name = shell_class.__name__
-            if name in self._shells:
-                raise AlreadyExists(name, self._shells[name], shell_class)
-            self._shells[name] = shell_class
-            return shell_class
-        if shell is not None:
-            return _inner(shell)
-        else:
-            return _inner
+        if not isinstance(shell, type) or not issubclass(shell, Shell):
+            raise TypeError("must be subclass of Shell to register")
+        name = shell.__name__
+        if name in self._shells:
+            raise AlreadyExists(name, self._shells[name], shell)
+        self._shells[name] = shell
+        return shell
 
 
 class Shell(HasFlags, HasParent):
@@ -182,8 +176,8 @@ class Shell(HasFlags, HasParent):
         """
         if cls.inherited_verbs():
             raise KeyError("cannot add verbs without explicit verb store")
-        if not issubclass(command, Command):
-            raise TypeError("cannot add verbs for non-Command")
+        if not isinstance(command, type) or not issubclass(command, Command):
+            raise TypeError("cannot add verbs for non-Command class")
         for verb in verbs:
             cls._validate_verb(verb)
             if verb in cls._verbs:
