@@ -6,7 +6,8 @@
 
 import pytest
 
-from atria.core.shells import AlreadyExists, ShellManager, Shell
+from atria.core.shells import (AlreadyExists, WeakValueDictionary, Command,
+                               ShellManager, Shell)
 from atria.core.utils.funcs import joins
 
 
@@ -61,6 +62,11 @@ class TestShells:
         with pytest.raises(AlreadyExists):
             self.shells.register(self.shell_class)
 
+    def test_shell_manager_register_not_shell(self):
+        """Test that trying to register a non-shell fails."""
+        with pytest.raises(TypeError):
+            self.shells.register(object())
+
     def test_shell_manager_contains(self):
         """Test that we can see if a shell manager contains a shell."""
         assert "TestShell" in self.shells
@@ -105,7 +111,97 @@ class TestShells:
         """Test that we can get the prompt for a session."""
         assert self.shell.get_prompt() == "^y>^~ "
 
-    def test_shell_generate_arguments(self):
+    def test_shell_inherited_verbs(self):
+        """Test that we can tell if a shell inherited its verbs."""
+        assert self.shell.inherited_verbs()
+        assert not Shell.inherited_verbs()
+        self.shell_class._verbs = None
+        assert not self.shell.inherited_verbs()
+        self.shell_class._verbs = WeakValueDictionary()
+        assert not self.shell.inherited_verbs()
+
+    def test_shell_validate_verb(self):
+        """Test that we can validate a command verb."""
+        self.shell._validate_verb("say")
+        self.shell._validate_verb("'")
+        with pytest.raises(ValueError):
+            self.shell._validate_verb("")
+        with pytest.raises(ValueError):
+            self.shell._validate_verb(5)
+        with pytest.raises(ValueError):
+            self.shell._validate_verb("a")
+        with pytest.raises(ValueError):
+            self.shell._validate_verb("b33p")
+
+    def test_shell_add_verbs(self):
+        """Test that we can add verbs to a shell's verb store."""
+        assert not self.shell._verbs
+        self.shell.add_verbs(Command, "test", "!")
+        assert "test" in self.shell._verbs and "!" in self.shell._verbs
+
+    def test_shell_add_verbs_inherited(self):
+        """Test that trying to add verbs to an inherited store fails."""
+        verbs = self.shell_class._verbs
+        delattr(self.shell_class, "_verbs")
+        with pytest.raises(KeyError):
+            self.shell.add_verbs(Command, "nope")
+        self.shell_class._verbs = verbs
+
+    def test_shell_add_verbs_not_command(self):
+        """Test that trying to add verbs for a non-Command fails."""
+        with pytest.raises(TypeError):
+            self.shell.add_verbs(True, "nope")
+        with pytest.raises(TypeError):
+            self.shell.add_verbs(Shell, "nope")
+
+    def test_shell_add_verbs_already_exists(self):
+        """Test that trying to re-add a verb to a store fails."""
+        with pytest.raises(AlreadyExists):
+            self.shell.add_verbs(Command, "test")
+
+    def test_shell_get_command(self):
+        """Test that we can get a command by its verb in the shell."""
+        assert self.shell.get_command("test") is Command
+        assert self.shell.get_command("!") is Command
+        assert not self.shell.get_command("nope")
+
+    def xtest_shell_find_command(self):
+        """Test that we can find a command in the shell's lineage."""
+        Shell.add_verbs(Command, "beep")
+        self.shell.parent = Shell()
+        assert not self.shell.get_command("beep")
+        assert self.shell.find_command("beep") is Command
+
+    def test_shell_remove_verbs(self):
+        """Test that we can remove verbs from a shell's verb store."""
+        assert "test" in self.shell._verbs and "!" in self.shell._verbs
+        self.shell.remove_verbs("test", "!", "nope")
+        assert not self.shell._verbs
+
+    def test_shell_remove_verbs_inherited(self):
+        """Test that trying to remove verbs from an inherited store fails."""
+        verbs = self.shell_class._verbs
+        delattr(self.shell_class, "_verbs")
+        with pytest.raises(KeyError):
+            self.shell.remove_verbs("nope")
+        self.shell_class._verbs = verbs
+
+    def test_shell_one_argument(self):
+        """Test that we can break off one argument from some client input."""
+        assert (self.shell._one_argument("this is 'a test'") ==
+                ("this", " is 'a test'"))
+        assert self.shell._one_argument("test") == ("test", "")
+        assert self.shell._one_argument("") == ("", "")
+        assert self.shell._one_argument("'test") == ("test", "")
+
+    def test_shell_iter_arguments(self):
+        """Test that we can iterate all the arguments from some input."""
+        args = self.shell._iter_arguments("this is 'a test'")
+        assert next(args) == "this"
+        assert next(args) == "is"
+        assert next(args) == "a test"
+
+    def test_shell_get_arguments(self):
         """Test that we can parse arguments from input."""
         assert self.shell._get_arguments("test") == ["test"]
         assert (self.shell._get_arguments('`testing` 1 ``2 "3"') ==
