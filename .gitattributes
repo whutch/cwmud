@@ -1,0 +1,8 @@
+# Default behavior for users without core.autocrlf set
+* text=auto
+
+# Files that must be converted to LF endings
+*.sh text eol=lf
+
+# Files that must be converted to CRLF endings
+*.bat text eol=crlf
