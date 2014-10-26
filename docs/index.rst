@@ -11,7 +11,47 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+.. automodule:: atria.core.commands
+    :members:
 
+.. automodule:: atria.core.events
+    :members:
+
+.. automodule:: atria.core.logs
+    :members:
+
+.. automodule:: atria.core.net
+    :members:
+
+.. automodule:: atria.core.server
+    :members:
+
+.. automodule:: atria.core.sessions
+    :members:
+
+.. automodule:: atria.core.shells
+    :members:
+
+.. automodule:: atria.core.storage
+    :members:
+
+.. automodule:: atria.core.timing
+    :members:
+
+.. automodule:: atria.core.utils.exceptions
+    :members:
+
+.. automodule:: atria.core.utils.funcs
+    :members:
+
+.. automodule:: atria.core.utils.mixins
+    :members:
+
+.. automodule:: atria.core.opt.json
+    :members:
+
+.. automodule:: atria.core.opt.pickle
+    :members:
 
 Indices and tables
 ==================
