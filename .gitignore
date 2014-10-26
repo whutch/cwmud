@@ -5,6 +5,7 @@ __pycache__/
 # Development
 *~
 .idea/
+.cache/
 .coverage
 .coverage-html/
 .tox
