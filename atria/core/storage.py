@@ -33,16 +33,13 @@ class DataStoreManager:
     def __getitem__(self, store):
         return self._stores[store]
 
-    def register(self, store=None):
+    def register(self, store):
         """Register a data store.
 
-        If you do not provide ``store``, this will instead return a
-        decorator that will register the decorated class.
+        This method can be used to decorate a DataStore class.
 
-        :param DataStore store: Optional, the store to be registered
-        :returns DataStore|function: The registered store if a store was
-                                     provided, otherwise a decorator to
-                                     register the store
+        :param DataStore store: The data store to be registered
+        :returns DataStore: The registered data store
         :raises AlreadyExists: If a store with that class name already exists
         :raises TypeError: If the supplied or decorated class is not a
                            subclass of DataStore.

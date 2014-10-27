@@ -49,15 +49,13 @@ class ShellManager:
     def __getitem__(self, shell):
         return self._shells[shell]
 
-    def register(self, shell=None):
+    def register(self, shell):
         """Register a shell.
 
-        If you do not provide ``shell``, this will instead return a
-        decorator that will register the decorated class.
+        This method can be used to decorate a Shell class.
 
-        :param Shell shell: Optional, the shell to be registered
-        :returns Shell|function: The registered shell if a shell was provided,
-                                  otherwise a decorator to register the shell
+        :param Shell shell: The shell to be registered
+        :returns Shell: The registered shell
         :raises AlreadyExists: If a shell with that class name already exists
         :raises TypeError: If the supplied or decorated class is not a
                            subclass of Shell.

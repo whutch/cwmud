@@ -39,16 +39,13 @@ class CommandManager:
         else:
             return command
 
-    def register(self, command=None):
+    def register(self, command):
         """Register a command.
 
-        If you do not provide ``command``, this will instead return a
-        decorator that will register the decorated class.
+        This method can be used to decorate a Command class.
 
-        :param Command command: Optional, the command to be registered
-        :returns Command|function: The registered command if a command was
-                                 provided, otherwise a decorator to register
-                                 the command
+        :param Command command: The command to be registered
+        :returns Command: The registered command
         :raises AlreadyExists: If a command with that class name already exists
         :raises TypeError: If the supplied or decorated class is not a
                            subclass of Command.
