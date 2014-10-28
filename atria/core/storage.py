@@ -18,7 +18,7 @@ class DataStoreManager:
     """A manager for data store registration.
 
     This is a convenience manager and is not required for the server to
-    function. All if its functionality can be achieved by subclassing,
+    function. All of its functionality can be achieved by subclassing,
     instantiating, and referencing data stores directly.
 
     """

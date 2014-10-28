@@ -34,7 +34,7 @@ class ShellManager:
     """A manager for shell registration.
 
     This is a convenience manager and is not required for the server to
-    function. All if its functionality can be achieved by subclassing,
+    function. All of its functionality can be achieved by subclassing,
     instantiating, and referencing shells directly.
 
     """

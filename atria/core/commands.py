@@ -17,7 +17,7 @@ class CommandManager:
     """A manager for command registration and control.
 
     This is a convenience manager and is not required for the server to
-    function. All if its functionality can be achieved by subclassing,
+    function. All of its functionality can be achieved by subclassing,
     instantiating, and referencing commands directly.
 
     """
