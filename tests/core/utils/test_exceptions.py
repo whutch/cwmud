@@ -7,9 +7,39 @@
 from atria.core.utils import exceptions
 
 
-def test_already_exists():
+def test_exception_already_exists():
     """Test that raising AlreadyExists works as intended."""
     try:
         raise exceptions.AlreadyExists("test", old=1, new=2)
     except exceptions.AlreadyExists as exc:
         assert exc.key and exc.old and exc.new
+
+
+def test_exception_server_shutdown():
+    """Test that raising ServerShutdown works as intended.
+
+    The logic of what raising this does to the server is handled in server.py
+    and thus tested in test_server.py, not here.
+
+    """
+    try:
+        raise exceptions.ServerShutdown()
+    except exceptions.ServerShutdown as exc:
+        assert exc.forced is True
+    try:
+        raise exceptions.ServerShutdown(forced=False)
+    except exceptions.ServerShutdown as exc:
+        assert exc.forced is False
+
+
+def test_exception_server_reboot():
+    """Test that raising ServerReboot works as intended.
+
+    The logic of what raising this does to the server is handled in server.py
+    and thus tested in test_server.py, not here.
+
+    """
+    try:
+        raise exceptions.ServerReboot()
+    except exceptions.ServerReboot:
+        pass

@@ -13,3 +13,18 @@ class AlreadyExists(Exception):
         self.key = key
         self.old = old
         self.new = new
+
+
+class ServerShutdown(Exception):
+
+    """Exception to signal that the server should be shutdown."""
+
+    def __init__(self, forced=True):
+        self.forced = forced
+
+
+class ServerReboot(Exception):
+
+    """Exception to signal that the server should be rebooted."""
+
+    pass
