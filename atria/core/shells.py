@@ -165,7 +165,7 @@ class Shell(HasFlags, HasParent):
         """Add verbs to this shell that trigger a given command.
 
         :param Command command: The command that will be executed
-        :param *str verbs: A sequence of verbs that trigger the command
+        :param str verbs: A sequence of verbs that trigger the command
         :returns: None
         :raises KeyError: If this shell inherited its verb store
         :raises TypeError: If the given command is not a Command subclass
@@ -187,7 +187,7 @@ class Shell(HasFlags, HasParent):
     def remove_verbs(cls, *verbs):
         """Remove verbs from this shell.
 
-        :param *str verbs: A sequence of verbs to remove
+        :param str verbs: A sequence of verbs to remove
         :returns: None
         :raises KeyError: If this shell inherited its verb store
 
