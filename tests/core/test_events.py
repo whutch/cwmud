@@ -46,12 +46,16 @@ class TestHooking:
         @self.events.hook("test", pre=True)
         def _dummy_func():
             pass
-        assert (_dummy_func, True) in self.event.hooks
+        assert len(self.event.hooks) == 1
+        assert self.event.hooks[-1].callback is _dummy_func
+        assert self.event.hooks[-1].pre is True
 
     def test_post_hook(self):
         """Test hooking with a callback."""
         self.events.hook("test", callback=self._dummy_func)
-        assert (self._dummy_func, False) in self.event.hooks
+        assert len(self.event.hooks) == 2
+        assert self.event.hooks[-1].callback is self._dummy_func
+        assert self.event.hooks[-1].pre is False
 
     def test_unhook_bad_event_name(self):
         """Test unhooking a non-existent event."""
@@ -62,17 +66,16 @@ class TestHooking:
 
     def test_unhook(self):
         """Test unhooking by callback."""
-        assert self.event.hooks
-        for cb, pre in self.event.hooks:
-            self.events.unhook("test", callback=cb)
-            assert (cb, pre) not in self.event.hooks
+        assert len(self.event.hooks) == 2
+        for hook in self.event.hooks[:]:
+            self.events.unhook("test", callback=hook.callback)
+        assert not self.event.hooks
 
     def test_unhook_duplicate_func(self):
-        """Test unhooking by callback with multiple matching functions."""
+        """Test unhooking by callback with multiple matching hooks."""
         self.events.hook("test", callback=self._dummy_func, pre=True)
         self.events.hook("test", callback=self._dummy_func)
-        assert self.event.hooks == [(self._dummy_func, True),
-                                    (self._dummy_func, False)]
+        assert len(self.event.hooks) == 2
         self.events.unhook("test", callback=self._dummy_func)
         assert not self.event.hooks
 
@@ -80,30 +83,28 @@ class TestHooking:
         """Test hooking with a namespace."""
         self.events.hook("test", "test_namespace",
                          callback=self._dummy_func)
-        assert "test_namespace" in self.event.named_hooks
-        namespace = self.event.named_hooks["test_namespace"]
-        assert self._dummy_func in namespace
+        assert len(self.event.hooks) == 1
+        assert self.event.hooks[-1].namespace == "test_namespace"
+        assert self.event.hooks[-1].callback is self._dummy_func
 
     def test_unhook_namespace(self):
         """Test unhooking by namespace."""
+        assert self.event.hooks
         self.events.unhook("test", "test_namespace")
-        assert "test_namespace" not in self.event.named_hooks
-        assert (self._dummy_func, False) not in self.event.hooks
+        assert not self.event.hooks
 
     def test_unhook_namespace_and_callback(self):
         """Test unhooking by both namespace and callback."""
         other_callback = lambda: None
         self.events.hook("test", "test_namespace", callback=self._dummy_func)
         self.events.hook("test", "test_namespace", callback=other_callback)
-        assert (self._dummy_func, False) in self.event.hooks
-        assert (other_callback, False) in self.event.hooks
-        assert "test_namespace" in self.event.named_hooks
+        assert len(self.event.hooks) == 2
         self.events.unhook("test", "test_namespace", callback=self._dummy_func)
-        assert self.event.hooks == [(other_callback, False)]
-        assert "test_namespace" in self.event.named_hooks
+        assert len(self.event.hooks) == 1
+        assert self.event.hooks[-1].namespace == "test_namespace"
+        assert self.event.hooks[-1].callback is other_callback
         self.events.unhook("test", "test_namespace", callback=other_callback)
         assert not self.event.hooks
-        assert not self.event.named_hooks
 
     def test_unhook_namespace_by_callback_only(self):
         """Test unhooking by callback where namespace points to callback.
@@ -113,11 +114,11 @@ class TestHooking:
 
         """
         self.events.hook("test", "test_namespace", callback=self._dummy_func)
-        assert (self._dummy_func, False) in self.event.hooks
-        assert "test_namespace" in self.event.named_hooks
+        assert len(self.event.hooks) == 1
+        assert self.event.hooks[-1].namespace == "test_namespace"
+        assert self.event.hooks[-1].callback is self._dummy_func
         self.events.unhook("test", callback=self._dummy_func)
         assert not self.event.hooks
-        assert not self.event.named_hooks
 
     def test_unhook_partial_wildcard(self):
         """Test partial wildcard unhooking."""
@@ -126,15 +127,16 @@ class TestHooking:
             self.events.hook(name, "test_namespace",
                              callback=self._dummy_func)
             event = self.events.get_or_make(name)
-            assert (self._dummy_func, False) in event.hooks
-            assert "test_namespace" in event.named_hooks
+            assert len(event.hooks) == 1
+            assert event.hooks[-1].namespace == "test_namespace"
+            assert event.hooks[-1].callback is self._dummy_func
             events.append(event)
         self.events.unhook("test*", "test_namespace")
-        assert (self._dummy_func, False) in events[0].hooks
-        assert "test_namespace" in events[0].named_hooks
+        assert len(events[0].hooks) == 1
+        assert events[0].hooks[-1].namespace == "test_namespace"
+        assert events[0].hooks[-1].callback is self._dummy_func
         for event in events[1:]:
             assert not event.hooks
-            assert not event.named_hooks
 
     def test_unhook_wildcard(self):
         """Test full wildcard unhooking."""
@@ -143,13 +145,13 @@ class TestHooking:
             self.events.hook(name, "test_namespace",
                              callback=self._dummy_func)
             event = self.events.get_or_make(name)
-            assert (self._dummy_func, False) in event.hooks
-            assert "test_namespace" in event.named_hooks
+            assert len(event.hooks) == 1
+            assert event.hooks[-1].namespace == "test_namespace"
+            assert event.hooks[-1].callback is self._dummy_func
             events.append(event)
         self.events.unhook("*", "test_namespace")
         for event in events:
             assert not event.hooks
-            assert not event.named_hooks
 
     def test_unhook_everything(self):
 
@@ -158,22 +160,23 @@ class TestHooking:
         @self.events.hook("test", "some_namespace", pre=True)
         def _dummy_func1():
             pass
-        assert (_dummy_func1, True) in self.event.hooks
-        assert "some_namespace" in self.event.named_hooks
 
         @self.events.hook("test", "some_other_namespace")
         def _dummy_func2():
             pass
-        assert (_dummy_func2, False) in self.event.hooks
-        assert "some_other_namespace" in self.event.named_hooks
 
         _dummy_func3 = lambda: None
         self.events.hook("test", callback=_dummy_func3)
-        assert (_dummy_func3, False) in self.event.hooks
 
+        assert len(self.event.hooks) == 3
+        assert self.event.hooks[0].namespace == "some_namespace"
+        assert self.event.hooks[0].callback is _dummy_func1
+        assert self.event.hooks[1].namespace == "some_other_namespace"
+        assert self.event.hooks[1].callback is _dummy_func2
+        assert self.event.hooks[2].namespace is None
+        assert self.event.hooks[2].callback is _dummy_func3
         self.events.unhook("test")
         assert not self.event.hooks
-        assert not self.event.named_hooks
 
     def test_event_fire(self):
         """Test firing an event."""
