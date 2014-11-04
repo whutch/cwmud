@@ -39,7 +39,7 @@ class EventManager:
             self._events[event_name] = event
         return event
 
-    def hook(self, event_name, namespace="", callback=None, pre=False):
+    def hook(self, event_name, namespace=None, callback=None, pre=False):
         """Hook a callback to an event, optionally through a decorator.
 
         If an event with the name ``event_name`` does not exist it will be
@@ -58,19 +58,15 @@ class EventManager:
         """
         def _inner(func):
             event = self.get_or_make(event_name)
-            event.hooks.append((func, pre))
-            if namespace:
-                named_hooks = event.named_hooks.get(namespace)
-                if not named_hooks:
-                    event.named_hooks[namespace] = named_hooks = []
-                named_hooks.append(func)
+            new_hook = _EventHook(func, namespace, pre)
+            event.hooks.append(new_hook)
             return func
         if callback:
             _inner(callback)
         else:
             return _inner
 
-    def unhook(self, event_name, namespace="", callback=None):
+    def unhook(self, event_name, namespace=None, callback=None):
         """Unhook callbacks from an event.
 
         If an event with the name ``event_name`` or a wildcard matching it
@@ -98,38 +94,22 @@ class EventManager:
             else:
                 events = []
         for event in events:
-            if callback and not namespace:
+            if callback and namespace is None:
                 # Unhook by callback only
-                event.hooks = [(cb, pre) for cb, pre in event.hooks
-                               if cb is not callback]
-                # We need to ensure that any namespaces pointing to this
-                # callback are also cleaned up
-                for cbs in event.named_hooks.values():
-                    if callback in cbs:
-                        cbs.remove(callback)
-                event.named_hooks = {name: cbs for name, cbs
-                                     in event.named_hooks.items() if cbs}
-            elif namespace:
+                event.hooks = [hook for hook in event.hooks
+                               if hook.callback is not callback]
+            elif namespace is not None:
                 # Unhook by namespace, with or without a callback
-                if namespace in event.named_hooks:
-                    hooks = event.named_hooks[namespace]
-                    if callback:
-                        event.hooks = [(cb, pre) for cb, pre in event.hooks
-                                       if cb is not callback]
-                        hooks = [hook for hook in hooks
-                                 if hook is not callback]
-                    else:
-                        event.hooks = [(cb, pre) for cb, pre in event.hooks
-                                       if cb not in hooks]
-                        hooks = []
-                    if hooks:
-                        event.named_hooks[namespace] = hooks
-                    else:
-                        del event.named_hooks[namespace]
+                if callback:
+                    event.hooks = [hook for hook in event.hooks
+                                   if hook.namespace != namespace
+                                   or hook.callback is not callback]
+                else:
+                    event.hooks = [hook for hook in event.hooks
+                                   if hook.namespace != namespace]
             else:
                 # Just unhook everything (not recommended)
                 event.hooks = []
-                event.named_hooks = {}
 
     def fire(self, event_name, *args, **opts):
         """Fire an event.
@@ -149,6 +129,21 @@ class EventManager:
         return _EventContext(event, args, opts)
 
 
+class _EventHook:
+
+    """A callback hooked to an event.
+
+    Don't mess with these yourself, they'll be created by and interfaced
+    entirely with an EventManager.
+
+    """
+
+    def __init__(self, callback, namespace=None, pre=False):
+        self.callback = callback
+        self.namespace = namespace
+        self.pre = pre
+
+
 class _Event:
 
     """An event, able to be hooked and fired.
@@ -161,7 +156,6 @@ class _Event:
     def __init__(self, name):
         self.name = name
         self.hooks = []
-        self.named_hooks = {}
 
 
 class _EventContext:
@@ -179,17 +173,17 @@ class _EventContext:
 
     def __enter__(self):
         if not self.opts.get("no_pre"):
-            for func, pre in self.event.hooks:
-                if pre:
-                    func(*self.args)
+            for hook in self.event.hooks:
+                if hook.pre:
+                    hook.callback(*self.args)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if exc_type:
             raise exc_type(exc_val).with_traceback(exc_tb)
         if not self.opts.get("no_post"):
-            for func, pre in self.event.hooks:
-                if not pre:
-                    func(*self.args)
+            for hook in self.event.hooks:
+                if not hook.pre:
+                    hook.callback(*self.args)
 
     def now(self):
         """Enter and exit the context manually.
