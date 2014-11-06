@@ -178,6 +178,37 @@ class TestHooking:
         self.events.unhook("test")
         assert not self.event.hooks
 
+    def test_hook_after(self):
+        """Test hooking a callback after another namespace."""
+        self.events.hook("test", "test1", callback=self._dummy_func,
+                         after="test3")
+        assert len(self.event.hooks) == 1
+        self.events.hook("test", "test2", callback=self._dummy_func,
+                         after="test4")
+        assert len(self.event.hooks) == 2
+        assert self.event.hooks[0].namespace == "test1"
+        assert self.event.hooks[1].namespace == "test2"
+        self.events.hook("test", "test3", callback=self._dummy_func,
+                         after="test4")
+        assert len(self.event.hooks) == 3
+        assert self.event.hooks[0].namespace == "test2"
+        assert self.event.hooks[1].namespace == "test3"
+        assert self.event.hooks[2].namespace == "test1"
+        self.events.hook("test", "test4", callback=self._dummy_func)
+        assert len(self.event.hooks) == 4
+        assert self.event.hooks[0].namespace == "test4"
+        assert self.event.hooks[1].namespace == "test2"
+        assert self.event.hooks[2].namespace == "test3"
+        assert self.event.hooks[3].namespace == "test1"
+
+    def test_hook_after_circular_references(self):
+        """Test hooks with circular `after` references will fail."""
+        self.events.hook("test", "test1", callback=self._dummy_func,
+                         after="test2")
+        with pytest.raises(OverflowError):
+            self.events.hook("test", "test2", callback=self._dummy_func,
+                             after="test1")
+
     def test_event_fire(self):
         """Test firing an event."""
         self.events.hook("test", callback=lambda: self.array.append(1),
