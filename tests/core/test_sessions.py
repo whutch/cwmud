@@ -20,7 +20,7 @@ class TestSessions:
     prompt = ""
 
     # noinspection PyDocstring
-    class _FakeSocket:
+    class _FakeClient:
 
         def __init__(self):
             self.active = True
@@ -53,7 +53,7 @@ class TestSessions:
             def close():
                 pass
 
-    socket = _FakeSocket()
+    client = _FakeClient()
 
     def test_session_manager_create(self):
         """Test that we can create a session manager.
@@ -68,24 +68,24 @@ class TestSessions:
 
     def test_session_create(self):
         """Test that we can create a session."""
-        type(self).session = self.sessions.create(self.socket)
+        type(self).session = self.sessions.create(self.client)
         assert self.session
 
     def test_session_create_already_exists(self):
-        """Test that trying to create a session with the same socket fails."""
+        """Test that trying to create a session with the same client fails."""
         with pytest.raises(AlreadyExists):
-            self.sessions.create(self.socket)
+            self.sessions.create(self.client)
 
-    def test_session_find_by_socket(self):
-        """Test that we can find a session by its socket."""
-        assert self.sessions.find_by_socket(self.socket) is self.session
+    def test_session_find_by_client(self):
+        """Test that we can find a session by its client."""
+        assert self.sessions.find_by_client(self.client) is self.session
 
     def test_session_active(self):
         """Test that we can determine if a session should be closed."""
         assert self.session.active
-        self.session._socket = None
+        self.session._client = None
         assert not self.session.active
-        self.session._socket = self.socket
+        self.session._client = self.client
         self.session.flags.toggle("close")
         assert not self.session.active
         self.session.flags.toggle("close")
@@ -155,21 +155,21 @@ class TestSessions:
 
     def test_session_poll(self):
         """Test that we can poll a session to process its queued IO."""
-        self.socket._commands.append("test")
-        assert self.socket.cmd_ready
+        self.client._commands.append("test")
+        assert self.client.cmd_ready
         self.session.poll()
-        assert not self.socket.cmd_ready
-        assert self.socket._output.pop(0) == "You sent: test\n"
-        assert self.socket._output.pop(0) == self.prompt
-        assert not self.socket._output
+        assert not self.client.cmd_ready
+        assert self.client._output.pop(0) == "You sent: test\n"
+        assert self.client._output.pop(0) == self.prompt
+        assert not self.client._output
 
     def test_session_poll_no_command(self):
         """Test that sending to a session with no input sends a newline."""
         self.session.send("Hello!")
         self.session.poll()
-        assert self.socket._output.pop(0) == "\nHello!\n"
-        assert self.socket._output.pop(0) == self.prompt
-        assert not self.socket._output
+        assert self.client._output.pop(0) == "\nHello!\n"
+        assert self.client._output.pop(0) == self.prompt
+        assert not self.client._output
 
     def test_session_check_idle(self):
         """Test that we can determine if a session is idle."""
@@ -177,18 +177,18 @@ class TestSessions:
         self.session._check_idle()
         assert not self.session.flags.has_any("idle", "close")
         # They've gone idle.
-        self.socket._idle = settings.IDLE_TIME
+        self.client._idle = settings.IDLE_TIME
         self.session._check_idle()
         assert "idle" in self.session.flags
         assert "close" not in self.session.flags
         # They came back.
-        self.socket._idle = 0
+        self.client._idle = 0
         self.session._check_idle()
         assert not self.session.flags.has_any("idle", "close")
         assert not self.session._output_queue
         assert self.session.active
         # Now they've been idle for a really long time.
-        self.socket._idle = settings.IDLE_TIME_MAX
+        self.client._idle = settings.IDLE_TIME_MAX
         self.session._check_idle()
         assert self.session.flags.has("close")
         assert (self.session._output_queue.popleft() ==
@@ -199,28 +199,28 @@ class TestSessions:
         """Test that we can poll a session manager to poll all its sessions."""
         # Create a couple more sessions to test with.
         sessions = [self.session,
-                    self.sessions.create(self._FakeSocket(), EchoShell),
-                    self.sessions.create(self._FakeSocket(), EchoShell)]
+                    self.sessions.create(self._FakeClient(), EchoShell),
+                    self.sessions.create(self._FakeClient(), EchoShell)]
         # Change them around a bit and then poll them all.
-        sessions[0]._socket._commands.append("test")
-        sessions[1]._socket._commands.append("test")
+        sessions[0]._client._commands.append("test")
+        sessions[1]._client._commands.append("test")
         self.sessions.poll()
         # The first session was flagged for closing in the previous test,
         # so its input should have been ignored and its flag should have
         # been changed from close to closed.
-        assert sessions[0]._socket.cmd_ready
-        assert not sessions[0]._socket._output
+        assert sessions[0]._client.cmd_ready
+        assert not sessions[0]._client._output
         assert not sessions[0].active
         assert "closed" in sessions[0].flags
         # The second session should have been parsed and output returned.
-        assert not sessions[1]._socket.cmd_ready
-        assert sessions[1]._socket._output.pop(0) == "You sent: test\n"
-        assert sessions[1]._socket._output.pop(0) == self.prompt
-        assert not sessions[1]._socket._output
+        assert not sessions[1]._client.cmd_ready
+        assert sessions[1]._client._output.pop(0) == "You sent: test\n"
+        assert sessions[1]._client._output.pop(0) == self.prompt
+        assert not sessions[1]._client._output
         assert sessions[1].active
         # And the third session didn't do anything, so should be unchanged.
-        assert not sessions[2]._socket.cmd_ready
-        assert not sessions[2]._socket._output
+        assert not sessions[2]._client.cmd_ready
+        assert not sessions[2]._client._output
         assert sessions[2].active
 
     def test_session_close(self):

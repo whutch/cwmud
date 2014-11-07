@@ -27,30 +27,30 @@ class SessionManager:
         self.greeting = "Welcome!\n"
         self._sessions = []
 
-    def find_by_socket(self, socket):
-        """Find a session by its socket.
+    def find_by_client(self, client):
+        """Find a session by its client.
 
-        :param miniboa.TelnetClient socket: The socket to search for
+        :param miniboa.TelnetClient client: The client to search for
         :returns _Session|None: A matching session or None
 
         """
         for session in self._sessions:
             # noinspection PyProtectedMember
-            if session._socket is socket:
+            if session._client is client:
                 return session
 
-    def create(self, socket, shell=None):
-        """Create a new session tied to the given socket.
+    def create(self, client, shell=None):
+        """Create a new session tied to the given client.
 
-        :param miniboa.TelnetClient socket: The socket to tie to the session
+        :param miniboa.TelnetClient client: The client to tie to the session
         :param Shell shell: Optional, a shell for the session
         :returns _Session: The new session
-        :raises AlreadyExists: If a session with that socket already exists
+        :raises AlreadyExists: If a session with that client already exists
 
         """
-        if self.find_by_socket(socket):
-            raise AlreadyExists(socket, self.find_by_socket(socket))
-        session = _Session(socket, shell)
+        if self.find_by_client(client):
+            raise AlreadyExists(client, self.find_by_client(client))
+        session = _Session(client, shell)
         self._sessions.append(session)
         return session
 
@@ -67,27 +67,27 @@ class SessionManager:
 
 class _Session(HasFlags):
 
-    """A client session, sending and receiving data through a socket."""
+    """A session, sending and receiving data through a client."""
 
-    def __init__(self, socket, shell=None):
-        """Create a new session tied to a socket.
+    def __init__(self, client, shell=None):
+        """Create a new session tied to a client.
 
         Don't do this yourself, call SessionManager.create instead.
 
         """
         super().__init__()
-        self._address = socket.addrport().rsplit(":", 1)[0]
+        self._address = client.addrport().rsplit(":", 1)[0]
         self._output_queue = deque()
         self._request_queue = deque()
         self._shell = None
-        self._socket = socket
+        self._client = client
         if shell:
             self.shell = shell
 
     def __del__(self):
-        if self._socket:
-            self._socket.sock.close()
-            self._socket.active = False
+        if self._client:
+            self._client.sock.close()
+            self._client.active = False
 
     def __repr__(self):
         return joins("Session<", self._address, ">", sep="")
@@ -96,7 +96,7 @@ class _Session(HasFlags):
     def active(self):
         """Return whether this session is still active."""
         return (not self.flags.has_any("close", "closed", "dead")
-                and self._socket and self._socket.active)
+                and self._client and self._client.active)
 
     @property
     def address(self):
@@ -133,7 +133,7 @@ class _Session(HasFlags):
 
     def _check_idle(self):
         """Check if this session is idle."""
-        idle = self._socket.idle()
+        idle = self._client.idle()
         if idle >= settings.IDLE_TIME:
             if (idle >= settings.IDLE_TIME_MAX or
                     not self._shell or self._shell.state < STATES.playing):
@@ -193,18 +193,18 @@ class _Session(HasFlags):
 
     def poll(self):
         """Check the status of this session and process any queued IO."""
-        if self._socket.active:
+        if self._client.active:
             if self.active:
                 self._check_idle()
             # Process input through the command queue.
             data = None
-            if self._socket.cmd_ready and self.active:
-                data = self._socket.get_command()
+            if self._client.cmd_ready and self.active:
+                data = self._client.get_command()
                 if data is not None:
                     self._parse_input(data)
             # Process output from the output queue.
             output = None
-            if self._output_queue and self._socket:
+            if self._output_queue and self._client:
                 # This can later be made more sophisticated with paged output,
                 # width-reformatting, etc., but for now it's pretty simple.
                 if data is None:
@@ -212,11 +212,11 @@ class _Session(HasFlags):
                     # them a newline before anything else.
                     self._output_queue.appendleft("\n")
                 output = "".join(self._output_queue)
-                self._socket.send_cc(output)
+                self._client.send_cc(output)
                 self._output_queue.clear()
             # Send them a prompt if there was any input or output.
             if (data is not None or output is not None) and self.active:
-                self._socket.send_cc(self._get_prompt())
+                self._client.send_cc(self._get_prompt())
         # All the IO is done, do a final state check.
         if not self.active and "closed" not in self.flags:
             with EVENTS.fire("session_ended", self):
