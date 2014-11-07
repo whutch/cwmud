@@ -39,7 +39,8 @@ class EventManager:
             self._events[event_name] = event
         return event
 
-    def hook(self, event_name, namespace=None, callback=None, pre=False):
+    def hook(self, event_name, namespace=None, callback=None,
+             pre=False, after=None):
         """Hook a callback to an event, optionally through a decorator.
 
         If an event with the name ``event_name`` does not exist it will be
@@ -52,15 +53,42 @@ class EventManager:
         :param str namespace: Optional, a namespace for the hook
         :param function callback: Optional, a callback for the hook
         :param bool pre: Optional, whether to pre- or post-hook the event
+        :param str after: Optional, a namespace that this hook will be inserted
+                          after in the hook order
         :returns function|None: A decorator to register an event hook callback
                                 or None if callback was provided
 
         """
         def _inner(func):
             event = self.get_or_make(event_name)
-            new_hook = _EventHook(func, namespace, pre)
+            new_hook = _EventHook(func, namespace, pre, after)
             event.hooks.append(new_hook)
+            if namespace is not None:
+                # Check for existing hooks that should be called after this.
+                moved = [new_hook]
+
+                def _check_afters(check_hooks):
+                    nonlocal moved
+                    move = []
+                    for hook in event.hooks:
+                        for check_hook in check_hooks:
+                            if (hook.after is not None and
+                                    hook.after == check_hook.namespace):
+                                move.append(hook)
+                    if move:
+                        for hook in move:
+                            if hook in moved:
+                                raise OverflowError(
+                                    "circular `after` attribute on"
+                                    " hook: {}".format(hook.after))
+                            event.hooks.remove(hook)
+                            event.hooks.append(hook)
+                            moved.append(hook)
+                        _check_afters(move)
+
+                _check_afters([new_hook])
             return func
+
         if callback:
             _inner(callback)
         else:
@@ -138,10 +166,11 @@ class _EventHook:
 
     """
 
-    def __init__(self, callback, namespace=None, pre=False):
+    def __init__(self, callback, namespace=None, pre=False, after=None):
         self.callback = callback
         self.namespace = namespace
         self.pre = pre
+        self.after = after
 
 
 class _Event:
