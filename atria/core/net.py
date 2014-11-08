@@ -4,6 +4,8 @@
 # :copyright: (c) 2008 - 2014 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
+from types import MappingProxyType
+
 from ..libs.miniboa import TelnetServer
 from .logs import get_logger
 
@@ -25,6 +27,12 @@ class SocketManager:
     def listening(self):
         """Return whether this is listening for new connections or not."""
         return self._listener is not None
+
+    @property
+    def clients(self):
+        """Return a read-only mapping of this manager's clients."""
+        return MappingProxyType(self._listener.clients
+                                if self._listener else {})
 
     @property
     def address(self):
