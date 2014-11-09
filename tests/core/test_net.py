@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Tests for network communication and socket management."""
+"""Tests for network communication and client management."""
 # Part of Atria MUD Server (https://github.com/whutch/atria)
 # :copyright: (c) 2008 - 2014 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
@@ -9,15 +9,15 @@ from time import sleep
 
 import pytest
 
-from atria.core.net import SocketManager
+from atria.core.net import ClientManager
 
 
-class TestSockets:
+class TestClients:
 
-    """A collection of tests for sockets and network communication."""
+    """A collection of tests for networking and client communication."""
 
-    sockets = None
-    opened_sockets = []
+    clients = None
+    opened_clients = []
     client = Telnet()
     address = "localhost"
     # Use a port here that is different than the one in settings, in case the
@@ -25,72 +25,72 @@ class TestSockets:
     port = 4444
 
     @classmethod
-    def _on_connect(cls, socket):
-        cls.opened_sockets.append(socket)
+    def _on_connect(cls, client):
+        cls.opened_clients.append(client)
 
     @classmethod
-    def _on_disconnect(cls, socket):
-        cls.opened_sockets.remove(socket)
+    def _on_disconnect(cls, client):
+        cls.opened_clients.remove(client)
 
-    def test_create_socket_manager(self):
-        """Test that we can create a new socket manager.
+    def test_create_client_manager(self):
+        """Test that we can create a new client manager.
 
         This is currently redundant, importing the net package already
         creates one, but we can keep it for symmetry and in case that
         isn't always so.
 
         """
-        type(self).sockets = SocketManager()
-        assert self.sockets
+        type(self).clients = ClientManager()
+        assert self.clients
 
     def test_listen_bad_callback(self):
         """Test that opening the listener with a bad callback fails."""
         with pytest.raises(TypeError):
-            self.sockets.listen(self.address, self.port, None, lambda: None)
+            self.clients.listen(self.address, self.port, None, lambda: None)
         with pytest.raises(TypeError):
-            self.sockets.listen(self.address, self.port, lambda: None, None)
+            self.clients.listen(self.address, self.port, lambda: None, None)
 
     def test_listen(self):
         """Test that we can open the listener socket."""
-        self.sockets.listen(self.address, self.port,
+        self.clients.listen(self.address, self.port,
                             self._on_connect, self._on_disconnect)
-        assert self.sockets.listening
-        assert self.sockets.address == self.address
-        assert self.sockets.port == self.port
+        assert self.clients.listening
+        assert self.clients.address == self.address
+        assert self.clients.port == self.port
 
-    def test_open_socket(self):
-        """Test that we can accept new socket connections."""
-        assert not self.opened_sockets
+    def test_client_connect(self):
+        """Test that we can accept new client connections."""
+        assert not self.opened_clients
         self.client.open(self.address, self.port)
         sleep(0.1)  # Try bumping this up if this test fails.
-        self.sockets.poll()
-        assert self.opened_sockets
+        self.clients.poll()
+        assert self.opened_clients
 
-    def test_read_from_socket(self):
-        """Test that we can read from a socket."""
+    def test_read_from_client(self):
+        """Test that we can read from a client."""
         self.client.write("ping".encode("ascii") + b"\n")
         sleep(0.1)  # Try bumping this up if this test fails.
-        self.sockets.poll()
-        socket = self.opened_sockets[0]
-        assert socket.cmd_ready
-        assert socket.get_command() == "ping"
+        self.clients.poll()
+        client = self.opened_clients[0]
+        assert client.cmd_ready
+        assert client.get_command() == "ping"
 
-    def test_write_to_socket(self):
-        """Test that we can write to a socket."""
-        socket = self.opened_sockets[0]
-        socket.send("pong\n")
+    def test_write_to_client(self):
+        """Test that we can write to a client."""
+        client = self.opened_clients[0]
+        client.send("pong\n")
         sleep(0.1)  # Try bumping this up if this test fails.
-        self.sockets.poll()
+        self.clients.poll()
         assert self.client.read_eager().decode("ascii").rstrip() == "pong"
 
-    def test_close_socket(self):
-        """Test that we can detect a dropped socket."""
+    def test_client_disconnect(self):
+        """Test that we can detect a client disconnect."""
         self.client.close()
-        self.sockets.poll()
-        assert not self.opened_sockets
+        self.clients.poll()
+        assert not self.opened_clients
 
-    def test_socket_manager_close(self):
+    def test_client_manager_close(self):
         """Test that we can close the listener socket."""
-        assert self.sockets.listening
-        self.sockets.close()
-        assert not self.sockets.listening
+        assert self.clients.listening
+        self.clients.close()
+        assert not self.clients.listening
