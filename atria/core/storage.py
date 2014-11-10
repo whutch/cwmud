@@ -201,8 +201,9 @@ class DataStore:
             return
         while self._transaction:
             key, data = self._transaction.popitem()
-            if not data:
-                self._delete(key)
+            if data is None:
+                if self._has(key):
+                    self._delete(key)
             else:
                 self._put(key, data)
 
