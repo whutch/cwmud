@@ -11,7 +11,7 @@ from .. import settings
 from .commands import COMMANDS, Command
 from .events import EVENTS
 from .logs import get_logger
-from .net import SOCKETS
+from .net import CLIENTS
 from .sessions import SESSIONS
 from .shells import STATES, SHELLS, Shell, WeakValueDictionary
 from .timing import TIMERS
@@ -56,28 +56,28 @@ BaseShell.add_verbs(QuitCommand, "quit")
 BaseShell.add_verbs(SayCommand, "say", "'")
 
 
-def _open_socket(socket):
-    """Fire an event when a new socket is opened."""
-    with EVENTS.fire("socket_opened", socket, no_pre=True):
-        log.info("Incoming connection from %s", socket.addrport())
+def _client_connected(client):
+    """Fire an event when a new client connects."""
+    with EVENTS.fire("client_connected", client, no_pre=True):
+        log.info("Incoming connection from %s", client.addrport())
 
 
-def _close_socket(socket):
-    """Fire and event when a socket is closed for any reason."""
-    with EVENTS.fire("socket_closed", socket, no_pre=True):
-        log.info("Lost connection from %s", socket.addrport())
+def _client_disconnected(client):
+    """Fire and event when a client disconnects for any reason."""
+    with EVENTS.fire("client_disconnected", client, no_pre=True):
+        log.info("Lost connection from %s", client.addrport())
 
 
-@EVENTS.hook("socket_opened")
-def _hook_socket_opened(socket):
-    session = SESSIONS.create(socket, BaseShell)
+@EVENTS.hook("client_connected")
+def _hook_client_connected(client):
+    session = SESSIONS.create(client, BaseShell)
     with EVENTS.fire("session_started", session):
         session.send(SESSIONS.greeting)
 
 
-@EVENTS.hook("socket_closed")
-def _hook_socket_closed(socket):
-    session = SESSIONS.find_by_socket(socket)
+@EVENTS.hook("client_disconnected")
+def _hook_client_disconnected(client):
+    session = SESSIONS.find_by_client(client)
     if session:
         session._socket = None
 
@@ -94,10 +94,10 @@ def boot():
 
     with EVENTS.fire("server_boot"):
         log.info("Booting server")
-        SOCKETS.listen(settings.BIND_ADDRESS,
+        CLIENTS.listen(settings.BIND_ADDRESS,
                        settings.BIND_PORT,
-                       _open_socket,
-                       _close_socket)
+                       _client_connected,
+                       _client_disconnected)
         greeting_path = join(settings.DATA_DIR, "greeting.txt")
         if exists(greeting_path):
             with open(greeting_path) as greeting_file:
@@ -111,7 +111,7 @@ def loop():
             with EVENTS.fire("server_loop"):
                 TIMERS.pulse()  # Pulse each timer once and fire any callbacks
                 SESSIONS.poll()  # Process IO for existing connections
-                SOCKETS.poll()  # Check for any new/dropped connections
+                CLIENTS.poll()  # Check for any new/dropped connections
                 SESSIONS.prune()  # Clean up closed/dead sessions
             # Any thing you want polled or updated should be done before
             # this point so that it is considered in the pulse delay.

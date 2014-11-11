@@ -33,7 +33,7 @@ def test_boot():
 
     server.boot()
     assert array == [1, 2]
-    assert server.SOCKETS.listening
+    assert server.CLIENTS.listening
 
 
 def test_loop():
