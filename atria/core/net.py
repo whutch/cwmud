@@ -4,9 +4,12 @@
 # :copyright: (c) 2008 - 2014 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
+import socket
+import sys
 from types import MappingProxyType
 
-from ..libs.miniboa import TelnetServer
+from ..libs.miniboa import TelnetClient, TelnetServer
+from .events import EVENTS
 from .logs import get_logger
 
 
@@ -90,3 +93,37 @@ class ClientManager:
 # will generally only need one to work with, they are NOT singletons and you
 # can make more ClientManager instances if you like.
 CLIENTS = ClientManager()
+
+
+@EVENTS.hook("server_save_state", "clients", pre=True)
+def _hook_server_save_state(state, pass_to_pid):
+    sockets = {}
+    if pass_to_pid is not None:
+        for fileno, client in CLIENTS.clients.items():
+            if sys.platform == "win32":
+                socket_info = client.sock.share(pass_to_pid)
+            else:
+                socket_info = fileno
+            sockets[fileno] = socket_info
+    state["clients"] = sockets
+
+
+# noinspection PyProtectedMember
+@EVENTS.hook("server_load_state", "clients")
+def _hook_server_load_state(state):
+    sockets = state["clients"]
+    new_clients = {}
+    for fileno, socket_info in sockets.items():
+        if sys.platform == "win32":
+            new_socket = socket.fromshare(socket_info)
+        else:
+            new_socket = socket.fromfd(socket_info,
+                                       socket.AF_INET,
+                                       socket.SOCK_STREAM)
+        client = TelnetClient(new_socket, new_socket.getsockname())
+        log.debug("Rebuilt client %s with socket %s", client, new_socket)
+        CLIENTS._server.clients[client.fileno] = client
+        new_clients[fileno] = client
+    # Rewrite the sockets dict in the state so that other modules can
+    #  reference the new clients by their old socket fileno.
+    state["clients"] = new_clients
