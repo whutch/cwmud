@@ -9,9 +9,10 @@ from collections import deque
 from .. import settings
 from .events import EVENTS
 from .logs import get_logger
-from .shells import STATES, Shell
+from .net import CLIENTS
+from .shells import SHELLS, STATES, Shell
 from .utils.exceptions import AlreadyExists
-from .utils.funcs import joins
+from .utils.funcs import class_name, joins
 from .utils.mixins import HasFlags
 
 
@@ -247,3 +248,32 @@ class _Session(HasFlags):
 # will generally only need one to work with, they are NOT singletons and you
 # can make more SessionManager instances if you like.
 SESSIONS = SessionManager()
+
+
+# noinspection PyProtectedMember
+@EVENTS.hook("server_save_state", "sessions", pre=True)
+def _hook_server_save_state(state, pass_to_pid):
+    sessions = []
+    # If sockets won't be saved, there's no point in saving sessions
+    if pass_to_pid is not None:
+        for session in SESSIONS._sessions:
+            sessions.append((session._client.fileno,
+                             class_name(session.shell)))
+    state["sessions"] = sessions
+
+
+# noinspection PyProtectedMember
+@EVENTS.hook("server_load_state", "sessions", after="clients")
+def _hook_server_load_state(state):
+    sessions = state["sessions"]
+    clients = state["clients"]
+    for socket_fileno, shell_name in sessions:
+        log.debug("Checking session %s, %s", socket_fileno, shell_name)
+        if not socket_fileno in clients:
+            # The client is gone, so no need for the session
+            continue
+        client = clients[socket_fileno]
+        shell = SHELLS[shell_name]
+        session = _Session(client, shell)
+        log.debug("Rebuilt session %s", session)
+        SESSIONS._sessions.append(session)
