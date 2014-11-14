@@ -9,7 +9,6 @@ from collections import deque
 from .. import settings
 from .events import EVENTS
 from .logs import get_logger
-from .net import CLIENTS
 from .shells import SHELLS, STATES, Shell
 from .utils.exceptions import AlreadyExists
 from .utils.funcs import class_name, joins
@@ -269,7 +268,7 @@ def _hook_server_load_state(state):
     clients = state["clients"]
     for socket_fileno, shell_name in sessions:
         log.debug("Checking session %s, %s", socket_fileno, shell_name)
-        if not socket_fileno in clients:
+        if socket_fileno not in clients:
             # The client is gone, so no need for the session
             continue
         client = clients[socket_fileno]
