@@ -21,6 +21,8 @@ from .opt.pickle import PickleStore
 
 log = get_logger("server")
 
+_SERVER_DATA = PickleStore("server")
+
 
 @SHELLS.register
 class BaseShell(Shell):
@@ -96,13 +98,12 @@ def save_state(pass_to_pid=None):
     :returns: None
 
     """
-    server_data = PickleStore("server")
-    if server_data.has("state"):
+    if _SERVER_DATA.has("state"):
         raise KeyError("a server state file already exists")
     state = {}
     with EVENTS.fire("server_save_state", state, pass_to_pid):
-        server_data.put("state", state)
-        server_data.commit()
+        _SERVER_DATA.put("state", state)
+        _SERVER_DATA.commit()
 
 
 def load_state():
@@ -116,10 +117,9 @@ def load_state():
     :returns: None
 
     """
-    server_data = PickleStore("server")
-    if not server_data.has("state"):
+    if not _SERVER_DATA.has("state"):
         raise KeyError("no server state file exists")
-    state = server_data.get("state")
+    state = _SERVER_DATA.get("state")
     EVENTS.fire("server_load_state", state).now()
 
 
@@ -132,7 +132,6 @@ def boot():
     with EVENTS.fire("server_init", no_pre=True):
         log.info("%s %s", settings.MUD_NAME_FULL, __version__)
         log.info("Initializing server")
-        server_data = PickleStore("server")
 
     with EVENTS.fire("server_boot"):
         log.info("Booting server")
@@ -144,10 +143,10 @@ def boot():
         if exists(greeting_path):
             with open(greeting_path) as greeting_file:
                 SESSIONS.greeting = greeting_file.read()
-        if server_data.has("state"):
+        if _SERVER_DATA.has("state"):
             load_state()
-            server_data.delete("state")
-            server_data.commit()
+            _SERVER_DATA.delete("state")
+            _SERVER_DATA.commit()
 
 
 def loop():
