@@ -187,6 +187,7 @@ class _Session(HasFlags):
         :param any more: Optional, any additional data to send
         :param str sep: Optional, a separator to join the resulting output by
         :param str end: Optional, a terminator appended to the resulting output
+        :returns None:
 
         """
         self._output_queue.append(joins(data, *more, sep=sep) + end)
@@ -234,6 +235,7 @@ class _Session(HasFlags):
         :param str reason: The reason this session is being closed, it will
                            be sent to the client prior to closing
         :param str log_msg: Optional, a custom log message for the closing
+        :returns: None
 
         """
         if not log_msg:
