@@ -121,7 +121,6 @@ def _hook_server_load_state(state):
                                        socket.AF_INET,
                                        socket.SOCK_STREAM)
         client = TelnetClient(new_socket, new_socket.getsockname())
-        log.debug("Rebuilt client %s with socket %s", client, new_socket)
         CLIENTS._server.clients[client.fileno] = client
         new_clients[fileno] = client
     # Rewrite the sockets dict in the state so that other modules can

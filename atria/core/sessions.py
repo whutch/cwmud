@@ -267,12 +267,10 @@ def _hook_server_load_state(state):
     sessions = state["sessions"]
     clients = state["clients"]
     for socket_fileno, shell_name in sessions:
-        log.debug("Checking session %s, %s", socket_fileno, shell_name)
         if socket_fileno not in clients:
             # The client is gone, so no need for the session
             continue
         client = clients[socket_fileno]
         shell = SHELLS[shell_name]
         session = _Session(client, shell)
-        log.debug("Rebuilt session %s", session)
         SESSIONS._sessions.append(session)
