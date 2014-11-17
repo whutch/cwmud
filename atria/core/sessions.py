@@ -54,10 +54,17 @@ class SessionManager:
         self._sessions.append(session)
         return session
 
-    def poll(self):
-        """Poll all sessions for queued IO."""
+    def poll(self, output_only=False):
+        """Poll all sessions for queued IO.
+
+        :param bool output_only: Whether to only process the output queue
+                                 (this allows you to call poll from inside a
+                                 command without triggering an infinite loop.)
+        :returns: None
+
+        """
         for session in self._sessions:
-            session.poll()
+            session.poll(output_only)
 
     def prune(self):
         """Clean up closed or dead sessions."""
@@ -192,17 +199,25 @@ class _Session(HasFlags):
         """
         self._output_queue.append(joins(data, *more, sep=sep) + end)
 
-    def poll(self):
-        """Check the status of this session and process any queued IO."""
+    def poll(self, output_only=False):
+        """Check the status of this session and process any queued IO.
+
+        :param bool output_only: Whether to only process the output queue
+                                 (this allows you to call poll from inside a
+                                 command without triggering an infinite loop.)
+        :returns: None
+
+        """
         if self._client.active:
-            if self.active:
+            if not output_only and self.active:
                 self._check_idle()
-            # Process input through the command queue.
             data = None
-            if self._client.cmd_ready and self.active:
-                data = self._client.get_command()
-                if data is not None:
-                    self._parse_input(data)
+            if not output_only:
+                # Process input through the command queue.
+                if self._client.cmd_ready and self.active:
+                    data = self._client.get_command()
+                    if data is not None:
+                        self._parse_input(data)
             # Process output from the output queue.
             output = None
             if self._output_queue and self._client:
@@ -219,7 +234,7 @@ class _Session(HasFlags):
             if (data is not None or output is not None) and self.active:
                 self._client.send_cc(self._get_prompt())
         # All the IO is done, do a final state check.
-        if not self.active and "closed" not in self.flags:
+        if not output_only and not self.active and "closed" not in self.flags:
             with EVENTS.fire("session_ended", self):
                 # Hooks to this event cannot send any output to the client,
                 # this is its last poll.
