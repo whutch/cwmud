@@ -15,6 +15,7 @@ from .net import CLIENTS
 from .sessions import SESSIONS
 from .shells import STATES, SHELLS, Shell, WeakValueDictionary
 from .timing import TIMERS
+from .utils.exceptions import ServerShutdown, ServerReboot
 from .utils.funcs import joins
 from .opt.pickle import PickleStore
 
@@ -163,6 +164,10 @@ def loop():
             TIMERS.sleep_excess()  # Wait until the next pulse is ready
     except KeyboardInterrupt:
         log.info("Received keyboard interrupt, stopping")
-
-    with EVENTS.fire("server_shutdown", no_post=True):
-        log.info("Shutting down server")
+    except ServerShutdown:
+        log.info("Received server shutdown")
+    except ServerReboot:
+        log.info("Received server reboot")
+    finally:
+        with EVENTS.fire("server_shutdown", no_post=True):
+            log.info("Server shutdown complete")
