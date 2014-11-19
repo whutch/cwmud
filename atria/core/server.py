@@ -71,6 +71,24 @@ class ServerReload(Exception):
     pass
 
 
+@COMMANDS.register
+class ReloadCommand(Command):
+
+    """A command to reload the game server, hopefully without interruption.
+
+    This is similar to the old ROM-style copyover, except that we try and
+    preserve a complete game state rather than just the open connections.
+
+    """
+
+    def _action(self):
+        self.session.send("Starting server reload, hold on to your butt.")
+        raise ServerReload
+
+
+BaseShell.add_verbs(ReloadCommand, "reload")
+
+
 def _client_connected(client):
     """Fire an event when a new client connects."""
     with EVENTS.fire("client_connected", client, no_pre=True):
