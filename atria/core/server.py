@@ -60,6 +60,17 @@ BaseShell.add_verbs(QuitCommand, "quit")
 BaseShell.add_verbs(SayCommand, "say", "'")
 
 
+class ServerReload(Exception):
+
+    """Exception to signal that the server should be reloaded.
+
+    This should only be raised after already saving a server state.
+
+    """
+
+    pass
+
+
 def _client_connected(client):
     """Fire an event when a new client connects."""
     with EVENTS.fire("client_connected", client, no_pre=True):
@@ -156,6 +167,7 @@ def boot():
 
 def loop():
     """Start the main server loop and loop until stopped."""
+    reloading = False
     try:
         while True:
             with EVENTS.fire("server_loop"):
@@ -172,6 +184,18 @@ def loop():
         log.info("Received server shutdown")
     except ServerReboot:
         log.info("Received server reboot")
+    except ServerReload:
+        log.info("Reloading server")
+        reloading = True
+        # Do one last session and client poll to clear the output queues
+        SESSIONS.poll(output_only=True)
+        CLIENTS.poll()
+        SESSIONS.prune()
+        import subprocess
+        new_process = subprocess.Popen(["python", "-m", "atria", "-R"])
+        log.debug("New process spawned, PID is %s", new_process.pid)
+        save_state(new_process.pid)
     finally:
-        with EVENTS.fire("server_shutdown", no_post=True):
-            log.info("Server shutdown complete")
+        if not reloading:
+            with EVENTS.fire("server_shutdown", no_post=True):
+                log.info("Server shutdown complete")
