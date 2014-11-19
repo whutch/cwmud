@@ -101,10 +101,12 @@ def save_state(pass_to_pid=None):
     """
     if _SERVER_DATA.has("state"):
         raise KeyError("a server state file already exists")
+    log.info("Starting game state save")
     state = {}
     with EVENTS.fire("server_save_state", state, pass_to_pid):
         _SERVER_DATA.put("state", state)
         _SERVER_DATA.commit()
+    log.info("Game state save successful")
 
 
 def load_state():
@@ -120,8 +122,10 @@ def load_state():
     """
     if not _SERVER_DATA.has("state"):
         raise KeyError("no server state file exists")
+    log.info("Starting game state load")
     state = _SERVER_DATA.get("state")
     EVENTS.fire("server_load_state", state).now()
+    log.info("Game state load successful")
 
 
 def boot():
