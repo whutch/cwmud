@@ -60,3 +60,9 @@ class Request:
     def __init__(self):
         """Create an input request from this template."""
         pass
+
+
+# We create a global RequestManager here for convenience, and while the
+# server will generally only need one to work with, they are NOT singletons
+# and you can make more RequestManager instances if you like.
+REQUESTS = RequestManager()
