@@ -4,4 +4,8 @@
 # :copyright: (c) 2008 - 2014 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
+# noinspection PyUnresolvedReferences
+import atria.core.utils.decorators  # To satisfy test coverage
+
+
 # There was something here but not anymore! Keeping file for future use.
