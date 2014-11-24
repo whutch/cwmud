@@ -165,10 +165,10 @@ class TestShells:
         assert self.shell.get_command("!") is Command
         assert not self.shell.get_command("nope")
 
-    def xtest_shell_find_command(self):
+    def test_shell_find_command(self):
         """Test that we can find a command in the shell's lineage."""
         Shell.add_verbs(Command, "beep")
-        self.shell.parent = Shell()
+        self.shell_class.parent = Shell
         assert not self.shell.get_command("beep")
         assert self.shell.find_command("beep") is Command
 
