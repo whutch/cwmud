@@ -122,27 +122,25 @@ class HasWeaks:
             del self._weak_refs[name]
 
 
-class HasParent(HasWeaks):
+# noinspection PyDocstring
+class HasParentMeta(type):
 
-    """A mix-in to allow objects to link themselves to a parent object.
+    """A metaclass to support arbitrary class lineages through `parent`."""
 
-    Parents are stored with weak references via the HasWeaks mix-in, so a
-    child object will not keep the parent object from being deleted if its
-    last strong reference is deleted.
-
-    """
-
-    def __init__(self):
-        super().__init__()
+    def __init__(cls, name, bases, namespace):
+        super().__init__(name, bases, namespace)
+        cls._parent = None
+        cls._parent_first = False
 
     @property
-    def parent(self):
-        """Get the parent of this object."""
-        return self._get_weak("parent")
+    def parent(cls):
+        """Get the parent of this class."""
+        # noinspection PyCallingNonCallable
+        return cls._parent
 
     @parent.setter
-    def parent(self, obj):
-        """Set the parent of this object.
+    def parent(cls, obj):
+        """Set the parent of this class.
 
         :param HasParent obj: The new parent; must subclass HasParent
         :returns: None
@@ -150,23 +148,25 @@ class HasParent(HasWeaks):
         :raises ValueError: If this parent results in a circular lineage
 
         """
-        if obj is not None:
+        if obj is None:
+            cls._parent = None
+        else:
             # Check that this object can be a parent
             if not hasattr(obj, "parent"):
                 raise TypeError("given object cannot be a parent")
             # Check for a circular lineage through this parent
             check_obj = obj
             while check_obj:
-                if check_obj is self:
+                if check_obj is cls:
                     raise ValueError("invalid parent due to circular lineage")
                 check_obj = check_obj.parent
-        # Lineage is good
-        self._set_weak("parent", obj)
+            # Lineage is good
+            cls._parent = obj
 
-    def get_lineage(self, priority=0):
+    def get_lineage(cls, priority=0):
         """Return a generator to iterate through this object's lineage.
 
-        Unless an object has the "parent first" flag, it will be yielded first
+        Unless an object has _parent_first set True, it will be yielded first
         in the lineage, before its parent, and so on through the line.
 
         :param int priority: If zero, this will iterate over the full lineage;
@@ -177,36 +177,45 @@ class HasParent(HasWeaks):
         :returns generator: An iterator through this object's lineage
 
         """
-        if hasattr(self, "flags"):
-            parent_first = ("parent first" in self.flags)
-        else:
-            parent_first = False
-        parent = self.parent  # Save a bunch of weakref de-referencing.
-        if parent and parent_first and priority >= 0:
+        parent = cls.parent  # Save a bunch of weakref de-referencing.
+        if parent and cls._parent_first and priority >= 0:
             for obj in parent.get_lineage():
                 yield obj
         if priority == 0:
-            yield self
-        if parent and not parent_first and priority <= 0:
+            yield cls
+        if parent and not cls._parent_first and priority <= 0:
             for obj in parent.get_lineage():
                 yield obj
 
-    def get_ancestors(self):
+    def get_ancestors(cls):
         """Return a generator to iterate through this object's ancestors.
 
         :returns generator: An iterator through this object's ancestry
 
         """
-        if self.parent:
-            yield self.parent
-            for obj in self.parent.get_ancestors():
+        if cls.parent:
+            yield cls.parent
+            for obj in cls.parent.get_ancestors():
                 yield obj
 
-    def has_ancestor(self, obj):
+    def has_ancestor(cls, obj):
         """Return whether this object has another object as an ancestor.
 
         :param HasParent obj: The object to search for
         :returns bool: Whether the object was found in this object's ancestry
 
         """
-        return obj in self.get_ancestors()
+        return obj in cls.get_ancestors()
+
+
+class HasParent(metaclass=HasParentMeta):
+
+    """A mix-in to allow classes to link themselves to a parent class.
+
+    For now, the parent system is only for the class objects themselves and
+    not their instances, unless we can think of a solid use-case otherwise.
+
+    """
+
+    def __init__(self):
+        super().__init__()
