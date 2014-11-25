@@ -66,6 +66,12 @@ class TestClients:
         self.clients.poll()
         assert self.opened_clients
 
+    def test_clients_property(self):
+        """Test that the clients property returns a mapping of clients."""
+        assert self.clients.clients
+        for client in self.clients.clients.values():
+            assert client in self.opened_clients
+
     def test_read_from_client(self):
         """Test that we can read from a client."""
         self.client.write("ping".encode("ascii") + b"\n")
