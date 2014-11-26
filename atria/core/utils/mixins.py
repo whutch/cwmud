@@ -85,9 +85,29 @@ class _FlagSet:
                 self._flags.add(flag)
 
 
-class HasFlags:
+class HasFlagsMeta(type):
 
-    """A mix-in to allow 'flagging' an object through a series of methods."""
+    """A metaclass to support flagging of classes themselves."""
+
+    def __init__(cls, name, bases, namespace):
+        super().__init__(name, bases, namespace)
+        cls._flag_set = _FlagSet()
+
+    # noinspection PyDocstring
+    @property
+    def flags(cls):
+        """Return this class's flag set."""
+        return cls._flag_set
+
+
+class HasFlags(metaclass=HasFlagsMeta):
+
+    """A mix-in to allow 'flagging' an object through a series of methods.
+
+    Each individual class or instance of a class that subclasses this will
+    have a separate flag set, there is no inheritance.
+
+    """
 
     def __init__(self):
         super().__init__()
@@ -95,13 +115,41 @@ class HasFlags:
 
     @property
     def flags(self):
-        """Return this object's flag set."""
+        """Return this instance's flag set."""
         return self._flag_set
 
 
-class HasWeaks:
+class HasWeaksMeta(type):
 
-    """A mix-in to allow objects to store weak references to other objects."""
+    """A metaclass to support storing weak references on classes themselves."""
+
+    def __init__(cls, name, bases, namespace):
+        super().__init__(name, bases, namespace)
+        cls._weak_refs = {}
+
+    def _get_weak(cls, name):
+        weak = cls._weak_refs.get(name)
+        return weak() if weak else None
+
+    def _set_weak(cls, name, obj):
+        if obj is None:
+            cls._del_weak(name)
+        else:
+            cls._weak_refs[name] = ref(obj)
+
+    def _del_weak(cls, name):
+        if name in cls._weak_refs:
+            del cls._weak_refs[name]
+
+
+class HasWeaks(metaclass=HasWeaksMeta):
+
+    """A mix-in to allow objects to store weak references to other objects.
+
+    Each individual class or instance of a class that subclasses this will
+    have a separate weak reference dict, there is no inheritance.
+
+    """
 
     def __init__(self):
         super().__init__()
