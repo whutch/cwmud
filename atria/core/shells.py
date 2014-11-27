@@ -10,7 +10,8 @@ from .logs import get_logger
 from .commands import Command
 from .utils.exceptions import AlreadyExists
 from .utils.funcs import joins
-from .utils.mixins import HasFlags, HasParent
+from .utils.mixins import (HasFlagsMeta, HasFlags, HasWeaksMeta, HasWeaks,
+                           HasParentMeta, HasParent)
 
 
 log = get_logger("shells")
@@ -70,7 +71,12 @@ class ShellManager:
         return shell
 
 
-class Shell(HasFlags, HasParent):
+class _ShellMeta(HasFlagsMeta, HasWeaksMeta, HasParentMeta):
+    # To avoid multiple metaclass errors
+    pass
+
+
+class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
 
     """A shell for processing client input."""
 
@@ -208,7 +214,8 @@ class Shell(HasFlags, HasParent):
         """
         return cls._verbs.get(verb)
 
-    def find_command(self, verb):
+    @classmethod
+    def find_command(cls, verb):
         """Find a command in this shell's lineage by its verb.
 
         Will return the first command found, as multiple stores may have
@@ -218,7 +225,7 @@ class Shell(HasFlags, HasParent):
         :returns Command|None: The command with that verb or None
 
         """
-        for shell in self.get_lineage():
+        for shell in cls.get_lineage():
             command = shell.get_command(verb)
             if command:
                 return command
