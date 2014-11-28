@@ -6,7 +6,7 @@
 
 from .logs import get_logger
 from .utils.exceptions import AlreadyExists
-from .utils.mixins import HasFlags, HasWeaks
+from .utils.mixins import HasFlagsMeta, HasFlags, HasWeaksMeta, HasWeaks
 
 
 log = get_logger("commands")
@@ -61,7 +61,12 @@ class CommandManager:
         return command
 
 
-class Command(HasFlags, HasWeaks):
+class _CommandMeta(HasFlagsMeta, HasWeaksMeta):
+    # To avoid multiple metaclass errors
+    pass
+
+
+class Command(HasFlags, HasWeaks, metaclass=_CommandMeta):
 
     """A command for performing actions through a shell."""
 
