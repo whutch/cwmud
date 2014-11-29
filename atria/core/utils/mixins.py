@@ -7,6 +7,23 @@
 from weakref import ref
 
 
+"""
+A note on using multiple mix-ins with metaclasses:
+
+If you subclass multiple mix-in classes that each have independent metaclasses,
+you will need to first create a new metaclass that subclasses the metaclasses
+of each of the mix-ins you are using and then use that as the metaclass for
+your new class. For example:
+
+class _MyClassMeta(HasFlagsMega, HasWeaksMeta):
+    pass
+
+class MyClass(HasFlags, HasWeaks, metaclass=_MyClassMeta):
+    ...
+
+"""
+
+
 class _FlagSet:
 
     """A set of flags on an object. Used by the HasFlags mix-in.
