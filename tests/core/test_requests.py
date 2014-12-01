@@ -7,6 +7,7 @@
 import pytest
 
 from atria.core.requests import AlreadyExists, RequestManager, Request
+from atria.core.utils.funcs import joins
 
 
 class TestRequests:
@@ -16,6 +17,17 @@ class TestRequests:
     requests = None
     request_class = None
     request = None
+
+    # noinspection PyDocstring
+    class _FakeSession:
+
+        def __init__(self):
+            self._output = []
+
+        def send(self, data, *more, sep=" ", end="\n"):
+            return self._output.append(joins(data, *more, sep=sep) + end)
+
+    session = _FakeSession()
 
     def test_request_manager_create(self):
         """Test that we can create a request manager.
@@ -34,12 +46,8 @@ class TestRequests:
 
         @self.requests.register
         class TestRequest(Request):
-
             """A test request."""
-
-            def __init__(self):
-                super().__init__()
-                pass
+            pass
 
         type(self).request_class = TestRequest
         assert "TestRequest" in self.requests._requests
@@ -68,5 +76,5 @@ class TestRequests:
     def test_request_create(self):
         """Test that we can create a new request instance."""
         # noinspection PyCallingNonCallable
-        type(self).request = self.request_class()
+        type(self).request = self.request_class(self.session, None)
         assert self.request
