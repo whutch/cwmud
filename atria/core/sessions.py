@@ -165,7 +165,10 @@ class _Session(HasFlags):
         :returns: None
 
         """
-        if self._shell:
+        if self._request_queue:
+            if self._request_queue[0].resolve(data):
+                self._request_queue.popleft()
+        elif self._shell:
             self._shell.parse(data)
         else:
             log.warn("Input not handled for %s: %s", self, data)
@@ -176,7 +179,9 @@ class _Session(HasFlags):
         :returns str: The generated prompt
 
         """
-        if self._shell:
+        if self._request_queue:
+            return self._request_queue[0].get_prompt()
+        elif self._shell:
             return self._shell.get_prompt()
         else:
             return "^y>^~ "
