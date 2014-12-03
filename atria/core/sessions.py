@@ -264,6 +264,22 @@ class _Session(HasFlags):
         self.send(reason)
         self.flags.add("close")
 
+    def request(self, request_class, callback, **options):
+        """Request data from the client.
+
+        :param requests.Request request_class: The request template
+        :param callable callback: A callback for after the request resolves
+        :param dict options: Keyword arguments passed to the request class
+        :returns: None
+
+        """
+        other_requests = bool(self._request_queue)
+        new_request = request_class(self, callback, **options)
+        self._request_queue.append(new_request)
+        if not other_requests:
+            # Force a prompt this poll.
+            self.send("", end="")
+
 
 # We create a global SessionManager here for convenience, and while the server
 # will generally only need one to work with, they are NOT singletons and you
