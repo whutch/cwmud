@@ -211,3 +211,50 @@ class Request(HasFlags, HasWeaks, metaclass=_RequestMeta):
 # server will generally only need one to work with, they are NOT singletons
 # and you can make more RequestManager instances if you like.
 REQUESTS = RequestManager()
+
+
+@REQUESTS.register
+class RequestNumber(Request):
+
+    """A request for a number.
+
+    :param int min: Optional, a minimum value for the number
+    :param int max: Optional, a maximum value for the number
+
+    """
+
+    def _validate(self, data):
+        if not data.isdigit():
+            raise Request.ValidationFailed("Input must be a number.")
+        data = int(data)
+        min_val = self.options.get("min")
+        if min_val and data < min_val:
+            raise Request.ValidationFailed(joins(
+                "Input must be at least ", min_val, ".", sep=""))
+        max_val = self.options.get("max")
+        if max_val and data < max_val:
+            raise Request.ValidationFailed(joins(
+                "Input cannot be more than ", max_val, ".", sep=""))
+        return data
+
+
+@REQUESTS.register
+class RequestString(Request):
+
+    """A request for a string.
+
+    :param int min_len: Optional, a minimum length for the string
+    :param int max_len: Optional, a maximum length for the string
+
+    """
+
+    def _validate(self, data):
+        min_len = self.options.get("min_len")
+        if min_len and len(data) < min_len:
+            raise Request.ValidationFailed(joins(
+                "Input must be at least", min_len, "characters long."))
+        max_len = self.options.get("max_len")
+        if max_len and len(data) > max_len:
+            raise Request.ValidationFailed(joins(
+                "Input cannot be more than", max_len, "characters long."))
+        return data
