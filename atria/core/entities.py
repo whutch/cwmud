@@ -197,3 +197,98 @@ class Attribute:
 
         """
         return value
+
+
+# noinspection PyDocstring
+class _EntityMeta(type):
+
+    def __init__(cls, name, bases, namespace):
+        super().__init__(name, bases, namespace)
+        cls._base_blob = type(name + "BaseBlob", (DataBlob,), {})
+
+    def register_blob(cls, name):
+        """Decorate a data blob to register it on this entity.
+
+        :param str name: The name of the field to store the blob
+        :returns: None
+        :raises AlreadyExists: If the given name already exists as an attr
+        :raises TypeError: If the supplied or decorated class is not a
+                           subclass of DataBlob
+
+        """
+        if hasattr(cls, name):
+            raise AlreadyExists(name, getattr(cls, name))
+
+        # noinspection PyProtectedMember
+        def _inner(blob_class):
+            if (not isinstance(blob_class, type) or
+                    not issubclass(blob_class, DataBlob)):
+                raise TypeError("must be subclass of DataBlob to register")
+            # noinspection PyUnresolvedReferences
+            cls._base_blob._blobs[name] = blob_class
+            prop = property(lambda s: s._base_blob._blobs[name])
+            setattr(cls, name, prop)
+            return blob_class
+
+        return _inner
+
+    def register_attr(cls, name):
+        """Decorate an attribute to register it on this entity.
+
+        :param str name: The name of the field to store the attribute
+        :returns: None
+        :raises AlreadyExists: If the given name already exists as an attr
+        :raises TypeError: If the supplied or decorated class is not a
+                           subclass of Attribute
+
+        """
+        if hasattr(cls, name):
+            raise AlreadyExists(name, getattr(cls, name))
+
+        # noinspection PyProtectedMember
+        def _inner(attr_class):
+            if (not isinstance(attr_class, type) or
+                    not issubclass(attr_class, Attribute)):
+                raise TypeError("must be subclass of Attribute to register")
+            # noinspection PyUnresolvedReferences
+            cls._base_blob._attrs[name] = attr_class
+            getter = lambda s: s._base_blob._get_attr_val(name)
+            setter = (lambda s, v: s._base_blob._set_attr_val(name, v)
+                      if not attr_class._read_only else None)
+            setattr(cls, name, property(getter, setter))
+            return attr_class
+
+        return _inner
+
+
+class Entity(metaclass=_EntityMeta):
+
+    """The base of all persistent objects in the game."""
+
+    def __init__(self, data=None):
+        self._base_blob = self._base_blob()
+        self._uid = None
+        if data is not None:
+            self.deserialize(data)
+
+    @property
+    def uid(self):
+        """Return the entity's UID."""
+        return self._uid
+
+    def serialize(self):
+        """Create a sanitized dict from the data on this entity.
+
+        :returns dict: The serialized data
+
+        """
+        return self._base_blob.serialize()
+
+    def deserialize(self, data):
+        """Update this entity's data using values from a dict.
+
+        :param dict data: The data to deserialize
+        :returns: None
+
+        """
+        self._base_blob.deserialize(data)
