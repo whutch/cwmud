@@ -5,6 +5,7 @@
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
 from .logs import get_logger
+from .timing import TIMERS
 from .utils.exceptions import AlreadyExists
 from .utils.funcs import class_name, joins
 
@@ -265,9 +266,13 @@ class Entity(metaclass=_EntityMeta):
 
     """The base of all persistent objects in the game."""
 
+    _uid_code = "E"
+    _uid_history = {}  # Don't redefine on subclasses
+
+    # noinspection PyProtectedMember
     def __init__(self, data=None):
         self._base_blob = self._base_blob()
-        self._uid = None
+        self._uid = self.make_uid()
         if data is not None:
             self.deserialize(data)
 
@@ -292,3 +297,29 @@ class Entity(metaclass=_EntityMeta):
 
         """
         self._base_blob.deserialize(data)
+
+    @classmethod
+    def make_uid(cls):
+        """Create a UID for this entity.
+
+        UIDs are in the form "X-YYYYYY-Z", where X is the entity code, Y is
+        the current time code, and Z is the number of UIDs created during
+        the same time code. (Ex. "E-ngfazj-0")
+
+        If my base 36 math is to be believed, the time codes should remain
+        six digits until December 23rd 2038, and after that will remain
+        seven digits until the year 4453.
+
+        :returns str: The new UID
+
+        """
+        time_code = TIMERS.get_time_code()
+        last_time, last_count = cls._uid_history.get(cls._uid_code, (0, 0))
+        if time_code == last_time:
+            last_count += 1
+        else:
+            last_time = time_code
+            last_count = 0
+        uid = "-".join((cls._uid_code, time_code, str(last_count)))
+        cls._uid_history[cls._uid_code] = (last_time, last_count)
+        return uid
