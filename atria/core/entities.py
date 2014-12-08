@@ -101,6 +101,18 @@ class DataBlob(metaclass=_DataBlobMeta):
         # noinspection PyProtectedMember
         self._attr_values[name] = attr._validate(value)
 
+    def _update(self, blob):
+        """Merge this blob with another, replacing blobs and attrs.
+
+        Sub-blobs and attrs on the given blob with take precedent over those
+        existing on this blob.
+
+        :param DataBlob blob: The blob to merge this blob with
+        """
+        self._blobs.update(blob._blobs)
+        self._attrs.update(blob._attrs)
+        self._attr_values.update(blob._attr_values)
+
     def serialize(self):
         """Create a dict from this blob, sanitized and suitable for storage.
 
@@ -271,8 +283,15 @@ class Entity(metaclass=_EntityMeta):
 
     # noinspection PyProtectedMember
     def __init__(self, data=None):
-        self._base_blob = self._base_blob()
-        self._uid = self.make_uid()
+        parent = super(self.__class__, self)
+        if hasattr(parent, "_base_blob"):
+            self._base_blob = parent._base_blob()
+            # noinspection PyUnresolvedReferences
+            self._base_blob._update(self.__class__._base_blob())
+        else:
+            self._base_blob = self._base_blob()
+        if not hasattr(self, "_uid"):
+            self._uid = self.make_uid()
         if data is not None:
             self.deserialize(data)
 
