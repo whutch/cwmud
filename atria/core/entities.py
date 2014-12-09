@@ -377,3 +377,30 @@ class Entity(metaclass=_EntityMeta):
         data["uid"] = self._uid
         key = data[self._store_key]
         self._store.put(key, data)
+
+    def revert(self):
+        """Revert this entity to a previously saved state."""
+        if not self._store:
+            raise TypeError("cannot revert entity with no store")
+        key = getattr(self, self._store_key)
+        data = self._store.get(key)
+        if self.uid != data["uid"]:
+            raise ValueError(joins("uid mismatch trying to revert", self))
+        del data["uid"]
+        self.deserialize(data)
+
+    def clone(self, new_key):
+        """Create a new entity with a copy of this entity's data.
+
+        :param new_key: The key the new entity will be stored under
+
+        """
+        if not self._store:
+            raise TypeError("cannot clone entity with no store")
+        entity_class = type(self)
+        if self._store.has(new_key):
+            raise KeyError(joins("key exists in entity store:", new_key))
+        new_entity = entity_class()
+        new_entity.deserialize(self.serialize())
+        setattr(new_entity, self._store_key, new_key)
+        return new_entity
