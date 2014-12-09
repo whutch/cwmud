@@ -278,6 +278,8 @@ class Entity(metaclass=_EntityMeta):
 
     """The base of all persistent objects in the game."""
 
+    _store = None
+    _store_key = "uid"
     _uid_code = "E"
     _uid_history = {}  # Don't redefine on subclasses
 
@@ -342,3 +344,36 @@ class Entity(metaclass=_EntityMeta):
         uid = "-".join((cls._uid_code, time_code, str(last_count)))
         cls._uid_history[cls._uid_code] = (last_time, last_count)
         return uid
+
+    @classmethod
+    def load(cls, key):
+        """Load an entity from storage.
+
+        :param key: The key the entity's data is stored under
+        :returns Entity: The loaded entity
+        :raises FileNotFoundError: If the given key is not found in the store
+
+        """
+        if not cls._store:
+            raise TypeError("cannot load entity with no store")
+        data = cls._store.get(key)
+        if not data:
+            raise FileNotFoundError(joins("couldn't load", class_name(cls),
+                                          "with key:", key))
+        if "uid" not in data:
+            raise ValueError(joins("no uid for", class_name(cls),
+                                   "loaded with key:", key))
+        uid = data["uid"]
+        del data["uid"]
+        entity = cls(data)
+        entity._uid = uid
+        return entity
+
+    def save(self):
+        """Store this entity."""
+        if not self._store:
+            raise TypeError("cannot save entity with no store")
+        data = self.serialize()
+        data["uid"] = self._uid
+        key = data[self._store_key]
+        self._store.put(key, data)
