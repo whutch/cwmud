@@ -43,6 +43,15 @@ class PickleStore(DataStore):
             raise OSError(joins("invalid path to pickle file:", path))
         return path
 
+    def _is_open(self):  # pragma: no cover
+        return True
+
+    def _open(self):  # pragma: no cover
+        pass
+
+    def _close(self):  # pragma: no cover
+        pass
+
     def _has(self, key):
         """Return whether a pickle file exists or not."""
         path = self._get_key_path(key)
