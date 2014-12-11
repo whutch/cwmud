@@ -404,3 +404,17 @@ class Entity(metaclass=_EntityMeta):
         new_entity.deserialize(self.serialize())
         setattr(new_entity, self._store_key, new_key)
         return new_entity
+
+
+@Entity.register_attr("version")
+class EntityVersion(Attribute):
+
+    """An entity's version."""
+
+    _default = 1
+
+    @classmethod
+    def _validate(cls, value):
+        if not isinstance(value, int):
+            raise TypeError("entity version must be a number")
+        return value
