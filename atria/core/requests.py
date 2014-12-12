@@ -64,8 +64,14 @@ class Request(HasFlags, HasWeaks, metaclass=_RequestMeta):
 
     """A request for input from a client."""
 
+    # Constants, don't change these
+    CONFIRM_YES = 1
+    CONFIRM_REPEAT = 2
+
+    # Defaults, override these on subclasses
     initial_prompt = "? "
     repeat_prompt = "? "
+    confirm = None
     confirm_prompt_yn = "'{data}', is that correct? (Y/N) "
     confirm_prompt_repeat = "Repeat to confirm: "
 
@@ -113,11 +119,11 @@ class Request(HasFlags, HasWeaks, metaclass=_RequestMeta):
     def get_prompt(self):
         """Generate the current prompt for this request."""
         if self._confirm:
-            confirm = self.options.get("confirm")
-            if confirm == "y/n":
+            confirm = self.options.get("confirm") or self.confirm
+            if confirm == Request.CONFIRM_YES:
                 prompt = (self.options.get("confirm_prompt_yn")
                           or self.confirm_prompt_yn)
-            elif confirm == "repeat":
+            elif confirm == Request.CONFIRM_REPEAT:
                 prompt = (self.options.get("confirm_prompt_repeat")
                           or self.confirm_prompt_repeat)
             else:
@@ -144,7 +150,7 @@ class Request(HasFlags, HasWeaks, metaclass=_RequestMeta):
 
         resolved = False
         error = None
-        confirm = self.options.get("confirm")
+        confirm = self.options.get("confirm") or self.confirm
         errors = self.options.get("errors", {})
 
         def _validate(_data):
@@ -155,10 +161,10 @@ class Request(HasFlags, HasWeaks, metaclass=_RequestMeta):
 
         if self._confirm:
             # They've already sent valid input, we just need to confirm it.
-            if confirm == "y/n":
+            if confirm == Request.CONFIRM_YES:
                 if not "yes".startswith(data.lower()):
                     error = errors.get("no", "Alright, what then?")
-            elif confirm == "repeat":
+            elif confirm == Request.CONFIRM_REPEAT:
                 try:
                     # We have to pass the repeated input through validation
                     #  so that any normalization that happened to the original
