@@ -15,7 +15,7 @@ from .net import CLIENTS
 from .sessions import SESSIONS
 from .shells import STATES, SHELLS, Shell, WeakValueDictionary
 from .timing import TIMERS
-from .utils.exceptions import ServerShutdown, ServerReboot
+from .utils.exceptions import ServerShutdown, ServerReboot, ServerReload
 from .utils.funcs import joins
 from .opt.pickle import PickleStore
 
@@ -56,21 +56,6 @@ class SayCommand(Command):
         self.session.send(joins("You say, '", message, "'.", sep=""))
 
 
-BaseShell.add_verbs(QuitCommand, "quit")
-BaseShell.add_verbs(SayCommand, "say", "'")
-
-
-class ServerReload(Exception):
-
-    """Exception to signal that the server should be reloaded.
-
-    This should only be raised after already saving a server state.
-
-    """
-
-    pass
-
-
 @COMMANDS.register
 class ReloadCommand(Command):
 
@@ -86,6 +71,8 @@ class ReloadCommand(Command):
         raise ServerReload
 
 
+BaseShell.add_verbs(QuitCommand, "quit")
+BaseShell.add_verbs(SayCommand, "say", "'")
 BaseShell.add_verbs(ReloadCommand, "reload")
 
 
