@@ -292,10 +292,11 @@ class Entity(metaclass=_EntityMeta):
             self._base_blob._update(self.__class__._base_blob())
         else:
             self._base_blob = self._base_blob()
-        if not hasattr(self, "_uid"):
-            self._uid = self.make_uid()
+        self._uid = None
         if data is not None:
             self.deserialize(data)
+        if self._uid is None:
+            self._uid = self.make_uid()
 
     @property
     def uid(self):
@@ -308,7 +309,9 @@ class Entity(metaclass=_EntityMeta):
         :returns dict: The serialized data
 
         """
-        return self._base_blob.serialize()
+        data = self._base_blob.serialize()
+        data["uid"] = self._uid
+        return data
 
     def deserialize(self, data):
         """Update this entity's data using values from a dict.
@@ -317,6 +320,9 @@ class Entity(metaclass=_EntityMeta):
         :returns: None
 
         """
+        if "uid" in data:
+            self._uid = data["uid"]
+            del data["uid"]
         self._base_blob.deserialize(data)
 
     @classmethod
@@ -358,15 +364,12 @@ class Entity(metaclass=_EntityMeta):
             raise TypeError("cannot load entity with no store")
         data = cls._store.get(key)
         if not data:
-            raise FileNotFoundError(joins("couldn't load", class_name(cls),
-                                          "with key:", key))
+            raise KeyError(joins("couldn't load", class_name(cls),
+                                 "with key:", key))
         if "uid" not in data:
             raise ValueError(joins("no uid for", class_name(cls),
                                    "loaded with key:", key))
-        uid = data["uid"]
-        del data["uid"]
         entity = cls(data)
-        entity._uid = uid
         return entity
 
     def save(self):
@@ -374,7 +377,6 @@ class Entity(metaclass=_EntityMeta):
         if not self._store:
             raise TypeError("cannot save entity with no store")
         data = self.serialize()
-        data["uid"] = self._uid
         key = data[self._store_key]
         self._store.put(key, data)
 
@@ -386,7 +388,6 @@ class Entity(metaclass=_EntityMeta):
         data = self._store.get(key)
         if self.uid != data["uid"]:
             raise ValueError(joins("uid mismatch trying to revert", self))
-        del data["uid"]
         self.deserialize(data)
 
     def clone(self, new_key):
@@ -400,8 +401,9 @@ class Entity(metaclass=_EntityMeta):
         entity_class = type(self)
         if self._store.has(new_key):
             raise KeyError(joins("key exists in entity store:", new_key))
-        new_entity = entity_class()
-        new_entity.deserialize(self.serialize())
+        data = self.serialize()
+        del data["uid"]
+        new_entity = entity_class(data)
         setattr(new_entity, self._store_key, new_key)
         return new_entity
 
