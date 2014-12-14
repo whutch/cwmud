@@ -4,6 +4,8 @@
 # :copyright: (c) 2008 - 2014 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
+from weakref import WeakValueDictionary
+
 from .logs import get_logger
 from .timing import TIMERS
 from .utils.exceptions import AlreadyExists
@@ -218,6 +220,7 @@ class _EntityMeta(type):
     def __init__(cls, name, bases, namespace):
         super().__init__(name, bases, namespace)
         cls._base_blob = type(name + "BaseBlob", (DataBlob,), {})
+        cls._instances = WeakValueDictionary()
 
     def register_blob(cls, name):
         """Decorate a data blob to register it on this entity.
@@ -297,6 +300,8 @@ class Entity(metaclass=_EntityMeta):
             self.deserialize(data)
         if self._uid is None:
             self._uid = self.make_uid()
+        # noinspection PyUnresolvedReferences
+        self._instances[self._uid] = self
 
     @property
     def uid(self):
@@ -351,26 +356,41 @@ class Entity(metaclass=_EntityMeta):
         cls._uid_history[cls._uid_code] = (last_time, last_count)
         return uid
 
+    # noinspection PyProtectedMember,PyUnresolvedReferences
     @classmethod
-    def load(cls, key):
+    def load(cls, key, from_cache=True):
         """Load an entity from storage.
 
+        If `from_cache` is True and an instance is found in the _instances
+        cache then the found instance will be returned as-is and NOT
+        reloaded from the store. If you want to reset an entity's data to a
+        stored state, use the revert method instead.
+
         :param key: The key the entity's data is stored under
+        :param bool from_cache: Whether to check the _instances cache for a
+                                match before reading from storage
         :returns Entity: The loaded entity
-        :raises FileNotFoundError: If the given key is not found in the store
+        :raises KeyError: If the given key is not found in the store
 
         """
-        if not cls._store:
-            raise TypeError("cannot load entity with no store")
-        data = cls._store.get(key)
-        if not data:
-            raise KeyError(joins("couldn't load", class_name(cls),
-                                 "with key:", key))
-        if "uid" not in data:
-            raise ValueError(joins("no uid for", class_name(cls),
-                                   "loaded with key:", key))
-        entity = cls(data)
-        return entity
+        if from_cache:
+            if cls._store_key == "uid":
+                if key in cls._instances:
+                    return cls._instances[key]
+            else:
+                for entity in cls._instances.values():
+                    if getattr(entity, cls._store_key) == key:
+                        return entity
+        if cls._store:
+            data = cls._store.get(key)
+            if data:
+                if "uid" not in data:
+                    log.warn("No uid for %s loaded with key: %s",
+                             class_name(cls), key)
+                entity = cls(data)
+                return entity
+        raise KeyError(joins("couldn't load", class_name(cls),
+                       "with key:", key))
 
     def save(self):
         """Store this entity."""
