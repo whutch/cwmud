@@ -358,6 +358,30 @@ class Entity(metaclass=_EntityMeta):
 
     # noinspection PyProtectedMember,PyUnresolvedReferences
     @classmethod
+    def exists(cls, key):
+        """Check if an entity with the given key exists.
+
+        :param key: The key the entity's data is stored under
+        :returns bool: True if it exists, else False
+
+        """
+        # Check the store first
+        if cls._store and cls._store.has(key):
+            return True
+        # Then check unsaved instances
+        if cls._store_key == "uid":
+            if key in cls._instances:
+                return True
+        else:
+            # This entity isn't saved by UID, so we have to check
+            # each one for a matching store key.
+            for entity in cls._instances.values():
+                if getattr(entity, cls._store_key) == key:
+                    return True
+        return False
+
+    # noinspection PyProtectedMember,PyUnresolvedReferences
+    @classmethod
     def load(cls, key, from_cache=True):
         """Load an entity from storage.
 
