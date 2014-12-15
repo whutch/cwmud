@@ -413,12 +413,16 @@ class Entity(metaclass=_EntityMeta):
     def clone(self, new_key):
         """Create a new entity with a copy of this entity's data.
 
-        :param new_key: The key the new entity will be stored under
+        :param new_key: The key the new entity will be stored under;
+                        new_key can be callable, in which case the return
+                        value will be used as the key
 
         """
         if not self._store:
             raise TypeError("cannot clone entity with no store")
         entity_class = type(self)
+        if callable(new_key):
+            new_key = new_key()
         if self._store.has(new_key):
             raise KeyError(joins("key exists in entity store:", new_key))
         data = self.serialize()
