@@ -6,7 +6,7 @@
 
 import re
 
-from .entities import Entity, Attribute
+from .entities import Entity, DataBlob, Attribute
 from .requests import REQUESTS, Request
 from .utils.funcs import joins
 from .opt.pickle import PickleStore
@@ -119,3 +119,9 @@ class RequestNewAccountPassword(Request):
             return AccountPassword._validate(data)
         except ValueError as exc:
             raise Request.ValidationFailed(*exc.args)
+
+
+@Account.register_blob("options")
+class AccountOptions(DataBlob):
+    """A collection of account and client options."""
+    pass
