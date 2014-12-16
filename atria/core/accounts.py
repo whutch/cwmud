@@ -30,6 +30,10 @@ class AccountName(Attribute):
     _max_len = 16
     _valid_chars = re.compile(r"^[\w]+$")
 
+    # Other modules can add any reservations they need to this list.
+    # Reserved account names should be all lowercase.
+    RESERVED = ["new", "account", "help"]
+
     @classmethod
     def _validate(cls, new_value):
         if (not isinstance(new_value, str) or
@@ -42,6 +46,16 @@ class AccountName(Attribute):
                                    cls._min_len, "and", cls._max_len,
                                    "characters in length."))
         return new_value.lower()
+
+    @classmethod
+    def check_reserved(cls, name):
+        """Check if an account name is reserved.
+
+        :param str name: The account name to check
+        :returns bool: True if the name is reserved, else False
+
+        """
+        return name in cls.RESERVED
 
 
 # noinspection PyProtectedMember
@@ -64,6 +78,8 @@ class RequestNewAccountName(Request):
             new_name = AccountName._validate(data)
         except ValueError as exc:
             raise Request.ValidationFailed(*exc.args)
+        if AccountName.check_reserved(new_name):
+            raise Request.ValidationFailed("That account name is reserved.")
         if Account._store.has(new_name):
             raise Request.ValidationFailed("That account name is taken.")
         return new_name
