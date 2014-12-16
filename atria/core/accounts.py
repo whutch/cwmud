@@ -7,6 +7,7 @@
 import re
 
 from .entities import Entity, Attribute
+from .requests import REQUESTS, Request
 from .utils.funcs import joins
 from .opt.pickle import PickleStore
 
@@ -43,6 +44,31 @@ class AccountName(Attribute):
         return new_value.lower()
 
 
+# noinspection PyProtectedMember
+@REQUESTS.register
+class RequestNewAccountName(Request):
+
+    """A request for a new account name."""
+
+    initial_prompt = joins("Enter a new account name (account names must"
+                           " be between", AccountName._min_len, "and",
+                           AccountName._max_len, "characters in length"
+                           " and contain only letters, numbers, or"
+                           " underscore): ")
+    repeat_prompt = "New account name: "
+    confirm = Request.CONFIRM_YES
+    confirm_prompt_yn = "'{data}', is that correct? (Y/N) "
+
+    def _validate(self, data):
+        try:
+            new_name = AccountName._validate(data)
+        except ValueError as exc:
+            raise Request.ValidationFailed(*exc.args)
+        if Account._store.has(new_name):
+            raise Request.ValidationFailed("That account name is taken.")
+        return new_name
+
+
 @Account.register_attr("password")
 class AccountPassword(Attribute):
 
@@ -58,3 +84,22 @@ class AccountPassword(Attribute):
             raise ValueError(joins("Account passwords must be at least",
                                    cls._min_len, "characters in length."))
         return new_value
+
+
+# noinspection PyProtectedMember
+@REQUESTS.register
+class RequestNewAccountPassword(Request):
+
+    """A request for a new account password."""
+
+    initial_prompt = joins("Enter a new password (passwords must"
+                           " be at least", AccountPassword._min_len,
+                           "characters in length): ")
+    repeat_prompt = "New password: "
+    confirm = Request.CONFIRM_REPEAT
+
+    def _validate(self, data):
+        try:
+            return AccountPassword._validate(data)
+        except ValueError as exc:
+            raise Request.ValidationFailed(*exc.args)
