@@ -26,9 +26,9 @@ _SERVER_DATA = PickleStore("server")
 
 
 @SHELLS.register
-class BaseShell(Shell):
+class ChatShell(Shell):
 
-    """A basic command shell."""
+    """A basic command shell for chatting."""
 
     _verbs = WeakValueDictionary()
     state = STATES.playing
@@ -71,9 +71,9 @@ class ReloadCommand(Command):
         raise ServerReload
 
 
-BaseShell.add_verbs(QuitCommand, "quit")
-BaseShell.add_verbs(SayCommand, "say", "'")
-BaseShell.add_verbs(ReloadCommand, "reload")
+ChatShell.add_verbs(QuitCommand, "quit")
+ChatShell.add_verbs(SayCommand, "say", "'")
+ChatShell.add_verbs(ReloadCommand, "reload")
 
 
 def _client_connected(client):
@@ -90,7 +90,7 @@ def _client_disconnected(client):
 
 @EVENTS.hook("client_connected")
 def _hook_client_connected(client):
-    session = SESSIONS.create(client, BaseShell)
+    session = SESSIONS.create(client, ChatShell)
     with EVENTS.fire("session_started", session):
         session.send(SESSIONS.greeting)
 
