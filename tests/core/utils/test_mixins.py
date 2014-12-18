@@ -4,6 +4,9 @@
 # :copyright: (c) 2008 - 2014 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
+import gc
+from weakref import finalize
+
 import pytest
 
 from atria.core.utils.mixins import HasFlags, HasParent, HasWeaks
@@ -103,14 +106,16 @@ class TestHasWeaks:
 
     class _TestClass(HasWeaks):
 
-        instances = 0
+        count = 0
 
         def __init__(self):
             super().__init__()
-            type(self).instances += 1
+            type(self).count += 1
+            finalize(self, type(self)._dec_count)
 
-        def __del__(self):
-            type(self).instances -= 1
+        @classmethod
+        def _dec_count(cls):
+            cls.count -= 1
 
         @property
         def weak_ref(self):
@@ -129,38 +134,44 @@ class TestHasWeaks:
 
     def test_weak_ref_one_way(self):
         """Test linking an object to another through a weak property."""
-        assert self._TestClass.instances == 0
+        assert self._TestClass.count == 0
         one = self._TestClass()
         two = self._TestClass()
-        assert self._TestClass.instances == 2
+        assert self._TestClass.count == 2
         one.weak_ref = two
         assert one.weak_ref is two
         del two
+        gc.collect()
         assert not one.weak_ref
-        assert self._TestClass.instances == 1
+        assert self._TestClass.count == 1
+        del one
+        gc.collect()
+        assert self._TestClass.count == 0
 
     def test_weak_ref_both_ways(self):
         """Test linking two objects to each other through weak properties."""
-        assert self._TestClass.instances == 0
+        assert self._TestClass.count == 0
         one = self._TestClass()
         two = self._TestClass()
-        assert self._TestClass.instances == 2
+        assert self._TestClass.count == 2
         one.weak_ref = two
         two.weak_ref = one
         assert one.weak_ref is two and two.weak_ref is one
         del one
         del two
-        assert self._TestClass.instances == 0
+        gc.collect()
+        assert self._TestClass.count == 0
 
     def test_weak_ref_to_self(self):
         """Test linking an object to itself through a weak property."""
-        assert self._TestClass.instances == 0
+        assert self._TestClass.count == 0
         one = self._TestClass()
-        assert self._TestClass.instances == 1
+        assert self._TestClass.count == 1
         one.weak_ref = one
         assert one.weak_ref is one
         del one
-        assert self._TestClass.instances == 0
+        gc.collect()
+        assert self._TestClass.count == 0
 
 
 class TestHasParent:

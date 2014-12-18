@@ -4,7 +4,7 @@
 # :copyright: (c) 2008 - 2014 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
-from weakref import ref
+from weakref import WeakMethod, WeakValueDictionary
 
 
 """
@@ -43,6 +43,9 @@ class _FlagSet:
 
     def __bool__(self):
         return bool(self._flags)
+
+    def __repr__(self):
+        return "Flags<{}>".format(", ".join(sorted(self._flags)))
 
     @property
     def as_tuple(self):
@@ -142,17 +145,16 @@ class HasWeaksMeta(type):
 
     def __init__(cls, name, bases, namespace):
         super().__init__(name, bases, namespace)
-        cls._weak_refs = {}
+        cls._weak_refs = WeakValueDictionary()
 
     def _get_weak(cls, name):
-        weak = cls._weak_refs.get(name)
-        return weak() if weak else None
+        return cls._weak_refs.get(name)
 
     def _set_weak(cls, name, obj):
         if obj is None:
             cls._del_weak(name)
         else:
-            cls._weak_refs[name] = ref(obj)
+            cls._weak_refs[name] = obj
 
     def _del_weak(cls, name):
         if name in cls._weak_refs:
@@ -170,19 +172,24 @@ class HasWeaks(metaclass=HasWeaksMeta):
 
     def __init__(self):
         super().__init__()
-        self._weak_refs = {}
+        self._get_weak_wr = WeakMethod(self._inst_get_weak)
+        self._get_weak = lambda k: self._get_weak_wr()(k)
+        self._set_weak_wr = WeakMethod(self._inst_set_weak)
+        self._set_weak = lambda k, o: self._set_weak_wr()(k, o)
+        self._del_weak_wr = WeakMethod(self._inst_del_weak)
+        self._del_weak = lambda k: self._del_weak_wr()(k)
+        self._weak_refs = WeakValueDictionary()
 
-    def _get_weak(self, name):
-        weak = self._weak_refs.get(name)
-        return weak() if weak else None
+    def _inst_get_weak(self, name):
+        return self._weak_refs.get(name)
 
-    def _set_weak(self, name, obj):
+    def _inst_set_weak(self, name, obj):
         if obj is None:
             self._del_weak(name)
         else:
-            self._weak_refs[name] = ref(obj)
+            self._weak_refs[name] = obj
 
-    def _del_weak(self, name):
+    def _inst_del_weak(self, name):
         if name in self._weak_refs:
             del self._weak_refs[name]
 
