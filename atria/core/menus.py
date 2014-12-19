@@ -5,6 +5,7 @@
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
 from collections import OrderedDict
+from weakref import WeakMethod
 
 from .logs import get_logger
 from .utils.exceptions import AlreadyExists
@@ -132,15 +133,36 @@ class Menu(HasWeaks, metaclass=_MenuMeta):
     error_color = "^R"
 
     def __init__(self, session):
+
         """Create an instance of this menu tied to a session."""
+
         super().__init__()
-        self.add_entry = self._inst_add_entry
-        self.remove_entry = self._inst_remove_entry
         self.session = session
         self._entries = self._entries.copy()
         self._entry_order = []
         self._init()
         self._update_order()
+
+        # TODO: Find out why these next two prevent these from being
+        # garbage collected. I know that bound methods create circular
+        # references with the instances but Python should detect that and
+        # free both objects. It's not.
+
+        # self.add_entry = self._inst_add_entry
+        # self.remove_entry = self._inst_remove_entry
+
+        # For now this is a work-around:
+        self._add_entry_wr = WeakMethod(self._inst_add_entry)
+        self._remove_entry_wr = WeakMethod(self._inst_remove_entry)
+
+        def _add_entry(key, description, callback=None):
+            return self._add_entry_wr()(key, description, callback)
+
+        def _remove_entry(key):
+            self._remove_entry_wr()(key)
+
+        self.add_entry = _add_entry
+        self.remove_entry = _remove_entry
 
     @property
     def session(self):
