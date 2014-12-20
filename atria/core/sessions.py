@@ -10,6 +10,7 @@ from .. import settings
 from .accounts import Account
 from .events import EVENTS
 from .logs import get_logger
+from .menus import Menu
 from .shells import SHELLS, STATES, Shell
 from .utils.exceptions import AlreadyExists
 from .utils.funcs import class_name, joins
@@ -87,6 +88,7 @@ class _Session(HasFlags):
         self._address = client.addrport().rsplit(":", 1)[0]
         self._output_queue = deque()
         self._request_queue = deque()
+        self._menu = None
         self._shell = None
         self._account = None
         self._client = client
@@ -111,6 +113,38 @@ class _Session(HasFlags):
     def address(self):
         """Return the address this session is connected from."""
         return self._address
+
+    @property
+    def menu(self):
+        """Return the current menu for this session."""
+        return self._menu
+
+    @menu.setter
+    def menu(self, new_menu):
+        """Set the current menu for this session.
+
+        :param menus.Menu new_menu: The menu to assign to this session
+                                    (class or instance)
+        :returns: None
+        :raises TypeError: If `new_menu` is neither a subclass nor
+                           an instance of Menu
+        :raises ValueError: If `new_menu` is a Menu instance and its assigned
+                            session is not this session
+
+        """
+        if new_menu is None:
+            self._menu = None
+        else:
+            if isinstance(new_menu, type) and issubclass(new_menu, Menu):
+                new_menu = new_menu(self)
+            elif not isinstance(new_menu, Menu):
+                raise TypeError("can only set session menu to a subclass or"
+                                " instance of Menu")
+            elif new_menu.session is not self:
+                raise ValueError("cannot set session menu to menu instance"
+                                 " that isn't tied to that session")
+            self._menu = new_menu
+            new_menu.display()
 
     @property
     def shell(self):
@@ -196,6 +230,8 @@ class _Session(HasFlags):
         if self._request_queue:
             if self._request_queue[0].resolve(data):
                 self._request_queue.popleft()
+        elif self._menu:
+            self._menu.parse(data)
         elif self._shell:
             self._shell.parse(data)
         else:
@@ -209,6 +245,8 @@ class _Session(HasFlags):
         """
         if self._request_queue:
             return self._request_queue[0].get_prompt()
+        elif self._menu:
+            return self._menu.get_prompt()
         elif self._shell:
             return self._shell.get_prompt()
         else:
