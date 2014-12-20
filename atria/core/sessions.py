@@ -7,6 +7,7 @@
 from collections import deque
 
 from .. import settings
+from .accounts import Account
 from .events import EVENTS
 from .logs import get_logger
 from .shells import SHELLS, STATES, Shell
@@ -87,6 +88,7 @@ class _Session(HasFlags):
         self._output_queue = deque()
         self._request_queue = deque()
         self._shell = None
+        self._account = None
         self._client = client
         if shell:
             self.shell = shell
@@ -138,6 +140,28 @@ class _Session(HasFlags):
             # The order of these is important, as assigning the shell's
             # session will call its init() method.
             new_shell.session = self
+
+    @property
+    def account(self):
+        """Return the current account for this session."""
+        return self._account
+
+    @account.setter
+    def account(self, new_account):
+        """Set the current account for this session.
+
+        :param accounts.Account new_account: The account to assign
+        :returns: None
+        :raises TypeError: If `new_account` is not an instance of Account
+
+        """
+        if new_account is None:
+            self._account = None
+        else:
+            if not isinstance(new_account, Account):
+                raise TypeError("argument must be an Account instance")
+            self._account = new_account
+            new_account.session = self
 
     def _check_idle(self):
         """Check if this session is idle."""
