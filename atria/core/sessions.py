@@ -116,27 +116,28 @@ class _Session(HasFlags):
         return self._shell
 
     @shell.setter
-    def shell(self, shell):
+    def shell(self, new_shell):
         """Set the current shell for this session.
 
-        :param class|Shell|None shell: The shell to assign to this session
-                                       (class or instance) or None
+        :param shells.Shell new_shell: The shell to assign to this session
+                                       (class or instance)
         :returns: None
-        :raises TypeError: If `shell` is provided and is not either a
-                           subclass of Shell or an instance of a subclass
+        :raises TypeError: If `new_shell` is neither a subclass nor
+                           an instance of Shell
 
         """
-        if shell is None:
+        if new_shell is None:
             self._shell = None
         else:
-            if isinstance(shell, type) and issubclass(shell, Shell):
-                shell = shell()
-            elif not isinstance(shell, Shell):
-                raise TypeError("argument must be shell class or instance")
-            self._shell = shell
+            if isinstance(new_shell, type) and issubclass(new_shell, Shell):
+                new_shell = new_shell()
+            elif not isinstance(new_shell, Shell):
+                raise TypeError("can only set session shell to a subclass or"
+                                " instance of Shell")
+            self._shell = new_shell
             # The order of these is important, as assigning the shell's
             # session will call its init() method.
-            shell.session = self
+            new_shell.session = self
 
     def _check_idle(self):
         """Check if this session is idle."""
