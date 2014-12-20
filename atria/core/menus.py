@@ -245,6 +245,38 @@ class Menu(HasWeaks, metaclass=_MenuMeta):
         elif self.ordering == self.ORDER_BY_ALPHA:
             self._entry_order = list(sorted(keys))
 
+    def display(self):
+        """Send this menu to the session."""
+        if self.title is not None:
+            self.session.send("\n", self.title_color, self.title, "^~", sep="")
+        for key in self._entry_order:
+            description = self._entries[key][0]
+            self.session.send(self.key_color, key, self.spacer_color, ") ",
+                              self.description_color, description,
+                              "^~", sep="")
+
+    def get_prompt(self):
+        """Generate the current prompt for this menu."""
+        return joins(self.prompt_color, self.prompt, "^~", sep="")
+
+    def parse(self, data):
+        """Parse input from the client session.
+
+        Only the first character of any input sent will be used.
+
+        :param str data: The data to be parsed
+        :returns: None
+
+        """
+        data = data[0].upper()
+        if data not in self._entries:
+            self.session.send(self.error_color, self.error.format(key=data),
+                              "^~", sep="")
+            self.display()
+        else:
+            callback = self._entries[data][1]
+            callback(self.session)
+
 
 # We create a global MenuManager here for convenience, and while the
 # server will generally only need one to work with, they are NOT singletons
