@@ -190,6 +190,9 @@ class _Session(HasFlags):
         :returns: None
 
         """
+        if not data:
+            # They just hit enter, let the prompt repeat itself
+            return
         if self._request_queue:
             if self._request_queue[0].resolve(data):
                 self._request_queue.popleft()
