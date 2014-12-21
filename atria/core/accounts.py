@@ -7,9 +7,13 @@
 import re
 
 from .entities import Entity, DataBlob, Attribute
-from .requests import REQUESTS, Request
+from .logs import get_logger
+from .requests import REQUESTS, Request, RequestString
 from .utils.funcs import joins
 from .opt.pickle import PickleStore
+
+
+log = get_logger("accounts")
 
 
 class Account(Entity):
@@ -125,3 +129,54 @@ class RequestNewAccountPassword(Request):
 class AccountOptions(DataBlob):
     """A collection of account and client options."""
     pass
+
+
+def authenticate_account(session, success=None, fail=None, account=None):
+    """Perform a series of requests to authenticate a session's account.
+
+    If given, either `success` or `fail` will be called with `session`
+    and the account (if it exists) as positional arguments.
+
+    If `account` is given, it will be used to authenticate against instead
+    of the account already assigned to `session`. If not, and `session` has
+    no account assigned, an account name will be requested first;
+    otherwise only the password is requested.
+
+    :param sessions._Session session: The session to authenticate
+    :param callable success: Optional, a callback for successful authentication
+    :param callable fail: Optional, a callback for failed authentication
+    :param Account account: Optional, an account to authenticate against
+    :returns: None
+
+    """
+    account = account if account is not None else session.account
+    if account is None:
+        # We need an account name first.
+        def _check_account(_session, account_name):
+            if not Account.exists(account_name):
+                # Account not found, recursing with False as the account
+                # will ensure that the password check fails.
+                # noinspection PyTypeChecker
+                authenticate_account(_session, fail, fail, False)
+            else:
+                _account = Account.load(account_name)
+                authenticate_account(_session, success, fail, _account)
+        session.request(RequestString, _check_account,
+                        initial_prompt="Account name: ",
+                        repeat_prompt="Account name: ")
+    else:
+        # Now we can request a password.
+        def _check_password(_session, password):
+            if account is False:
+                # They entered an account name and it didn't exist.
+                if fail is not None:
+                    fail(_session, None)
+            else:
+                # Check the given password against the account
+                if password and password == account.password:
+                    success(_session, account)
+                else:
+                    fail(_session, account)
+        session.request(RequestString, _check_password,
+                        initial_prompt="Password: ",
+                        repeat_prompt="Password: ")
