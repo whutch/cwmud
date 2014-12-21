@@ -40,8 +40,9 @@ class QuitCommand(Command):
     """A command for quitting the server."""
 
     def _action(self):
-        self.session.close("Okay, goodbye!",
-                           log_msg=joins(self.session, "has quit"))
+        from .accounts import AccountMenu
+        self.session.menu = AccountMenu
+        self.session.shell = None
 
 
 @COMMANDS.register
@@ -90,9 +91,11 @@ def _client_disconnected(client):
 
 @EVENTS.hook("client_connected")
 def _hook_client_connected(client):
-    session = SESSIONS.create(client, ChatShell)
+    session = SESSIONS.create(client)
     with EVENTS.fire("session_started", session):
         session.send(SESSIONS.greeting)
+        from .accounts import AccountMenu
+        session.menu = AccountMenu
 
 
 @EVENTS.hook("client_disconnected")

@@ -8,7 +8,9 @@ import re
 
 from .entities import Entity, DataBlob, Attribute
 from .logs import get_logger
+from .menus import MENUS, Menu
 from .requests import REQUESTS, Request, RequestString
+from .shells import SHELLS
 from .utils.funcs import joins
 from .opt.pickle import PickleStore
 
@@ -180,3 +182,24 @@ def authenticate_account(session, success=None, fail=None, account=None):
         session.request(RequestString, _check_password,
                         initial_prompt="Password: ",
                         repeat_prompt="Password: ")
+
+
+@MENUS.register
+class AccountMenu(Menu):
+
+    """An account menu."""
+
+    title = "ACCOUNT MENU:"
+    ordering = Menu.ORDER_BY_ALPHA
+
+
+@AccountMenu.add_entry("L", "Enter lobby")
+def _account_menu_enter_lobby(session):
+    session.shell = SHELLS["ChatShell"]
+    session.menu = None
+
+
+@AccountMenu.add_entry("Q", "Quit")
+def _account_menu_quit(session):
+    session.close("Okay, goodbye!",
+                  log_msg=joins(session, "has quit"))
