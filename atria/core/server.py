@@ -21,7 +21,7 @@ from .opt.pickle import PickleStore
 
 
 log = get_logger("server")
-_SERVER_DATA = PickleStore("server")
+_store = PickleStore("server")
 
 
 def boot():
@@ -52,10 +52,10 @@ def boot():
         if exists(greeting_path):
             with open(greeting_path) as greeting_file:
                 SESSIONS.greeting = greeting_file.read()
-        if _SERVER_DATA.has("state"):
+        if _store.has("state"):
             load_state()
-            _SERVER_DATA.delete("state")
-            _SERVER_DATA.commit()
+            _store.delete("state")
+            _store.commit()
 
 
 def loop():
@@ -107,13 +107,13 @@ def save_state(pass_to_pid=None):
     :returns: None
 
     """
-    if _SERVER_DATA.has("state"):
+    if _store.has("state"):
         raise KeyError("a server state file already exists")
     log.info("Starting game state save")
     state = {}
     with EVENTS.fire("server_save_state", state, pass_to_pid):
-        _SERVER_DATA.put("state", state)
-        _SERVER_DATA.commit()
+        _store.put("state", state)
+        _store.commit()
     log.info("Game state save successful")
 
 
@@ -128,10 +128,10 @@ def load_state():
     :returns: None
 
     """
-    if not _SERVER_DATA.has("state"):
+    if not _store.has("state"):
         raise KeyError("no server state file exists")
     log.info("Starting game state load")
-    state = _SERVER_DATA.get("state")
+    state = _store.get("state")
     EVENTS.fire("server_load_state", state).now()
     log.info("Game state load successful")
 
