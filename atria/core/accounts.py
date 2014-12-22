@@ -26,6 +26,10 @@ class Account(Entity):
     _store_key = "name"
     _uid_code = "A"
 
+    def __repr__(self):
+        if hasattr(self, "name"):
+            return joins("Account<", self.name, ">", sep="")
+
 
 @Account.register_attr("name")
 class AccountName(Attribute):
@@ -151,15 +155,15 @@ def authenticate_account(session, success=None, fail=None, account=None):
     :returns: None
 
     """
-    account = account if account is not None else session.account
-    if account is None:
+    account = account if account else session.account
+    if not account:
         # We need an account name first.
         def _check_account(_session, account_name):
             if not Account.exists(account_name):
                 # Account not found, recursing with False as the account
                 # will ensure that the password check fails.
                 # noinspection PyTypeChecker
-                authenticate_account(_session, fail, fail, False)
+                authenticate_account(_session, fail, fail, account_name)
             else:
                 _account = Account.load(account_name)
                 authenticate_account(_session, success, fail, _account)
@@ -169,10 +173,10 @@ def authenticate_account(session, success=None, fail=None, account=None):
     else:
         # Now we can request a password.
         def _check_password(_session, password):
-            if account is False:
+            if not isinstance(account, Account):
                 # They entered an account name and it didn't exist.
                 if fail is not None:
-                    fail(_session, None)
+                    fail(_session, account)
             else:
                 # Check the given password against the account
                 if password and password == account.password:
