@@ -96,9 +96,7 @@ class _Session(HasFlags):
             self.shell = shell
 
     def __del__(self):
-        if self._client:
-            self._client.sock.close()
-            self._client.active = False
+        self._close()
 
     def __repr__(self):
         return joins("Session<", self._address, ">", sep="")
@@ -106,7 +104,7 @@ class _Session(HasFlags):
     @property
     def active(self):
         """Return whether this session is still active."""
-        return (not self.flags.has_any("close", "closed", "dead")
+        return (not self.flags.has_any("closed", "dead")
                 and self._client and self._client.active)
 
     @property
@@ -279,6 +277,16 @@ class _Session(HasFlags):
         :returns: None
 
         """
+        # Do an initial state check.
+        if (("close" in self.flags or not self.active)
+                and "closed" not in self.flags):
+            with EVENTS.fire("session_ended", self):
+                # Hooks to this event cannot send any output to the client,
+                # they've already had their last poll.
+                self.flags.drop("close")
+                self._close()
+                self.flags.add("closed")
+        # If they're still around, handle their business.
         if self._client.active:
             if not output_only and self.active:
                 self._check_idle()
@@ -302,15 +310,15 @@ class _Session(HasFlags):
                 self._client.send_cc(output)
                 self._output_queue.clear()
             # Send them a prompt if there was any input or output.
-            if (data is not None or output is not None) and self.active:
+            if ((data is not None or output is not None) and self.active
+                    and "close" not in self.flags):
                 self._client.send_cc(self._get_prompt())
-        # All the IO is done, do a final state check.
-        if not output_only and not self.active and "closed" not in self.flags:
-            with EVENTS.fire("session_ended", self):
-                # Hooks to this event cannot send any output to the client,
-                # this is its last poll.
-                self.flags.drop("close")
-                self.flags.add("closed")
+
+    def _close(self):
+        """Really close a session's socket."""
+        if self._client:
+            self._client.sock.close()
+            self._client.active = False
 
     def close(self, reason, log_msg=""):
         """Close this session.
