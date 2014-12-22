@@ -199,6 +199,33 @@ class SayCommand(Command):
         self.session.send(joins("You say, '", message, "'.", sep=""))
 
 
+@COMMANDS.register
+class TestCommand(Command):
+
+    """A command to test something."""
+
+    def _action(self):
+        self.session.send("Great success!")
+
+
+@COMMANDS.register
+class TimeCommand(Command):
+
+    """A command to display the current server time.
+
+    This can be replaced in a game shell to display special in-game time, etc.
+
+    """
+
+    def _action(self):
+        from datetime import datetime as dt
+        timestamp = dt.fromtimestamp(TIMERS.time).strftime("%c")
+        self.session.send("Current time: ", timestamp,
+                          " (", TIMERS.get_time_code(), ")", sep="")
+
+
 ChatShell.add_verbs(QuitCommand, "quit")
 ChatShell.add_verbs(ReloadCommand, "reload")
 ChatShell.add_verbs(SayCommand, "say", "'")
+ChatShell.add_verbs(TestCommand, "test")
+ChatShell.add_verbs(TimeCommand, "time")
