@@ -4,7 +4,7 @@ general:
 
 machine:
   python:
-    version: 3.3.3
+    version: 3.4.2
 
 dependencies:
   pre:
