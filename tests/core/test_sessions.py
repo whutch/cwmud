@@ -86,9 +86,9 @@ class TestSessions:
         self.session._client = None
         assert not self.session.active
         self.session._client = self.client
-        self.session.flags.toggle("close")
+        self.session.flags.toggle("closed")
         assert not self.session.active
-        self.session.flags.toggle("close")
+        self.session.flags.toggle("closed")
         assert self.session.active
 
     def test_session_address(self):
@@ -193,7 +193,6 @@ class TestSessions:
         assert self.session.flags.has("close")
         assert (self.session._output_queue.popleft() ==
                 "^RDisconnecting due to inactivity. Goodbye!^~\n")
-        assert not self.session.active
 
     def test_session_manager_poll(self):
         """Test that we can poll a session manager to poll all its sessions."""
@@ -229,6 +228,7 @@ class TestSessions:
         session = self.sessions._sessions[2]
         assert session.active
         session.close("bye cause reasons.")
+        session.poll()
         assert not session.active
         assert session._output_queue.popleft() == "bye cause reasons.\n"
         assert not session._output_queue
