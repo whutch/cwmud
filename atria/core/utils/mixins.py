@@ -4,7 +4,8 @@
 # :copyright: (c) 2008 - 2014 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
-from weakref import WeakMethod, WeakValueDictionary
+from collections.abc import MutableMapping
+from weakref import ref, WeakMethod, WeakValueDictionary
 
 
 """
@@ -24,6 +25,7 @@ class MyClass(HasFlags, HasWeaks, metaclass=_MyClassMeta):
 """
 
 
+# noinspection PyProtectedMember
 class _FlagSet:
 
     """A set of flags on an object. Used by the HasFlags mix-in.
@@ -32,8 +34,13 @@ class _FlagSet:
 
     """
 
-    def __init__(self):
+    def __init__(self, owner=None):
         self._flags = set()
+        self._owner_ref = ref(owner) if owner else None
+
+    @property
+    def _owner(self):
+        return self._owner_ref()
 
     def __contains__(self, flag):
         return flag in self._flags
@@ -79,6 +86,8 @@ class _FlagSet:
         """
         for flag in flags:
             self._flags.add(flag)
+        if self._owner:
+            self._owner._flags_changed()
 
     def drop(self, *flags):
         """Drop one or more flags from this set.
@@ -90,6 +99,8 @@ class _FlagSet:
         for flag in flags:
             if flag in self._flags:
                 self._flags.remove(flag)
+        if self._owner:
+            self._owner._flags_changed()
 
     def toggle(self, *flags):
         """Toggle whether one or more flags are in this set.
@@ -103,6 +114,8 @@ class _FlagSet:
                 self._flags.remove(flag)
             else:
                 self._flags.add(flag)
+        if self._owner:
+            self._owner._flags_changed()
 
 
 class HasFlagsMeta(type):
@@ -131,12 +144,97 @@ class HasFlags(metaclass=HasFlagsMeta):
 
     def __init__(self):
         super().__init__()
-        self._flag_set = _FlagSet()
+        self._flag_set = _FlagSet(self)
 
     @property
     def flags(self):
         """Return this instance's flag set."""
         return self._flag_set
+
+    # noinspection PyMethodMayBeStatic
+    def _flags_changed(self):
+        """Perform any callbacks for when the flag set has changed.
+
+        Override this to perform any necessary post-change actions.
+
+        """
+        pass
+
+
+# noinspection PyProtectedMember
+class _Tags(MutableMapping):
+
+    """A mapping of tags on an object. Used by the HasTags mix-in.
+
+    Tags are used to store arbitrary data on another object. Tag keys and
+    values are functionally equivalent to dictionary keys and values.
+
+    """
+
+    def __init__(self, owner=None):
+        self._tags = {}
+        self._owner_ref = ref(owner) if owner else None
+
+    @property
+    def _owner(self):
+        return self._owner_ref()
+
+    def __repr__(self):
+        items = ["{}: {}".format(k, v) for k, v in self._tags.items()]
+        return "Tags{{{}}}".format(", ".join(sorted(items)))
+
+    def __bool__(self):
+        return bool(self._tags)
+
+    def __contains__(self, key):
+        return key in self._tags
+
+    def __iter__(self):
+        return iter(self._tags)
+
+    def __len__(self):
+        return len(self._tags)
+
+    def __getitem__(self, key):
+        return self._tags[key]
+
+    def __setitem__(self, key, value):
+        self._tags[key] = value
+        if self._owner:
+            self._owner._tags_changed()
+
+    def __delitem__(self, key):
+        del self._tags[key]
+        if self._owner:
+            self._owner._tags_changed()
+
+    @property
+    def as_dict(self):
+        """Return a copy of the current tags as a dict."""
+        return self._tags.copy()
+
+
+class HasTags:
+
+    """A mix-in to allow 'tagging' an object to store arbitrary data."""
+
+    def __init__(self):
+        super().__init__()
+        self._tags = _Tags(self)
+
+    @property
+    def tags(self):
+        """Return this instance's tag collection."""
+        return self._tags
+
+    # noinspection PyMethodMayBeStatic
+    def _tags_changed(self):
+        """Perform any callbacks for when the tag collection has changed.
+
+        Override this to perform any necessary post-change actions.
+
+        """
+        pass
 
 
 class HasWeaksMeta(type):
