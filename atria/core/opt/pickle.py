@@ -4,8 +4,8 @@
 # :copyright: (c) 2008 - 2014 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
-from os import makedirs, remove
-from os.path import abspath, exists, join
+from os import listdir, makedirs, remove
+from os.path import abspath, exists, join, splitext
 import pickle
 
 from ... import settings
@@ -51,6 +51,13 @@ class PickleStore(DataStore):
 
     def _close(self):  # pragma: no cover
         pass
+
+    def _keys(self):
+        """Return an iterator through the pickle files in this store."""
+        for name in listdir(abspath(self._path)):
+            key, ext = splitext(name)
+            if ext == ".pkl":
+                yield key
 
     def _has(self, key):
         """Return whether a pickle file exists or not."""

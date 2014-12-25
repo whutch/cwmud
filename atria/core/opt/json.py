@@ -4,8 +4,8 @@
 # :copyright: (c) 2008 - 2014 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
-from os import makedirs, remove
-from os.path import abspath, exists, join
+from os import listdir, makedirs, remove
+from os.path import abspath, exists, join, splitext
 import json
 
 from ... import settings
@@ -44,6 +44,22 @@ class JSONStore(DataStore):
         if not path.startswith(abspath(self._path)):
             raise OSError(joins("invalid path to JSON file:", path))
         return path
+
+    def _is_open(self):  # pragma: no cover
+        return True
+
+    def _open(self):  # pragma: no cover
+        pass
+
+    def _close(self):  # pragma: no cover
+        pass
+
+    def _keys(self):
+        """Return an iterator through the JSON files in this store."""
+        for name in listdir(abspath(self._path)):
+            key, ext = splitext(name)
+            if ext == ".json":
+                yield key
 
     def _has(self, key):
         """Return whether a JSON file exists or not."""

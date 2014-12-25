@@ -75,6 +75,9 @@ class DataStore:
     def _close(self):  # pragma: no cover
         raise NotImplementedError
 
+    def _keys(self):  # pragma: no cover
+        raise NotImplementedError
+
     def _has(self, key):  # pragma: no cover
         raise NotImplementedError
 
@@ -125,6 +128,10 @@ class DataStore:
     # RED SKY AT NIGHT
     # CHEESEBURGER MOURNING
     # SAILORS TAKE WARNING
+
+    def keys(self):
+        """Return an iterator through this store's keys."""
+        return self._keys()
 
     def has(self, key):
         """Return whether this store has a given key or not.
