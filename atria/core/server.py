@@ -229,3 +229,8 @@ ChatShell.add_verbs(ReloadCommand, "reload")
 ChatShell.add_verbs(SayCommand, "say", "'")
 ChatShell.add_verbs(TestCommand, "test")
 ChatShell.add_verbs(TimeCommand, "time")
+
+
+if settings.FORCE_GC_COLLECT:
+    import gc
+    TIMERS.create("1m", "gc_collect", repeat=-1, callback=gc.collect)

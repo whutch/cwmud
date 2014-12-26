@@ -31,3 +31,6 @@ LOG_UTC_TIMES = False
 
 # Storage
 DATA_DIR = join(ROOT_DIR, "data")
+
+# Advanced
+FORCE_GC_COLLECT = False
