@@ -14,9 +14,44 @@ class TestDataStores:
     """A collection of tests for data store management."""
 
     stores = None
-    store_class = None
     store = None
     data = {"yeah": 1, "beep": 2}
+
+    class _TestStore(DataStore):
+
+        """A test store."""
+
+        _opens = False
+
+        def __init__(self):
+            super().__init__()
+            self._stored = {}
+            self._opened = False
+
+        @property
+        def _is_open(self):
+            return self._opened
+
+        def _open(self):
+            self._opened = True
+
+        def _close(self):
+            self._opened = False
+
+        def _keys(self):
+            return self._stored.keys()
+
+        def _has(self, key):
+            return key in self._stored
+
+        def _get(self, key):
+            return self._stored[key]
+
+        def _put(self, key, data):
+            self._stored[key] = data
+
+        def _delete(self, key):
+            del self._stored[key]
 
     def test_store_manager_create(self):
         """Test that we can create a store manager.
@@ -29,73 +64,36 @@ class TestDataStores:
         type(self).stores = DataStoreManager()
         assert self.stores
 
+    def test_store_create(self):
+        """Test that we can create a new store instance."""
+        type(self).store = self._TestStore()
+        assert self.store
+
     def test_store_manager_register(self):
-
         """Test that we can register a new store through a store manager."""
-
-        @self.stores.register
-        class TestStore(DataStore):
-
-            """A test store."""
-
-            _opens = False
-
-            def __init__(self):
-                super().__init__()
-                self._stored = {}
-                self._opened = False
-
-            @property
-            def _is_open(self):
-                return self._opened
-
-            def _open(self):
-                self._opened = True
-
-            def _close(self):
-                self._opened = False
-
-            def _has(self, key):
-                return key in self._stored
-
-            def _get(self, key):
-                return self._stored[key]
-
-            def _put(self, key, data):
-                self._stored[key] = data
-
-            def _delete(self, key):
-                del self._stored[key]
-
-        type(self).store_class = TestStore
-        assert "TestStore" in self.stores._stores
+        self.stores.register("test", self.store)
+        assert "test" in self.stores._stores
 
     def test_store_manager_register_already_exists(self):
         """Test that trying to re-register a store fails."""
         with pytest.raises(AlreadyExists):
-            self.stores.register(self.store_class)
+            self.stores.register("test", self.store)
 
     def test_store_manager_register_not_store(self):
         """Test that trying to register a non-store fails."""
         with pytest.raises(TypeError):
-            self.stores.register(object())
+            self.stores.register("test", object())
 
     def test_store_manager_contains(self):
         """Test that we can see if a store manager contains a store."""
-        assert "TestStore" in self.stores
-        assert "SomeNonExistentStore" not in self.stores
+        assert "test" in self.stores
+        assert "non_existent_store" not in self.stores
 
     def test_store_manager_get_store(self):
         """Test that we can get a store from a store manager."""
-        assert self.stores["TestStore"] is self.store_class
+        assert self.stores["test"] is self.store
         with pytest.raises(KeyError):
-            self.stores["SomeNonExistentStore"].has("yeah")
-
-    def test_store_create(self):
-        """Test that we can create a new store instance."""
-        # noinspection PyCallingNonCallable
-        type(self).store = self.store_class()
-        assert self.store
+            self.stores["non_existent_store"].has("yeah")
 
     def test_store_opens(self):
         """Test that we can tell if a store opens and closes or not."""

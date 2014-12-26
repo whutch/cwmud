@@ -11,6 +11,7 @@ from .logs import get_logger
 from .menus import MENUS, Menu
 from .requests import REQUESTS, Request, RequestString
 from .shells import SHELLS
+from .storage import STORES
 from .utils.funcs import joins
 from .opt.pickle import PickleStore
 
@@ -22,7 +23,7 @@ class Account(Entity):
 
     """A user account."""
 
-    _store = PickleStore("accounts")
+    _store = STORES.register("accounts", PickleStore("accounts"))
     _store_key = "name"
     _uid_code = "A"
 

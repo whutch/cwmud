@@ -13,15 +13,10 @@ from .utils.exceptions import AlreadyExists
 log = get_logger("storage")
 
 
+# noinspection PyProtectedMember
 class DataStoreManager:
 
-    """A manager for data store registration.
-
-    This is a convenience manager and is not required for the server to
-    function. All of its functionality can be achieved by subclassing,
-    instantiating, and referencing data stores directly.
-
-    """
+    """A manager for data store registration."""
 
     def __init__(self):
         """Create a new data store manager."""
@@ -33,22 +28,18 @@ class DataStoreManager:
     def __getitem__(self, store):
         return self._stores[store]
 
-    def register(self, store):
+    def register(self, name, store):
         """Register a data store.
 
-        This method can be used to decorate a DataStore class.
-
+        :param str name: The name of the data store
         :param DataStore store: The data store to be registered
         :returns DataStore: The registered data store
-        :raises AlreadyExists: If a store with that class name already exists
-        :raises TypeError: If the supplied or decorated class is not a
-                           subclass of DataStore.
+        :raises AlreadyExists: If a store with that name already exists
+        :raises TypeError: If `store` is not an instance of DataStore.
 
         """
-        if (not isinstance(store, type) or
-                not issubclass(store, DataStore)):
-            raise TypeError("must be subclass of DataStore to register")
-        name = store.__name__
+        if not isinstance(store, DataStore):
+            raise TypeError("must be instance of DataStore to register")
         if name in self._stores:
             raise AlreadyExists(name, self._stores[name], store)
         self._stores[name] = store
