@@ -28,8 +28,10 @@ class Account(Entity):
     _uid_code = "A"
 
     def __repr__(self):
-        if hasattr(self, "name"):
+        if hasattr(self, "name") and self.name:
             return joins("Account<", self.name, ">", sep="")
+        else:
+            return "Account<unnamed>"
 
 
 @Account.register_attr("name")

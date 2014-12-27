@@ -303,6 +303,9 @@ class Entity(metaclass=_EntityMeta):
         # noinspection PyUnresolvedReferences
         self._instances[self._uid] = self
 
+    def __repr__(self):
+        return joins("Entity<", self.uid, ">", sep="")
+
     @property
     def uid(self):
         """Return the entity's UID."""
