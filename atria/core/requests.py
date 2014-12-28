@@ -69,7 +69,7 @@ class Request(HasFlags, HasWeaks, metaclass=_RequestMeta):
     CONFIRM_REPEAT = 2
 
     # Defaults, override these on subclasses
-    initial_prompt = "? "
+    initial_prompt = None
     repeat_prompt = "? "
     confirm = None
     confirm_prompt_yn = "'{data}', is that correct? (Y/N) "
@@ -133,11 +133,11 @@ class Request(HasFlags, HasWeaks, metaclass=_RequestMeta):
         else:
             if not self.flags.has("prompted"):
                 self.flags.add("prompted")
-                initial_prompt = self.options.get("initial_prompt")
-                return initial_prompt or self.initial_prompt
-            else:
-                repeat_prompt = self.options.get("repeat_prompt")
-                return repeat_prompt or self.repeat_prompt
+                initial_prompt = (self.options.get("initial_prompt")
+                                  or self.initial_prompt)
+                if initial_prompt:
+                    return initial_prompt
+            return self.options.get("repeat_prompt") or self.repeat_prompt
 
     def resolve(self, data):
 
