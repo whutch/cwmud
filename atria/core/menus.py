@@ -247,8 +247,9 @@ class Menu(HasWeaks, metaclass=_MenuMeta):
 
     def display(self):
         """Send this menu to the session."""
+        self.session.send("")  # Send a newline.
         if self.title is not None:
-            self.session.send("\n", self.title_color, self.title, "^~", sep="")
+            self.session.send(self.title_color, self.title, "^~", sep="")
         for key in self._entry_order:
             description = self._entries[key][0]
             self.session.send(self.key_color, key, self.spacer_color, ") ",
