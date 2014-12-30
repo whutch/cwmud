@@ -45,6 +45,32 @@ class DataStoreManager:
         self._stores[name] = store
         return store
 
+    def commit(self):
+        """Commit the transactions of all registered data stores."""
+        item_count = 0
+        transaction_count = 0
+        for store in self._stores.values():
+            if store.pending:
+                item_count += len(store._transaction)
+                transaction_count += 1
+                store.commit()
+        if item_count or transaction_count:
+            log.info("Commit %s items from %s transactions.",
+                     item_count, transaction_count)
+
+    def abort(self):
+        """Abort the transactions of all registered data stores."""
+        item_count = 0
+        transaction_count = 0
+        for store in self._stores.values():
+            if store.pending:
+                item_count += len(store._transaction)
+                transaction_count += 1
+                store.abort()
+        if item_count or transaction_count:
+            log.info("Abort %s items from %s transactions.",
+                     item_count, transaction_count)
+
 
 class DataStore:
 
