@@ -156,6 +156,19 @@ class DataBlob(metaclass=_DataBlobMeta):
                                value, "'", sep=""))
 
 
+class _UnsetMeta(type):
+
+    def __bool__(cls):
+        return False
+
+
+class Unset(metaclass=_UnsetMeta):
+
+    """A unique value to note that an attribute hasn't been set."""
+
+    pass
+
+
 class Attribute:
 
     """A single attribute of an entity.
@@ -169,7 +182,7 @@ class Attribute:
 
     """
 
-    _default = None  # Do NOT use mutable types for this
+    _default = Unset  # Do NOT use mutable types for this.
     _read_only = False
 
     @classmethod
