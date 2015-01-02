@@ -94,6 +94,8 @@ class _Session(HasFlags):
         self._client = client
         if shell:
             self.shell = shell
+        # Display options
+        self._client.use_ansi = False
 
     def __del__(self):
         self._close()
@@ -194,6 +196,21 @@ class _Session(HasFlags):
                 raise TypeError("argument must be an Account instance")
             self._account = new_account
             new_account.session = self
+
+    @property
+    def color(self):
+        """Return whether this session is using color."""
+        return self._client.use_ansi
+
+    @color.setter
+    def color(self, value):
+        """Set whether this session is using color.
+
+        :param bool value: Whether this session should use color or not
+        :returns None:
+
+        """
+        self._client.use_ansi = bool(value)
 
     def _check_idle(self):
         """Check if this session is idle."""
