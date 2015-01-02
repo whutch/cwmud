@@ -98,10 +98,12 @@ class DataBlob(metaclass=_DataBlobMeta):
     def _get_attr_val(self, name):
         return self._attr_values.get(name)
 
-    def _set_attr_val(self, name, value):
+    # noinspection PyProtectedMember
+    def _set_attr_val(self, name, value, validate=True):
         attr = self._attrs[name]
-        # noinspection PyProtectedMember
-        self._attr_values[name] = attr._validate(value)
+        if validate:
+            value = attr._validate(value)
+        self._attr_values[name] = value
 
     def _update(self, blob):
         """Merge this blob with another, replacing blobs and attrs.
@@ -147,7 +149,7 @@ class DataBlob(metaclass=_DataBlobMeta):
             if key in self._attrs:
                 # noinspection PyProtectedMember
                 value = self._attrs[key]._deserialize(value)
-                self._set_attr_val(key, value)
+                self._set_attr_val(key, value, validate=False)
             elif key in self._blobs:
                 self._blobs[key].deserialize(value)
             else:
