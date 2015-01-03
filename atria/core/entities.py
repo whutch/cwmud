@@ -10,13 +10,15 @@ from .logs import get_logger
 from .timing import TIMERS
 from .utils.exceptions import AlreadyExists
 from .utils.funcs import class_name, joins
+from .utils.mixins import (HasFlags, HasFlagsMeta, HasTags,
+                           HasWeaks, HasWeaksMeta)
 
 
 log = get_logger("entities")
 
 
 # noinspection PyDocstring
-class _DataBlobMeta(type):
+class _DataBlobMeta(HasWeaksMeta):
 
     def __init__(cls, name, bases, namespace):
         super().__init__(name, bases, namespace)
@@ -77,7 +79,7 @@ class _DataBlobMeta(type):
         return _inner
 
 
-class DataBlob(metaclass=_DataBlobMeta):
+class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
 
     """A collection of attributes and sub-blobs on an entity."""
 
@@ -87,6 +89,7 @@ class DataBlob(metaclass=_DataBlobMeta):
     _attrs = {}
 
     def __init__(self):
+        super().__init__()
         self._attr_values = {}
         for key, attr in self._attrs.items():
             # noinspection PyProtectedMember
@@ -230,7 +233,7 @@ class Attribute:
 
 
 # noinspection PyDocstring
-class _EntityMeta(type):
+class _EntityMeta(HasFlagsMeta, HasWeaksMeta):
 
     def __init__(cls, name, bases, namespace):
         super().__init__(name, bases, namespace)
@@ -292,7 +295,7 @@ class _EntityMeta(type):
         return _inner
 
 
-class Entity(metaclass=_EntityMeta):
+class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
 
     """The base of all persistent objects in the game."""
 
@@ -303,6 +306,7 @@ class Entity(metaclass=_EntityMeta):
 
     # noinspection PyProtectedMember
     def __init__(self, data=None):
+        super().__init__()
         parent = super(self.__class__, self)
         if hasattr(parent, "_base_blob"):
             self._base_blob = parent._base_blob()
