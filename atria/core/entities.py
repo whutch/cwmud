@@ -4,6 +4,7 @@
 # :copyright: (c) 2008 - 2015 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
+from copy import deepcopy
 from weakref import WeakValueDictionary
 
 from .logs import get_logger
@@ -347,6 +348,8 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         """
         data = self._base_blob.serialize()
         data["uid"] = self._uid
+        data["flags"] = self.flags.as_tuple
+        data["tags"] = deepcopy(self.tags.as_dict)
         return data
 
     def deserialize(self, data):
@@ -359,6 +362,13 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         if "uid" in data:
             self._uid = data["uid"]
             del data["uid"]
+        if "flags" in data:
+            self.flags.add(*data["flags"])
+            del data["flags"]
+        if "tags" in data:
+            self.tags.clear()
+            self.tags.update(data["tags"])
+            del data["tags"]
         self._base_blob.deserialize(data)
 
     @classmethod
