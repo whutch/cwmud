@@ -88,15 +88,24 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
     _blobs = {}
     _attrs = {}
 
-    def __init__(self):
+    def __init__(self, entity):
         super().__init__()
+        self._entity = entity
         self._attr_values = {}
         for key, attr in self._attrs.items():
             # noinspection PyProtectedMember
             self._attr_values[key] = attr._default
         self._blobs = self._blobs.copy()
         for key, blob in self._blobs.items():
-            self._blobs[key] = blob()
+            self._blobs[key] = blob(entity)
+
+    @property
+    def _entity(self):
+        return self._get_weak("entity")
+
+    @_entity.setter
+    def _entity(self, new_entity):
+        self._set_weak("entity", new_entity)
 
     def _get_attr_val(self, name):
         return self._attr_values.get(name)
@@ -309,11 +318,11 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         super().__init__()
         parent = super(self.__class__, self)
         if hasattr(parent, "_base_blob"):
-            self._base_blob = parent._base_blob()
+            self._base_blob = parent._base_blob(self)
             # noinspection PyUnresolvedReferences
-            self._base_blob._update(self.__class__._base_blob())
+            self._base_blob._update(self.__class__._base_blob(self))
         else:
-            self._base_blob = self._base_blob()
+            self._base_blob = self._base_blob(self)
         self._uid = None
         if data is not None:
             self.deserialize(data)
