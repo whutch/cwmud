@@ -114,9 +114,11 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
     # noinspection PyProtectedMember
     def _set_attr_val(self, name, value, validate=True):
         attr = self._attrs[name]
+        old_value = self._attr_values.get(name)
         if validate:
             value = attr._validate(value)
         self._attr_values[name] = value
+        attr._changed(self, old_value, value)
 
     def _update(self, blob):
         """Merge this blob with another, replacing blobs and attrs.
@@ -214,6 +216,21 @@ class Attribute:
 
         """
         return new_value
+
+    @classmethod
+    def _changed(cls, blob, old_value, new_value):
+        """Perform any actions necessary after this attribute's value changes.
+
+        This will be called by the blob after the value of this attribute
+        has changed, override it to do any necessary post-setter actions.
+
+        :param DataBlob blob: The blob that changed
+        :param old_value: The previous value
+        :param new_value: The new value
+        :returns: None
+
+        """
+        pass
 
     @classmethod
     def _serialize(cls, value):
