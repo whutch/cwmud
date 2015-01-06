@@ -117,6 +117,10 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
         old_value = self._attr_values.get(name)
         if validate:
             value = attr._validate(value)
+        entity = self._entity
+        if entity._base_blob == self and entity._store_key == name:
+            # We're updating our store key, we need to check for an old one
+            entity.tags["_old_key"] = old_value
         self._attr_values[name] = value
         attr._changed(self, old_value, value)
 
@@ -341,6 +345,9 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
             self._base_blob._update(self.__class__._base_blob(self))
         else:
             self._base_blob = self._base_blob(self)
+        # Never, ever manually change an object's UID! There are no checks
+        # for removing the old UID from the store, updating UID links, or
+        # anything else like that. Bad things will happen!
         self._uid = None
         if data is not None:
             self.deserialize(data)
@@ -354,7 +361,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
 
     @property
     def uid(self):
-        """Return the entity's UID."""
+        """Return this entity's UID."""
         return self._uid
 
     def serialize(self):
@@ -478,6 +485,11 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         """Store this entity."""
         if not self._store:
             raise TypeError("cannot save entity with no store")
+        old_key = self.tags.get("_old_key")
+        if old_key:
+            if self._store.has(old_key):
+                self._store.delete(old_key)
+            del self.tags["_old_key"]
         data = self.serialize()
         key = data[self._store_key]
         self._store.put(key, data)
