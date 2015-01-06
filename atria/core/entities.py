@@ -447,6 +447,35 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
 
     # noinspection PyProtectedMember,PyUnresolvedReferences
     @classmethod
+    def find(cls, attr, value, store_only=False, cache_only=False):
+        """Find one or more entities by one of their attribute values.
+
+        :param str attr: The name of the attribute to match against
+        :param value: The matching attribute value
+        :param bool store_only: Whether to only check the store
+        :param bool cache_only: Whether to only check the _instances cache
+        :returns list: A list of found entities, if any
+        :raises ValueError: If both `store_only` and `cache_only` are True
+
+        """
+        if store_only and cache_only:
+            raise ValueError("cannot check both store only and cache only")
+        found = []
+        if not cache_only:
+            for key in cls._store.keys():
+                data = cls._store.get(key)
+                if data:
+                    if data.get(attr) == value:
+                        entity = cls(data)
+                        found.append(entity)
+        if not store_only:
+            for entity in cls._instances.values():
+                if entity not in found and getattr(entity, attr) == value:
+                    found.append(entity)
+        return found
+
+    # noinspection PyProtectedMember,PyUnresolvedReferences
+    @classmethod
     def load(cls, key, from_cache=True):
         """Load an entity from storage.
 
