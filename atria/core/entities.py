@@ -345,6 +345,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
             self._base_blob._update(self.__class__._base_blob(self))
         else:
             self._base_blob = self._base_blob(self)
+        self._savable = True
         # Never, ever manually change an object's UID! There are no checks
         # for removing the old UID from the store, updating UID links, or
         # anything else like that. Bad things will happen!
@@ -363,6 +364,11 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
     def uid(self):
         """Return this entity's UID."""
         return self._uid
+
+    @property
+    def is_savable(self):
+        """Return whether this entity can be saved."""
+        return self._store and self._savable
 
     def serialize(self):
         """Create a sanitized dict from the data on this entity.
@@ -512,8 +518,9 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
 
     def save(self):
         """Store this entity."""
-        if not self._store:
-            raise TypeError("cannot save entity with no store")
+        if not self.is_savable:
+            log.warn("Tried to save non-savable entity %s", self)
+            return
         old_key = self.tags.get("_old_key")
         if old_key:
             if self._store.has(old_key):
