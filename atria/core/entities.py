@@ -327,6 +327,61 @@ class _EntityMeta(HasFlagsMeta, HasWeaksMeta):
         return _inner
 
 
+class EntityManager:
+
+    """A manager for entity types."""
+
+    def __init__(self):
+        """Create a new entity manager."""
+        self._entities = {}
+
+    def __contains__(self, entity):
+        return entity in self._entities
+
+    def __getitem__(self, entity):
+        return self._entities[entity]
+
+    def register(self, entity):
+        """Register an entity type.
+
+        This method can be used to decorate an Entity class.
+
+        :param Entity entity: The entity to be registered
+        :returns Entity: The registered entity
+        :raises AlreadyExists: If an entity with that class name already exists
+        :raises KeyError: If an entity with the same _uid_code attribute
+                          already exists
+        :raises TypeError: If the supplied or decorated class is not a
+                           subclass of Entity.
+
+        """
+        if (not isinstance(entity, type) or
+                not issubclass(entity, Entity)):
+            raise TypeError("must be subclass of Entity to register")
+        name = entity.__name__
+        if name in self._entities:
+            raise AlreadyExists(name, self._entities[name], entity)
+        for registered_entity in self._entities.values():
+            # noinspection PyProtectedMember,PyUnresolvedReferences
+            if entity._uid_code == registered_entity._uid_code:
+                raise KeyError("cannot register two Entity classes with the"
+                               " same UID code")
+        self._entities[name] = entity
+        return entity
+
+    def save(self):
+        """Save the dirty instances of all registered entities."""
+        count = 0
+        for entity in self._entities.values():
+            # noinspection PyProtectedMember
+            for instance in entity._instances.values():
+                if instance.is_savable and instance.is_dirty:
+                    instance.save()
+                    count += 1
+        if count:
+            log.info("Saved %s dirty entities.", count)
+
+
 class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
 
     """The base of all persistent objects in the game."""
@@ -578,6 +633,12 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         new_entity = entity_class(data)
         setattr(new_entity, self._store_key, new_key)
         return new_entity
+
+
+# We create a global EntityManager here for convenience, and while the
+# server will generally only need one to work with, they are NOT singletons
+# and you can make more EntityManager instances if you like.
+ENTITIES = EntityManager()
 
 
 @Entity.register_attr("version")
