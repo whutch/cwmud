@@ -122,6 +122,7 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
             # We're updating our store key, we need to check for an old one
             entity.tags["_old_key"] = old_value
         self._attr_values[name] = value
+        entity.dirty()
         attr._changed(self, old_value, value)
 
     def _update(self, blob):
@@ -345,6 +346,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
             self._base_blob._update(self.__class__._base_blob(self))
         else:
             self._base_blob = self._base_blob(self)
+        self._dirty = False
         self._savable = True
         # Never, ever manually change an object's UID! There are no checks
         # for removing the old UID from the store, updating UID links, or
@@ -366,9 +368,24 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         return self._uid
 
     @property
+    def is_dirty(self):
+        """Return whether this entity is dirty and needs to be saved."""
+        return self._dirty
+
+    @property
     def is_savable(self):
         """Return whether this entity can be saved."""
         return self._store and self._savable
+
+    def _flags_changed(self):
+        self.dirty()
+
+    def _tags_changed(self):
+        self.dirty()
+
+    def dirty(self):
+        """Mark this entity as dirty so that it will be saved."""
+        self._dirty = True
 
     def serialize(self):
         """Create a sanitized dict from the data on this entity.
@@ -529,6 +546,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         data = self.serialize()
         key = data[self._store_key]
         self._store.put(key, data)
+        self._dirty = False
 
     def revert(self):
         """Revert this entity to a previously saved state."""
