@@ -200,6 +200,95 @@ class AccountOptions(DataBlob):
     pass
 
 
+@AccountOptions.register_attr("reader")
+class AccountOptionsReader(Attribute):
+
+    """An account option for using a screen reader."""
+
+    @classmethod
+    def _validate(cls, new_value):
+        if not isinstance(new_value, bool):
+            raise TypeError("The reader option must be either True or False.")
+        return new_value
+
+
+# noinspection PyProtectedMember
+@REQUESTS.register
+class RequestAccountOptionsReader(Request):
+
+    """A request for the reader account option."""
+
+    repeat_prompt = "Do you use a screen reader? (Y/N) "
+
+    def _validate(self, data):
+        if isinstance(data, str):
+            if "yes".startswith(data.lower()):
+                return True
+            elif "no".startswith(data.lower()):
+                return False
+        raise Request.ValidationFailed("Please enter 'yes' or 'no'.")
+
+
+@AccountOptions.register_attr("color")
+class AccountOptionsColor(Attribute):
+
+    """An account option for using color."""
+
+    @classmethod
+    def _validate(cls, new_value):
+        if not isinstance(new_value, bool):
+            raise TypeError("The color option must be either True or False.")
+        return new_value
+
+
+# noinspection PyProtectedMember
+@REQUESTS.register
+class RequestAccountOptionsColor(Request):
+
+    """A request for the color account option."""
+
+    repeat_prompt = "Do you wish to use color? (Y/N) "
+
+    def _validate(self, data):
+        if isinstance(data, str):
+            if "yes".startswith(data.lower()):
+                return True
+            elif "no".startswith(data.lower()):
+                return False
+        raise Request.ValidationFailed("Please enter 'yes' or 'no'.")
+
+
+@AccountOptions.register_attr("width")
+class AccountOptionsWidth(Attribute):
+
+    """An account option for screen width."""
+
+    @classmethod
+    def _validate(cls, new_value):
+        if not isinstance(new_value, int):
+            raise TypeError("The width option must be an integer.")
+        return new_value
+
+
+# noinspection PyProtectedMember
+@REQUESTS.register
+class RequestAccountOptionsWidth(Request):
+
+    """A request for the width account option."""
+
+    repeat_prompt = "Enter your screen width: "
+
+    def _validate(self, data):
+        try:
+            value = int(data)
+            if value < 1:
+                raise ValueError
+            return value
+        except (TypeError, ValueError):
+            raise Request.ValidationFailed("Please enter a number greater "
+                                           " than zero.")
+
+
 def authenticate_account(session, success=None, fail=None, account=None):
     """Perform a series of requests to authenticate a session's account.
 
