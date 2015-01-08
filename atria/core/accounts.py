@@ -6,7 +6,7 @@
 
 import re
 
-from .entities import Entity, DataBlob, Attribute
+from .entities import ENTITIES, Entity, DataBlob, Attribute
 from .logs import get_logger
 from .menus import MENUS, Menu
 from .requests import REQUESTS, Request, RequestString
@@ -19,6 +19,7 @@ from .opt.pickle import PickleStore
 log = get_logger("accounts")
 
 
+@ENTITIES.register
 class Account(Entity):
 
     """A user account."""
