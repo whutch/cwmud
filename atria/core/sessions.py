@@ -6,6 +6,7 @@
 
 from collections import deque
 
+from ..libs.miniboa import ANSI_CODES
 from .. import settings
 from .accounts import Account
 from .events import EVENTS
@@ -95,6 +96,7 @@ class _Session(HasFlags):
         if shell:
             self.shell = shell
         # Display options
+        self.width = 80
         self._client.use_ansi = False
 
     def __del__(self):
@@ -212,6 +214,54 @@ class _Session(HasFlags):
         """
         self._client.use_ansi = bool(value)
 
+    @classmethod
+    def wrap_to_width(cls, text, width=80, parse_codes=True):
+        """Wrap text to a given width.
+
+        If `parse_codes` is True, the parser will count ^^ as a single
+        character and won't count any other valid Miniboa formatting codes
+        as characters when determining width.
+
+        I haven't bothered with non-displaying characters like \b or \0, or
+        with other whitespace characters like \t, \f, or \v, so including any
+        of those will throw off the count and/or mess up the text.
+
+        :param str text: The text to be wrapped
+        :param int width: The target width to wrap the text around
+        :param bool parse_codes: Whether the parser should check for Miniboa
+                                 formatting codes with counting width
+        :returns list: A list of wrapped strings
+
+        """
+        length = len(text)
+        index = 0
+        count = 0
+        space = -1
+        while index < length and count < width:
+            if parse_codes and text[index] == "^":
+                if text[index:index + 2] in ANSI_CODES:
+                    index += 1
+                elif text[index:index + 2] == "^^":
+                    index += 1
+                    count += 1
+                else:
+                    count += 1
+            else:
+                if text[index] == " ":
+                    space = index
+                count += 1
+            index += 1
+        stop = space if space > -1 else index
+        if index == length:
+            # End of the line, send everything.
+            return [text]
+        else:
+            # We've hit this session's line width, send up to the last
+            # space if there was one and then start over from there.
+            wrapped = [text[:stop]]
+            wrapped.extend(cls.wrap_to_width(text[stop + 1:]))
+            return wrapped
+
     def _check_idle(self):
         """Check if this session is idle."""
         idle = self._client.idle()
@@ -285,6 +335,26 @@ class _Session(HasFlags):
         """
         self._output_queue.append(joins(data, *more, sep=sep) + end)
 
+    def _send(self, data):
+
+        """Put data in the client's output buffer to be sent next socket poll.
+
+        The given data will be processed for any necessary text formatting
+        prior to sending.
+
+        :param str data: The data to send to the client
+        :returns None:
+
+        """
+        lines = data.split("\n")
+        formatted = []
+        for line in lines:
+            if line:
+                formatted.extend(self.wrap_to_width(line, self.width))
+            else:
+                formatted.append("")
+        self._client.send_cc("\n".join(formatted))
+
     def poll(self, output_only=False):
         """Check the status of this session and process any queued IO.
 
@@ -324,12 +394,12 @@ class _Session(HasFlags):
                     # them a newline before anything else.
                     self._output_queue.appendleft("\n")
                 output = "".join(self._output_queue)
-                self._client.send_cc(output)
+                self._send(output)
                 self._output_queue.clear()
             # Send them a prompt if there was any input or output.
             if ((data is not None or output is not None) and self.active
                     and "close" not in self.flags):
-                self._client.send_cc(self._get_prompt())
+                self._send(self._get_prompt())
 
     def _close(self):
         """Really close a session's socket."""
