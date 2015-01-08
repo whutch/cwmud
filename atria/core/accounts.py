@@ -25,7 +25,7 @@ class Account(Entity):
     """A user account."""
 
     _store = STORES.register("accounts", PickleStore("accounts"))
-    _store_key = "name"
+    _store_key = "email"
     _uid_code = "A"
 
     def __repr__(self):
@@ -50,10 +50,53 @@ class Account(Entity):
         self._set_weak("session", new_session)
 
 
+# noinspection PyProtectedMember
+@Account.register_attr("email")
+class AccountEmail(Attribute):
+
+    """An account's e-mail address."""
+
+    # There's a jillion regexes and RFCs for matching emails, I don't
+    # really care about validating them perfectly, I just want to check
+    # if they are really obviously not valid.
+    _pattern = re.compile(r"^[\w.%+-]+@[\w.%+-]+\.[a-zA-Z]{2,4}$")
+
+    @classmethod
+    def _validate(cls, new_value):
+        if (not isinstance(new_value, str) or
+                not cls._pattern.match(new_value)):
+            raise ValueError("Invalid email address.")
+        new_value = new_value.lower()
+        if Account._store.has(new_value):
+            raise Request.ValidationFailed("That email is already in use.")
+        return new_value
+
+
+# noinspection PyProtectedMember
+@REQUESTS.register
+class RequestNewAccountEmail(Request):
+
+    """A request for a new account email."""
+
+    initial_prompt = joins("Enter an email address for this account (emails"
+                           " are used for account login and recovery purposes,"
+                           " by default no other communication will be sent"
+                           " to your email): ")
+    repeat_prompt = "New account email: "
+    confirm = Request.CONFIRM_REPEAT
+
+    def _validate(self, data):
+        try:
+            new_email = AccountEmail._validate(data)
+        except ValueError as exc:
+            raise Request.ValidationFailed(*exc.args)
+        return new_email
+
+
 @Account.register_attr("name")
 class AccountName(Attribute):
 
-    """An account name."""
+    """An account's display name."""
 
     _min_len = 2
     _max_len = 16
@@ -61,7 +104,7 @@ class AccountName(Attribute):
 
     # Other modules can add any reservations they need to this list.
     # Reserved account names should be all lowercase.
-    RESERVED = ["new", "account", "help"]
+    RESERVED = []
 
     @classmethod
     def _validate(cls, new_value):
@@ -74,7 +117,12 @@ class AccountName(Attribute):
             raise ValueError(joins("Account names must be between",
                                    cls._min_len, "and", cls._max_len,
                                    "characters in length."))
-        return new_value.lower()
+        new_value = new_value.lower()
+        if AccountName.check_reserved(new_value):
+            raise ValueError("That account name is reserved.")
+        if Account.find("name", new_value):
+            raise ValueError("That account name is already in use.")
+        return new_value
 
     @classmethod
     def check_reserved(cls, name):
@@ -107,10 +155,6 @@ class RequestNewAccountName(Request):
             new_name = AccountName._validate(data)
         except ValueError as exc:
             raise Request.ValidationFailed(*exc.args)
-        if AccountName.check_reserved(new_name):
-            raise Request.ValidationFailed("That account name is reserved.")
-        if Account._store.has(new_name):
-            raise Request.ValidationFailed("That account name is taken.")
         return new_name
 
 
@@ -176,24 +220,24 @@ def authenticate_account(session, success=None, fail=None, account=None):
     """
     account = account if account else session.account
     if not account:
-        # We need an account name first.
-        def _check_account(_session, account_name):
-            if not Account.exists(account_name):
-                # Account not found, recursing with False as the account
-                # will ensure that the password check fails.
+        # We need the account's email first.
+        def _check_account(_session, account_email):
+            if not Account.exists(account_email):
+                # Account not found, recursing with the account email string
+                # as the account will ensure that the password check fails.
                 # noinspection PyTypeChecker
-                authenticate_account(_session, fail, fail, account_name)
+                authenticate_account(_session, fail, fail, account_email)
             else:
-                _account = Account.load(account_name)
+                _account = Account.load(account_email)
                 authenticate_account(_session, success, fail, _account)
         session.request(RequestString, _check_account,
-                        initial_prompt="Account name: ",
-                        repeat_prompt="Account name: ")
+                        initial_prompt="Account email: ",
+                        repeat_prompt="Account email: ")
     else:
         # Now we can request a password.
         def _check_password(_session, password):
             if not isinstance(account, Account):
-                # They entered an account name and it didn't exist.
+                # They entered an account email and it didn't exist.
                 if fail is not None:
                     fail(_session, account)
             else:
@@ -220,6 +264,7 @@ class AccountMenu(Menu):
 def _account_menu_enter_lobby(session):
     session.shell = SHELLS["ChatShell"]
     session.menu = None
+    session.send("")  # Send a newline.
 
 
 @AccountMenu.add_entry("Q", "Quit")
