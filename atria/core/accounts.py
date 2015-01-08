@@ -6,7 +6,7 @@
 
 import re
 
-from .entities import ENTITIES, Entity, DataBlob, Attribute
+from .entities import ENTITIES, Entity, DataBlob, Attribute, Unset
 from .logs import get_logger
 from .menus import MENUS, Menu
 from .requests import REQUESTS, Request, RequestString
@@ -289,6 +289,49 @@ class RequestAccountOptionsWidth(Request):
                                            " than zero.")
 
 
+# noinspection PyUnresolvedReferences
+def create_account(session, callback, account=None):
+    """Perform a series of requests to create a new account.
+
+    :param sessions._Session session: The session creating an account
+    :param callable callback: A callback for when the account is created
+    :param Account account: The account in the process of being created
+    :returns: None
+
+    """
+    if not account:
+        account = Account()
+        account._savable = False
+    if not account.email:
+        def _set_email(_session, new_email):
+            account.email = new_email
+            create_account(_session, callback, account)
+        session.request(RequestNewAccountEmail, _set_email)
+    elif not account.name:
+        def _set_name(_session, new_name):
+            account.name = new_name
+            create_account(_session, callback, account)
+        session.request(RequestNewAccountName, _set_name)
+    elif not account.password:
+        def _set_password(_session, new_password):
+            account.password = new_password
+            create_account(_session, callback, account)
+        session.request(RequestNewAccountPassword, _set_password)
+    elif account.options.reader is Unset:
+        def _set_reader_option(_session, option):
+            account.options.reader = option
+            create_account(_session, callback, account)
+        session.request(RequestAccountOptionsReader, _set_reader_option)
+    elif account.options.color is Unset:
+        def _set_color_option(_session, option):
+            account.options.color = option
+            create_account(_session, callback, account)
+        session.request(RequestAccountOptionsColor, _set_color_option)
+    else:
+        account._savable = True
+        callback(session, account)
+
+
 def authenticate_account(session, success=None, fail=None, account=None):
     """Perform a series of requests to authenticate a session's account.
 
@@ -358,5 +401,6 @@ def _account_menu_enter_lobby(session):
 
 @AccountMenu.add_entry("Q", "Quit")
 def _account_menu_quit(session):
+    session.account.save()
     session.close("Okay, goodbye!",
                   log_msg=joins(session, "has quit"))
