@@ -33,6 +33,21 @@ class Account(Entity):
         else:
             return "Account<unnamed>"
 
+    @property
+    def session(self):
+        """Return the current session for this account."""
+        return self._get_weak("session")
+
+    @session.setter
+    def session(self, new_session):
+        """Set the current session for this account.
+
+        :param sessions._Session new_session: The session tied to this account
+        :returns: None
+
+        """
+        self._set_weak("session", new_session)
+
 
 @Account.register_attr("name")
 class AccountName(Attribute):
