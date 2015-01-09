@@ -320,6 +320,8 @@ def create_account(session, callback, account=None):
     elif account.options.reader is Unset:
         def _set_reader_option(_session, option):
             account.options.reader = option
+            # They don't need color if they are using a screen reader
+            account.options.color = False
             create_account(_session, callback, account)
         session.request(RequestAccountOptionsReader, _set_reader_option)
     elif account.options.color is Unset:
