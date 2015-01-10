@@ -140,7 +140,7 @@ def load_state():
 def _hook_client_connected(client):
     session = SESSIONS.create(client)
     with EVENTS.fire("session_started", session):
-        session.send(SESSIONS.greeting)
+        session.send(SESSIONS.connect_greeting)
         from .accounts import AccountMenu
         session.menu = AccountMenu
 

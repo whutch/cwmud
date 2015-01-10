@@ -7,7 +7,7 @@
 from collections import deque
 
 from ..libs.miniboa import ANSI_CODES
-from .. import settings
+from .. import __version__, settings
 from .accounts import Account
 from .events import EVENTS
 from .logs import get_logger
@@ -27,7 +27,10 @@ class SessionManager:
 
     def __init__(self):
         """Create a new session manager."""
-        self.greeting = "Welcome!\n"
+        self.connect_greeting = "You're connected to {}, v{}.".format(
+            settings.MUD_NAME_FULL, __version__)
+        self.login_greeting_reader = "\nWelcome back!"
+        self.login_greeting_ascii = self.login_greeting_reader
         self._sessions = []
 
     def find_by_client(self, client):
