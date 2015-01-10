@@ -47,6 +47,17 @@ class ClientManager:
         """Return the port used to listen for new connections."""
         return self._port
 
+    def find_by_port(self, port):
+        """Find a client by the port it is connected through.
+
+        :param int port: The port to search for
+        :returns miniboa.TelnetClient: A matching client or None
+
+        """
+        for client in self.clients.values():
+            if client.port == port:
+                return client
+
     def listen(self, address, port, on_connect, on_disconnect):
         """Start a new telnet server to listen for connections.
 
