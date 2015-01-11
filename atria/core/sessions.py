@@ -5,6 +5,7 @@
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
 from collections import deque
+from os.path import exists, join
 
 from ..libs.miniboa import ANSI_CODES
 from .. import __version__, settings
@@ -453,6 +454,15 @@ class _Session(HasFlags):
 # will generally only need one to work with, they are NOT singletons and you
 # can make more SessionManager instances if you like.
 SESSIONS = SessionManager()
+
+
+@EVENTS.hook("server_boot")
+def _hook_server_boot():
+    for name in ("login_greeting_reader", "login_greeting_ascii"):
+        path = join(settings.DATA_DIR, name + ".txt")
+        if exists(path):
+            with open(path) as greeting_file:
+                setattr(SESSIONS, name, greeting_file.read())
 
 
 # noinspection PyProtectedMember

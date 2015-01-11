@@ -4,8 +4,6 @@
 # :copyright: (c) 2008 - 2015 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
-from os.path import exists, join
-
 from .. import __version__
 from .. import settings
 from .accounts import AccountMenu, authenticate_account, create_account
@@ -51,10 +49,6 @@ def boot():
                        settings.BIND_PORT,
                        _client_connected,
                        _client_disconnected)
-        greeting_path = join(settings.DATA_DIR, "greeting.txt")
-        if exists(greeting_path):
-            with open(greeting_path) as greeting_file:
-                SESSIONS.greeting = greeting_file.read()
         if _store.has("state"):
             load_state()
             _store.delete("state")
