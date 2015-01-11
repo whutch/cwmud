@@ -8,9 +8,12 @@ from os.path import exists, join
 
 from .. import __version__
 from .. import settings
+from .accounts import AccountMenu, authenticate_account, create_account
 from .commands import COMMANDS, Command
+from .entities import Unset
 from .events import EVENTS
 from .logs import get_logger
+from .menus import MENUS, Menu
 from .net import CLIENTS
 from .sessions import SESSIONS
 from .shells import STATES, SHELLS, Shell, WeakValueDictionary
@@ -141,8 +144,7 @@ def _hook_client_connected(client):
     session = SESSIONS.create(client)
     with EVENTS.fire("session_started", session):
         session.send(SESSIONS.connect_greeting)
-        from .accounts import AccountMenu
-        session.menu = AccountMenu
+        session.menu = ConnectMenu
 
 
 @EVENTS.hook("client_disconnected")
@@ -150,6 +152,63 @@ def _hook_client_disconnected(client):
     session = SESSIONS.find_by_client(client)
     if session:
         session._socket = None
+
+
+@MENUS.register
+class ConnectMenu(Menu):
+
+    """A menu for new connections."""
+
+    title = None
+    ordering = Menu.ORDER_BY_ADDED
+
+
+@ConnectMenu.add_entry("L", "Login")
+def _connect_menu_login(session):
+
+    def _success(_session, account):
+        with EVENTS.fire("account_login", account):
+            if account.options.reader or account.options.reader is Unset:
+                _session.send(SESSIONS.login_greeting_reader)
+            else:
+                _session.send(SESSIONS.login_greeting_ascii)
+            _session.account = account
+            account.session = _session
+        _session.menu = AccountMenu
+
+    def _fail(_session, account):
+        if isinstance(account, str):
+            account = joins("unknown account:", account)
+        _session.close("^RBad account name or password.^~",
+                       log_msg=joins(session, "failed to log into", account))
+
+    authenticate_account(session, _success, _fail)
+
+
+@ConnectMenu.add_entry("C", "Create account")
+def _connect_menu_create_account(session):
+    def _callback(_session, account):
+        _session.send("\n^WWelcome ", account.name, "!^~", sep="")
+        _session.account = account
+        account.session = _session
+        _session.menu = AccountMenu
+    create_account(session, _callback)
+
+
+@ConnectMenu.add_entry("Q", "Quit")
+def _connect_menu_quit(session):
+    session.close("Okay, goodbye!",
+                  log_msg=joins(session, "has quit"))
+
+
+@ConnectMenu.add_entry("?", "Help")
+def _connect_menu_help(session):
+    session.send("No help yet, sorry.")
+
+
+@EVENTS.hook("account_login")
+def _hook_account_login(account):
+    account.session.send("\nMOTD will go here!")
 
 
 @SHELLS.register
@@ -167,7 +226,6 @@ class QuitCommand(Command):
     """A command for quitting the server."""
 
     def _action(self):
-        from .accounts import AccountMenu
         self.session.menu = AccountMenu
         self.session.shell = None
 
