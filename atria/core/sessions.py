@@ -201,6 +201,10 @@ class _Session(HasFlags):
                 raise TypeError("argument must be an Account instance")
             self._account = new_account
             new_account.session = self
+            # Update any session settings that derive from account options.
+            if new_account.options.width:
+                self.width = new_account.options.width
+            self.color = bool(new_account.options.color)
 
     @property
     def color(self):
