@@ -22,15 +22,16 @@ class TestSessions:
     # noinspection PyDocstring
     class _FakeClient:
 
-        def __init__(self):
+        def __init__(self, port):
             self.active = True
+            self.address = "127.0.0.1"
+            self.port = port
             self._idle = 0
             self._commands = []
             self._output = []
 
-        @staticmethod
-        def addrport():
-            return "127.0.0.1:56789"
+        def addrport(self):
+            return "{}:{}".format(self.address, self.port)
 
         @property
         def cmd_ready(self):
@@ -53,7 +54,7 @@ class TestSessions:
             def close():
                 pass
 
-    client = _FakeClient()
+    client = _FakeClient(56789)
 
     def test_session_manager_create(self):
         """Test that we can create a session manager.
@@ -198,8 +199,8 @@ class TestSessions:
         """Test that we can poll a session manager to poll all its sessions."""
         # Create a couple more sessions to test with.
         sessions = [self.session,
-                    self.sessions.create(self._FakeClient(), EchoShell),
-                    self.sessions.create(self._FakeClient(), EchoShell)]
+                    self.sessions.create(self._FakeClient(56790), EchoShell),
+                    self.sessions.create(self._FakeClient(56791), EchoShell)]
         # Change them around a bit and then poll them all.
         sessions[0]._client._commands.append("test")
         sessions[1]._client._commands.append("test")
@@ -225,7 +226,7 @@ class TestSessions:
     def test_session_close(self):
         """Test that we can close a session."""
         assert len(self.sessions._sessions) == 3
-        session = self.sessions._sessions[2]
+        session = self.sessions._sessions[56791]
         assert session.active
         session.close("bye cause reasons.")
         session.poll()

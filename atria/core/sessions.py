@@ -32,16 +32,25 @@ class SessionManager:
             settings.MUD_NAME_FULL, __version__)
         self.login_greeting_reader = "\nWelcome back!"
         self.login_greeting_ascii = self.login_greeting_reader
-        self._sessions = []
+        self._sessions = {}
+
+    def find_by_port(self, port):
+        """Find a session by its port.
+
+        :param int port: The port to search for
+        :returns _Session: A matching session or None
+
+        """
+        return self._sessions.get(port)
 
     def find_by_client(self, client):
         """Find a session by its client.
 
         :param miniboa.TelnetClient client: The client to search for
-        :returns _Session|None: A matching session or None
+        :returns _Session: A matching session or None
 
         """
-        for session in self._sessions:
+        for session in self._sessions.values():
             # noinspection PyProtectedMember
             if session._client is client:
                 return session
@@ -58,7 +67,7 @@ class SessionManager:
         if self.find_by_client(client):
             raise AlreadyExists(client, self.find_by_client(client))
         session = _Session(client, shell)
-        self._sessions.append(session)
+        self._sessions[session.port] = session
         return session
 
     def poll(self, output_only=False):
@@ -70,13 +79,17 @@ class SessionManager:
         :returns: None
 
         """
-        for session in self._sessions:
+        for session in self._sessions.values():
             session.poll(output_only)
 
     def prune(self):
         """Clean up closed or dead sessions."""
-        self._sessions = [session for session in self._sessions
-                          if session.active]
+        close = []
+        for port, session in self._sessions.items():
+            if not session.active:
+                close.append(port)
+        for port in close:
+            del self._sessions[port]
 
 
 class _Session(HasFlags):
@@ -90,7 +103,6 @@ class _Session(HasFlags):
 
         """
         super().__init__()
-        self._address = client.addrport().rsplit(":", 1)[0]
         self._output_queue = deque()
         self._request_queue = deque()
         self._menu = None
@@ -107,7 +119,7 @@ class _Session(HasFlags):
         self._close()
 
     def __repr__(self):
-        return joins("Session<", self._address, ">", sep="")
+        return joins("Session<", self.address, ":", self.port, ">", sep="")
 
     @property
     def active(self):
@@ -118,7 +130,12 @@ class _Session(HasFlags):
     @property
     def address(self):
         """Return the address this session is connected from."""
-        return self._address
+        return self._client.address
+
+    @property
+    def port(self):
+        """Return the port this session is connected through."""
+        return self._client.port
 
     @property
     def menu(self):
