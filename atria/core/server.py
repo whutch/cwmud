@@ -8,13 +8,14 @@ from .. import __version__
 from .. import settings
 from .accounts import AccountMenu, authenticate_account, create_account
 from .commands import COMMANDS, Command
-from .entities import Unset
+from .entities import ENTITIES, Unset
 from .events import EVENTS
 from .logs import get_logger
 from .menus import MENUS, Menu
 from .net import CLIENTS
 from .sessions import SESSIONS
 from .shells import STATES, SHELLS, Shell, WeakValueDictionary
+from .storage import STORES
 from .timing import TIMERS
 from .utils.exceptions import ServerShutdown, ServerReboot, ServerReload
 from .utils.funcs import joins
@@ -88,6 +89,8 @@ def loop():
     finally:
         if not reloading:
             with EVENTS.fire("server_shutdown", no_post=True):
+                ENTITIES.save()
+                STORES.commit()
                 log.info("Server shutdown complete")
 
 
@@ -107,6 +110,8 @@ def save_state(pass_to_pid=None):
     if _store.has("state"):
         raise KeyError("a server state file already exists")
     log.info("Starting game state save")
+    ENTITIES.save()
+    STORES.commit()
     state = {}
     with EVENTS.fire("server_save_state", state, pass_to_pid):
         _store.put("state", state)
@@ -286,3 +291,9 @@ ChatShell.add_verbs(TimeCommand, "time")
 if settings.FORCE_GC_COLLECT:
     import gc
     TIMERS.create("1m", "gc_collect", repeat=-1, callback=gc.collect)
+
+
+@TIMERS.create("3m", "save_and_commit", repeat=-1)
+def _save_and_commit():
+    ENTITIES.save()
+    STORES.commit()
