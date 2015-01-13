@@ -34,4 +34,5 @@ class ServerReload(Exception):
 
     """Exception to signal that the server should be reloaded."""
 
-    pass
+    def __init__(self, new_pid=None):
+        self.new_pid = new_pid
