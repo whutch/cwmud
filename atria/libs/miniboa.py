@@ -258,6 +258,10 @@ class TelnetClient(object):
         self.telnet_echo_password = False  # Echo back '*' for passwords?
         self.telnet_sb_buffer = ''  # Buffer for sub-negotiations
 
+    def __repr__(self):
+        return "TelnetClient<{}:{}({})>".format(
+            self.address, self.port, self.fileno)
+
     def get_command(self):
         """
         Get a line of text that was received from the client. The class's
@@ -781,7 +785,7 @@ class TelnetServer(object):
     """
     def __init__(self, port=23, address='', on_connect=_on_connect,
             on_disconnect=_on_disconnect, max_connections=MAX_CONNECTIONS,
-            timeout=0.1):
+            timeout=0.1, server_socket=None, create_client=True):
         """
         Create a new Telnet Server.
 
@@ -811,19 +815,28 @@ class TelnetServer(object):
         self.on_disconnect = on_disconnect
         self.max_connections = min(max_connections, MAX_CONNECTIONS)
         self.timeout = timeout
+        self.create_client = create_client
+        self.server_socket = None
+        self.server_fileno = None
 
-        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        if server_socket is None:
+            server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            try:
+                server_socket.bind((address, port))
+                server_socket.listen(5)
+            except:
+                raise
+        else:
+            if server_socket == 0:
+                server_socket = None
+            else:
+                server_socket = socket.fromfd(server_socket, socket.AF_INET,
+                                              socket.SOCK_STREAM)
 
-        try:
-            server_socket.bind((address, port))
-            server_socket.listen(5)
-        except socket.err as err:
-            logging.critical("Unable to create the server socket: " + str(err))
-            raise
-
-        self.server_socket = server_socket
-        self.server_fileno = server_socket.fileno()
+        if server_socket:
+            self.server_socket = server_socket
+            self.server_fileno = server_socket.fileno()
 
         ## Dictionary of active clients,
         ## key = file descriptor, value = TelnetClient instance
@@ -835,7 +848,8 @@ class TelnetServer(object):
         """
         for clients in self.client_list():
             clients.sock.close()
-        self.server_socket.close()
+        if self.server_socket:
+            self.server_socket.close()
         ## TODO: Anything else need doing?
 
     def client_count(self):
@@ -858,7 +872,9 @@ class TelnetServer(object):
         be partial.
         """
         ## Build a list of connections to test for receive data pending
-        recv_list = [self.server_fileno]    # always add the server
+        recv_list = []
+        if self.server_socket:
+            recv_list.append(self.server_fileno)
 
         del_list = [] # list of clients to delete after polling
 
@@ -892,7 +908,7 @@ class TelnetServer(object):
         for sock_fileno in rlist:
 
             ## If it's coming from the server's socket then this is a new connection request.
-            if sock_fileno == self.server_fileno:
+            if self.server_socket and sock_fileno == self.server_fileno:
 
                 try:
                     sock, addr_tup = self.server_socket.accept()
@@ -906,12 +922,14 @@ class TelnetServer(object):
                     sock.close()
                     continue
 
-                ## Create the client instance
-                new_client = TelnetClient(sock, addr_tup)
-
-                ## Add the connection to our dictionary and call handler
-                self.clients[new_client.fileno] = new_client
-                self.on_connect(new_client)
+                if self.create_client:
+                    ## Create the client instance
+                    new_client = TelnetClient(sock, addr_tup)
+                    ## Add the connection to our dictionary and call handler
+                    self.clients[new_client.fileno] = new_client
+                    self.on_connect(new_client)
+                else:
+                    self.on_connect(sock, addr_tup)
 
             else:
                 ## Call the connection's recieve method
