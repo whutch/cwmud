@@ -4,12 +4,9 @@
 # :copyright: (c) 2008 - 2015 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
-import socket
-import sys
 from types import MappingProxyType
 
-from ..libs.miniboa import TelnetClient, TelnetServer
-from .events import EVENTS
+from ..libs.miniboa import TelnetServer
 from .logs import get_logger
 
 
@@ -58,7 +55,8 @@ class ClientManager:
             if client.port == port:
                 return client
 
-    def listen(self, address, port, on_connect, on_disconnect):
+    def listen(self, address, port, on_connect, on_disconnect,
+               server_socket=None):
         """Start a new telnet server to listen for connections.
 
         This will discard any existing listener server, likely dropping any
@@ -68,6 +66,9 @@ class ClientManager:
         :param int port: The port to listen for new connections on
         :param callable on_connect: A callback for when a client connects
         :param callable on_disconnect: A callback for when a client disconnects
+        :param fd server_socket: The fileno of an existing listener socket to
+                                 listen with; if None, a new listener will be
+                                 opened; if 0, no listener is used
         :returns: None
         :raises TypeError: if on_connect or on_disconnect aren't callable
 
@@ -78,12 +79,16 @@ class ClientManager:
             raise TypeError("on_disconnect callback must be callable")
         self._address = address
         self._port = port
-        log.info("Binding listener to %s on port %s", address, port)
+        if server_socket:
+            log.info("Using existing listener socket")
+        elif server_socket is None:
+            log.info("Binding listener to %s on port %s", address, port)
         self._server = TelnetServer(address=address,
                                     port=port,
                                     timeout=0,
                                     on_connect=on_connect,
-                                    on_disconnect=on_disconnect)
+                                    on_disconnect=on_disconnect,
+                                    server_socket=server_socket)
 
     def close(self):
         """Stop the telnet server."""
@@ -104,36 +109,3 @@ class ClientManager:
 # will generally only need one to work with, they are NOT singletons and you
 # can make more ClientManager instances if you like.
 CLIENTS = ClientManager()
-
-
-@EVENTS.hook("server_save_state", "clients", pre=True)
-def _hook_server_save_state(state, pass_to_pid):
-    sockets = {}
-    if pass_to_pid is not None:
-        for fileno, client in CLIENTS.clients.items():
-            if sys.platform == "win32":
-                socket_info = client.sock.share(pass_to_pid)
-            else:
-                socket_info = fileno
-            sockets[fileno] = socket_info
-    state["clients"] = sockets
-
-
-# noinspection PyProtectedMember
-@EVENTS.hook("server_load_state", "clients")
-def _hook_server_load_state(state):
-    sockets = state["clients"]
-    new_clients = {}
-    for fileno, socket_info in sockets.items():
-        if sys.platform == "win32":
-            new_socket = socket.fromshare(socket_info)
-        else:
-            new_socket = socket.fromfd(socket_info,
-                                       socket.AF_INET,
-                                       socket.SOCK_STREAM)
-        client = TelnetClient(new_socket, new_socket.getsockname())
-        CLIENTS._server.clients[client.fileno] = client
-        new_clients[fileno] = client
-    # Rewrite the sockets dict in the state so that other modules can
-    #  reference the new clients by their old socket fileno.
-    state["clients"] = new_clients
