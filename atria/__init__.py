@@ -12,7 +12,7 @@ __homepage__ = "https://github.com/whutch/atria"
 __license__ = "MIT"
 __docformat__ = "restructuredtext"
 
-VERSION = (0, 2, 0, "dev", "Banana Bread")
+VERSION = (0, 3, 0, "dev", "Count Chocula")
 
 
 def get_version():
