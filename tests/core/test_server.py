@@ -4,9 +4,11 @@
 # :copyright: (c) 2008 - 2015 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
+from multiprocessing import Queue
+
 import pytest
 
-from atria.core import server
+from atria.core.server import EVENTS, CLIENTS, SERVER
 
 
 def test_boot():
@@ -17,23 +19,23 @@ def test_boot():
 
     # noinspection PyUnusedLocal
     # This one should not fire, as init is not pre-hookable
-    @server.EVENTS.hook("server_init", pre=True)
+    @EVENTS.hook("server_init", pre=True)
     def _init_pre_hook():
         array.append(0)
 
     # noinspection PyUnusedLocal
-    @server.EVENTS.hook("server_init")
+    @EVENTS.hook("server_init")
     def _init_post_hook_1():
         array.append(1)
 
     # noinspection PyUnusedLocal
-    @server.EVENTS.hook("server_boot")
+    @EVENTS.hook("server_boot")
     def _init_post_hook_2():
         array.append(2)
 
-    server.boot()
+    SERVER.boot(Queue())
     assert array == [1, 2]
-    assert server.CLIENTS.listening
+    assert CLIENTS.listening
 
 
 def test_loop():
@@ -44,9 +46,9 @@ def test_loop():
         pass
 
     # noinspection PyUnusedLocal
-    @server.EVENTS.hook("server_loop")
+    @EVENTS.hook("server_loop")
     def _loop_hook():
         raise _DummyException()
 
     with pytest.raises(_DummyException):
-        server.loop()
+        SERVER.loop()

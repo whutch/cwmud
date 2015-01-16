@@ -484,26 +484,43 @@ def _hook_server_boot():
 
 # noinspection PyProtectedMember
 @EVENTS.hook("server_save_state", "sessions", pre=True)
-def _hook_server_save_state(state, pass_to_pid):
-    sessions = []
-    # If sockets won't be saved, there's no point in saving sessions
-    if pass_to_pid is not None:
-        for session in SESSIONS._sessions:
-            sessions.append((session._client.fileno,
-                             class_name(session.shell)))
+def _hook_server_save_state(state):
+    sessions = {}
+    for session in SESSIONS._sessions.values():
+        sessions[session.port] = (
+            session._output_queue,
+            class_name(session.shell) if session.shell else None,
+            class_name(session.menu) if session.menu else None,
+            session.account.email if session.account else None,
+            session.width,
+            session.color)
     state["sessions"] = sessions
 
 
 # noinspection PyProtectedMember
-@EVENTS.hook("server_load_state", "sessions", after="clients")
+@EVENTS.hook("server_load_state", "sessions")
 def _hook_server_load_state(state):
+    from .accounts import Account
+    from .menus import MENUS
+    from .net import CLIENTS
     sessions = state["sessions"]
-    clients = state["clients"]
-    for socket_fileno, shell_name in sessions:
-        if socket_fileno not in clients:
+    for port, (output, shell, menu, email, width, color) in sessions.items():
+        client = CLIENTS.find_by_port(port)
+        if not client:
             # The client is gone, so no need for the session
             continue
-        client = clients[socket_fileno]
-        shell = SHELLS[shell_name]
-        session = _Session(client, shell)
-        SESSIONS._sessions.append(session)
+        session = SESSIONS.find_by_client(client)
+        if session:
+            if shell:
+                session.shell = SHELLS[shell]
+        else:
+            if shell:
+                shell = SHELLS[shell]
+            session = SESSIONS.create(client, shell)
+        if menu:
+            menu = MENUS[menu](session)
+        session._menu = menu
+        if email:
+            session.account = Account.load(email)
+        session.width = width
+        session.color = color
