@@ -81,7 +81,7 @@ class _FlagSet:
         """Add one or more flags to this set.
 
         :param hashable flags: The flags to add
-        :returns: None
+        :returns None:
 
         """
         for flag in flags:
@@ -93,7 +93,7 @@ class _FlagSet:
         """Drop one or more flags from this set.
 
         :param hashable flags: The flags to drop
-        :returns: None
+        :returns None:
 
         """
         for flag in flags:
@@ -106,7 +106,7 @@ class _FlagSet:
         """Toggle whether one or more flags are in this set.
 
         :param hashable flags: The flags to toggle
-        :returns: None
+        :returns None:
 
         """
         for flag in flags:
@@ -313,7 +313,7 @@ class HasParentMeta(type):
         """Set the parent of this class.
 
         :param HasParent obj: The new parent; must subclass HasParent
-        :returns: None
+        :returns None:
         :raises TypeError: If ``obj`` cannot be a parent
         :raises ValueError: If this parent results in a circular lineage
 

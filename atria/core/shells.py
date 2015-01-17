@@ -113,7 +113,7 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
         will be called.
 
         :param _Session new_session: The session tied to this shell
-        :returns: None
+        :returns None:
 
         """
         self._set_weak("session", new_session)
@@ -172,7 +172,7 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
 
         :param Command command: The command that will be executed
         :param str verbs: A sequence of verbs that trigger the command
-        :returns: None
+        :returns None:
         :raises KeyError: If this shell inherited its verb store
         :raises TypeError: If the given command is not a Command subclass
         :raises ValueError: If any of the verbs are not valid verbs
@@ -194,7 +194,7 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
         """Remove verbs from this shell.
 
         :param str verbs: A sequence of verbs to remove
-        :returns: None
+        :returns None:
         :raises KeyError: If this shell inherited its verb store
 
         """
@@ -316,7 +316,7 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
         """Parse input from the client session.
 
         :param str data: The data to be parsed
-        :returns: None
+        :returns None:
 
         """
         if not data:

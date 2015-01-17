@@ -44,7 +44,7 @@ class Account(Entity):
         """Set the current session for this account.
 
         :param sessions._Session new_session: The session tied to this account
-        :returns: None
+        :returns None:
 
         """
         self._set_weak("session", new_session)
@@ -296,7 +296,7 @@ def create_account(session, callback, account=None):
     :param sessions._Session session: The session creating an account
     :param callable callback: A callback for when the account is created
     :param Account account: The account in the process of being created
-    :returns: None
+    :returns None:
 
     """
     if not account:
@@ -350,7 +350,7 @@ def authenticate_account(session, success=None, fail=None, account=None):
     :param callable success: Optional, a callback for successful authentication
     :param callable fail: Optional, a callback for failed authentication
     :param Account account: Optional, an account to authenticate against
-    :returns: None
+    :returns None:
 
     """
     account = account if account else session.account

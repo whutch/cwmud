@@ -69,7 +69,7 @@ class ClientManager:
         :param fd server_socket: The fileno of an existing listener socket to
                                  listen with; if None, a new listener will be
                                  opened; if 0, no listener is used
-        :returns: None
+        :returns None:
         :raises TypeError: if on_connect or on_disconnect aren't callable
 
         """

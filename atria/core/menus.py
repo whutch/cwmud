@@ -74,7 +74,7 @@ class _MenuMeta(HasWeaksMeta):
         :param str key: A single-character key the entry will be accessed by
         :param str description: A description line for the entry
         :param callable callback: A callback for when the entry is chosen
-        :returns: None
+        :returns None:
         :raises AlreadyExists: If an entry with that key already exists
         :raises ValueError: If `key` is not a single character string
 
@@ -101,7 +101,7 @@ class _MenuMeta(HasWeaksMeta):
         """Remove an entry from this menu.
 
         :param str key: The key of the entry to remove
-        :returns: None
+        :returns None:
         :raises KeyError: If an entry with that key is not found
 
         """
@@ -174,7 +174,7 @@ class Menu(HasWeaks, metaclass=_MenuMeta):
         """Set the current session for this menu.
 
         :param _Session new_session: The session tied to this menu
-        :returns: None
+        :returns None:
 
         """
         self._set_weak("session", new_session)
@@ -198,7 +198,7 @@ class Menu(HasWeaks, metaclass=_MenuMeta):
         :param str key: A single-character key the entry will be accessed by
         :param str description: A description line for the entry
         :param callable callback: A callback for when the entry is chosen
-        :returns: None
+        :returns None:
         :raises AlreadyExists: If an entry with that key already exists
         :raises ValueError: If `key` is not a single character string
 
@@ -226,7 +226,7 @@ class Menu(HasWeaks, metaclass=_MenuMeta):
         """Remove an entry from this menu.
 
         :param str key: The key of the entry to remove
-        :returns: None
+        :returns None:
         :raises KeyError: If an entry with that key is not found
 
         """
@@ -266,7 +266,7 @@ class Menu(HasWeaks, metaclass=_MenuMeta):
         Only the first character of any input sent will be used.
 
         :param str data: The data to be parsed
-        :returns: None
+        :returns None:
 
         """
         data = data[0].upper()

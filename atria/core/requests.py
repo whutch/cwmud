@@ -93,7 +93,7 @@ class Request(HasFlags, HasWeaks, metaclass=_RequestMeta):
         """Set the current session for this request.
 
         :param _Session new_session: The session tied to this request
-        :returns: None
+        :returns None:
 
         """
         self._set_weak("session", new_session)

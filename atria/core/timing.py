@@ -156,7 +156,7 @@ class TimerManager:
         """Destroy a timer if it exists, by name or reference.
 
         :param str|_Timer timer: The timer to kill
-        :returns: None
+        :returns None:
 
         """
         if timer in self._timers:
@@ -175,7 +175,7 @@ class TimerManager:
         """Sleep away the excess time of a number of pulses.
 
         :param int pulses: The number of pulses to sleep through
-        :returns: None
+        :returns None:
 
         """
         for n in range(pulses):

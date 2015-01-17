@@ -108,7 +108,7 @@ class EventManager:
                                wildcard, or "*" for a total wildcard
         :param str namespace: Optional, a namespace to filter by
         :param function callback: Optional, a function to filter by
-        :returns: None
+        :returns None:
 
         """
         if event_name == "*":

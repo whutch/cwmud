@@ -76,7 +76,7 @@ class SessionManager:
         :param bool output_only: Whether to only process the output queue
                                  (this allows you to call poll from inside a
                                  command without triggering an infinite loop.)
-        :returns: None
+        :returns None:
 
         """
         for session in self._sessions.values():
@@ -148,7 +148,7 @@ class _Session(HasFlags):
 
         :param menus.Menu new_menu: The menu to assign to this session
                                     (class or instance)
-        :returns: None
+        :returns None:
         :raises TypeError: If `new_menu` is neither a subclass nor
                            an instance of Menu
         :raises ValueError: If `new_menu` is a Menu instance and its assigned
@@ -180,7 +180,7 @@ class _Session(HasFlags):
 
         :param shells.Shell new_shell: The shell to assign to this session
                                        (class or instance)
-        :returns: None
+        :returns None:
         :raises TypeError: If `new_shell` is neither a subclass nor
                            an instance of Shell
 
@@ -208,7 +208,7 @@ class _Session(HasFlags):
         """Set the current account for this session.
 
         :param accounts.Account new_account: The account to assign
-        :returns: None
+        :returns None:
         :raises TypeError: If `new_account` is not an instance of Account
 
         """
@@ -311,7 +311,7 @@ class _Session(HasFlags):
         """Process input from the client.
 
         :param str data: The data to be processed
-        :returns: None
+        :returns None:
 
         """
         if not data:
@@ -386,7 +386,7 @@ class _Session(HasFlags):
         :param bool output_only: Whether to only process the output queue
                                  (this allows you to call poll from inside a
                                  command without triggering an infinite loop.)
-        :returns: None
+        :returns None:
 
         """
         # Do an initial state check.
@@ -441,7 +441,7 @@ class _Session(HasFlags):
         :param str reason: The reason this session is being closed, it will
                            be sent to the client prior to closing
         :param str log_msg: Optional, a custom log message for the closing
-        :returns: None
+        :returns None:
 
         """
         if not log_msg:
@@ -456,7 +456,7 @@ class _Session(HasFlags):
         :param requests.Request request_class: The request template
         :param callable callback: A callback for after the request resolves
         :param dict options: Keyword arguments passed to the request class
-        :returns: None
+        :returns None:
 
         """
         other_requests = bool(self._request_queue)

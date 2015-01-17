@@ -132,7 +132,7 @@ class DataStore:
         """Close this data store.
 
         :param bool commit: Whether to commit the transaction before closing
-        :returns: None
+        :returns None:
 
         """
         if not self._opens:
@@ -187,7 +187,7 @@ class DataStore:
 
         :param hashable key: The key to store the data under
         :param dict data: The data to store
-        :returns: None
+        :returns None:
 
         """
         self._transaction[key] = data
@@ -199,7 +199,7 @@ class DataStore:
         queue it for removal in the transaction.
 
         :param hashable key: The key of the data to delete
-        :returns: None
+        :returns None:
         :raises KeyError: If the given key does not exist in the store
 
         """

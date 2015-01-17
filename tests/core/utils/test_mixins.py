@@ -127,7 +127,7 @@ class TestHasWeaks:
             """Set this object's weak reference.
 
             :param any obj: The object we want to weakly reference
-            :returns: None
+            :returns None:
 
             """
             self._set_weak("weak_ref", obj)

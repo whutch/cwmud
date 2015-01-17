@@ -31,7 +31,7 @@ class _DataBlobMeta(HasWeaksMeta):
         """Decorate a data blob to register it in this blob.
 
         :param str name: The name of the field to store the blob
-        :returns: None
+        :returns None:
         :raises AlreadyExists: If the given name already exists as an attr
         :raises TypeError: If the supplied or decorated class is not a
                            subclass of DataBlob
@@ -56,7 +56,7 @@ class _DataBlobMeta(HasWeaksMeta):
         """Decorate an attribute to register it in this blob.
 
         :param str name: The name of the field to store the attribute
-        :returns: None
+        :returns None:
         :raises AlreadyExists: If the given name already exists as an attr
         :raises TypeError: If the supplied or decorated class is not a
                            subclass of Attribute
@@ -162,7 +162,7 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
         All sub-blobs found will in turn be deserialized.
 
         :param dict data: The data to deserialize
-        :returns: None
+        :returns None:
 
         """
         for key, value in data.items():
@@ -232,7 +232,7 @@ class Attribute:
         :param DataBlob blob: The blob that changed
         :param old_value: The previous value
         :param new_value: The new value
-        :returns: None
+        :returns None:
 
         """
         pass
@@ -276,7 +276,7 @@ class _EntityMeta(HasFlagsMeta, HasWeaksMeta):
         """Decorate a data blob to register it on this entity.
 
         :param str name: The name of the field to store the blob
-        :returns: None
+        :returns None:
         :raises AlreadyExists: If the given name already exists as an attr
         :raises TypeError: If the supplied or decorated class is not a
                            subclass of DataBlob
@@ -302,7 +302,7 @@ class _EntityMeta(HasFlagsMeta, HasWeaksMeta):
         """Decorate an attribute to register it on this entity.
 
         :param str name: The name of the field to store the attribute
-        :returns: None
+        :returns None:
         :raises AlreadyExists: If the given name already exists as an attr
         :raises TypeError: If the supplied or decorated class is not a
                            subclass of Attribute
@@ -458,7 +458,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         """Update this entity's data using values from a dict.
 
         :param dict data: The data to deserialize
-        :returns: None
+        :returns None:
 
         """
         if "uid" in data:

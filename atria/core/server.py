@@ -200,7 +200,7 @@ class Server:
         add any data they want saved to the shared state dict before it is
         serialized.
 
-        :returns: None
+        :returns None:
 
         """
         if self._store.has("state"):
@@ -223,7 +223,7 @@ class Server:
         pull any data they want loaded from the shared state dict after it is
         deserialized.
 
-        :returns: None
+        :returns None:
 
         """
         if not self._store.has("state"):
