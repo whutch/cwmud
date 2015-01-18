@@ -22,7 +22,7 @@ SECS_PER_HOUR = 60 * 60
 SECS_PER_DAY = 24 * SECS_PER_HOUR
 
 # Timing
-PULSE_PER_SECOND = 4
+PULSE_PER_SECOND = 25
 _PULSE_TIME = 1.0 / PULSE_PER_SECOND
 
 # Increasing the pulses per second will increase the server responsiveness
