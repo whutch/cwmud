@@ -32,7 +32,7 @@ class Account(Entity):
         if hasattr(self, "name") and self.name:
             return joins("Account<", self.name, ">", sep="")
         else:
-            return "Account<unnamed>"
+            return "Account<(unnamed)>"
 
     @property
     def session(self):
