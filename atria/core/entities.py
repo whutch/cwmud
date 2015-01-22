@@ -85,9 +85,9 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
     """A collection of attributes and sub-blobs on an entity."""
 
     # These are overridden in the metaclass, I just put them here
-    #  to avoid a lot of unresolved reference errors in IDE introspection
-    _blobs = {}
-    _attrs = {}
+    # to avoid a lot of unresolved reference errors in IDE introspection
+    _blobs = None
+    _attrs = None
 
     def __init__(self, entity):
         super().__init__()
