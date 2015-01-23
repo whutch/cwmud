@@ -391,16 +391,23 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
     _uid_code = "E"
     _uid_history = {}  # Don't redefine on subclasses
 
-    # noinspection PyProtectedMember
     def __init__(self, data=None):
         super().__init__()
-        parent = super(self.__class__, self)
-        if hasattr(parent, "_base_blob"):
-            self._base_blob = parent._base_blob(self)
-            # noinspection PyUnresolvedReferences
-            self._base_blob._update(self.__class__._base_blob(self))
-        else:
-            self._base_blob = self._base_blob(self)
+
+        # noinspection PyProtectedMember
+        def _build_base_blob(cls, blob=self._base_blob(self), checked=set()):
+            # Recursively update our base blob with the blobs of our parents.
+            for base in cls.__bases__:
+                _build_base_blob(base)
+                # We don't need to do anything with the blob returned by this
+                # because we're abusing the mutability of default arguments.
+            if issubclass(cls, Entity):
+                if cls not in checked:
+                    blob._update(cls._base_blob(self))
+                    checked.add(cls)
+            return blob
+
+        self._base_blob = _build_base_blob(self.__class__)
         self._dirty = False
         self._savable = True
         # Never, ever manually change an object's UID! There are no checks
