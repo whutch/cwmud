@@ -430,6 +430,11 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         return self._uid
 
     @property
+    def key(self):
+        """Return the value of this entity's storage key."""
+        return getattr(self, self._store_key)
+
+    @property
     def is_dirty(self):
         """Return whether this entity is dirty and needs to be saved."""
         return self._dirty
