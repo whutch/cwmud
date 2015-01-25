@@ -537,32 +537,58 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
 
     # noinspection PyProtectedMember,PyUnresolvedReferences
     @classmethod
-    def find(cls, attr, value, store_only=False, cache_only=False):
+    def find(cls, *attr_value_pairs, cache=True, store=True, match=all, n=0):
         """Find one or more entities by one of their attribute values.
 
-        :param str attr: The name of the attribute to match against
-        :param value: The matching attribute value
-        :param bool store_only: Whether to only check the store
-        :param bool cache_only: Whether to only check the _instances cache
+        :param iterable attr_value_pairs: Pairs of attributes and values to
+                                          match against; unless _or is True,
+                                          they must all match
+        :param bool cache: Whether to check the _instances cache
+        :param bool store: Whether to check the store
+        :param function match: Function to test if an entity matches, given
+                               a list of booleans returned by attr/value
+                               comparisons; should be any or all
+        :param int n: The maximum number of matches to return
         :returns list: A list of found entities, if any
         :raises ValueError: If both `store_only` and `cache_only` are True
 
         """
-        if store_only and cache_only:
-            raise ValueError("cannot check both store only and cache only")
-        found = []
-        if not cache_only:
+        pairs = []
+        while attr_value_pairs:
+            attr, value, *attr_value_pairs = attr_value_pairs
+            pairs.append((attr, value))
+        found = set()
+        checked_keys = set()
+        if cache:
+            # Check the cache
+            for entity in cls._instances.values():
+                matches = [getattr(entity, attr) == value
+                           for attr, value in pairs]
+                if match(matches):
+                    found.add(entity)
+                    if n and len(found) >= n:
+                        break
+                checked_keys.add(entity.key)
+        if store and (not n or (n and len(found) < n)):
+            # Check the store
             for key in cls._store.keys():
+                if key in checked_keys:
+                    # We already checked this entity when we were checking the
+                    # cache, so don't bother reading from the store
+                    continue
                 data = cls._store.get(key)
                 if data:
-                    if data.get(attr) == value:
+                    matches = [data.get(attr) == value
+                               for attr, value in pairs]
+                    if match(matches):
                         entity = cls(data)
-                        found.append(entity)
-        if not store_only:
-            for entity in cls._instances.values():
-                if entity not in found and getattr(entity, attr) == value:
-                    found.append(entity)
-        return found
+                        found.add(entity)
+                        if n and len(found) >= n:
+                            break
+        if n == 1:
+            return found.pop() if found else None
+        else:
+            return list(found)
 
     # noinspection PyProtectedMember,PyUnresolvedReferences
     @classmethod
