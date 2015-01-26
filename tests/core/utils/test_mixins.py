@@ -178,90 +178,51 @@ class TestHasParent:
 
     """A collection of tests for parents mix-in class."""
 
-    class _TestClass1(HasParent):
+    class _A(HasParent):
         pass
 
-    class _TestClass2(HasParent):
+    class _B(_A):
         pass
 
-    class _TestClass3(HasParent):
+    class _C(_B):
         pass
 
-    class _AnotherTestClass(HasParent):
+    class _D(_B):
         pass
 
-    grandparent = _TestClass1
-    parent = _TestClass2
-    child = _TestClass3
-
-    def test_get_parent(self):
-        """Test that we can get the parent of an object."""
-        assert self.child.parent is None
-
-    def test_set_parent(self):
-        """Test that we can set the parent of an object."""
-        self.child.parent = self.parent
-        assert self.child.parent is self.parent
-        self.parent.parent = self.grandparent
-        assert self.parent.parent is self.grandparent
-        assert self.child.parent.parent is self.grandparent
-
-    def test_set_parent_invalid_parent(self):
-        """Test that trying to set an invalid parent fails."""
-        with pytest.raises(TypeError):
-            self.grandparent.parent = "yeah"
-
-    def test_set_parent_circular(self):
-        """Test that trying to set a circular lineage fails."""
-        assert not self.grandparent.parent
-        with pytest.raises(ValueError):
-            self.grandparent.parent = self.child
-        assert not self.grandparent.parent
+    class _E(_C, _D):
+        pass
 
     def test_get_lineage(self):
         """Test that we can get an objects lineage through the parents."""
-        assert (tuple(self.child.get_lineage()) ==
-                (self.child, self.parent, self.grandparent))
-
-    def test_get_lineage_no_flags(self):
-        """Test that an object doesn't need flags to get its lineage."""
-        another = self._AnotherTestClass
-        another.parent = self.child
-        assert (tuple(another.get_lineage()) ==
-                (another, self.child, self.parent, self.grandparent))
+        assert (tuple(self._C.get_lineage()) ==
+                (self._C, self._B, self._A))
 
     def test_get_lineage_higher_priority(self):
         """Test that we can get the higher priority objects in a lineage."""
-        assert (tuple(self.child.get_lineage(priority=1)) == ())
+        assert (tuple(self._C.get_lineage(priority=1)) == ())
 
     def test_get_lineage_lower_priority(self):
         """Test that we can get the lower priority objects in a lineage."""
-        assert (tuple(self.child.get_lineage(priority=-1)) ==
-                (self.parent, self.grandparent))
+        assert (tuple(self._C.get_lineage(priority=-1)) ==
+                (self._B, self._A))
 
     def test_get_lineage_parent_first(self):
         """Test that we can get an objects lineage with a parent first flag."""
-        self.child._parent_first = True
-        assert (tuple(self.child.get_lineage()) ==
-                (self.parent, self.grandparent, self.child))
-        assert (tuple(self.child.get_lineage(priority=1)) ==
-                (self.parent, self.grandparent))
-        assert (tuple(self.child.get_lineage(priority=-11)) == ())
+        self._C.parent_first = True
+        assert (tuple(self._C.get_lineage()) ==
+                (self._B, self._A, self._C))
+        assert (tuple(self._C.get_lineage(priority=1)) ==
+                (self._B, self._A))
+        assert (tuple(self._C.get_lineage(priority=-1)) == ())
 
     def test_get_ancestors(self):
         """Test that we can get the ancestors of an object."""
-        assert (tuple(self.child.get_ancestors()) ==
-                (self.parent, self.grandparent))
+        assert (tuple(self._C.get_ancestors()) ==
+                (self._B, self._A))
+        assert tuple(self._A.get_ancestors()) == ()
 
     def test_has_ancestor(self):
         """Test that we can see if an object has an ancestor."""
-        assert self.child.has_ancestor(self.grandparent)
-        assert not self.grandparent.has_ancestor(self.child)
-
-    def test_unset_parent(self):
-        """Test that we can unset the parent of an object."""
-        self.child.parent = None
-        assert self.child.parent is None
-        # And just for the hell of it..
-        self.grandparent.parent = self.child
-        assert self.parent.parent.parent is self.child
+        assert self._C.has_ancestor(self._A)
+        assert not self._A.has_ancestor(self._C)

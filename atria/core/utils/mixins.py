@@ -299,44 +299,12 @@ class HasParentMeta(type):
 
     def __init__(cls, name, bases, namespace):
         super().__init__(name, bases, namespace)
-        cls._parent = None
-        cls._parent_first = False
+        cls.parent_first = False
 
-    @property
-    def parent(cls):
-        """Get the parent of this class."""
-        # noinspection PyCallingNonCallable
-        return cls._parent
-
-    @parent.setter
-    def parent(cls, obj):
-        """Set the parent of this class.
-
-        :param HasParent obj: The new parent; must subclass HasParent
-        :returns None:
-        :raises TypeError: If ``obj`` cannot be a parent
-        :raises ValueError: If this parent results in a circular lineage
-
-        """
-        if obj is None:
-            cls._parent = None
-        else:
-            # Check that this object can be a parent
-            if not hasattr(obj, "parent"):
-                raise TypeError("given object cannot be a parent")
-            # Check for a circular lineage through this parent
-            check_obj = obj
-            while check_obj:
-                if check_obj is cls:
-                    raise ValueError("invalid parent due to circular lineage")
-                check_obj = check_obj.parent
-            # Lineage is good
-            cls._parent = obj
-
-    def get_lineage(cls, priority=0):
+    def get_lineage(cls, priority=0, yielded=None):
         """Return a generator to iterate through this object's lineage.
 
-        Unless an object has _parent_first set True, it will be yielded first
+        Unless an object has parent_first set True, it will be yielded first
         in the lineage, before its parent, and so on through the line.
 
         :param int priority: If zero, this will iterate over the full lineage;
@@ -344,29 +312,42 @@ class HasParentMeta(type):
                              that have priority over this object; if negative,
                              this will only iterate over objects that this
                              object has priority over
+        :param set yielded: A set used internally for keeping track of which
+                            parents have already been yielded
         :returns generator: An iterator through this object's lineage
 
         """
-        parent = cls.parent  # Save a bunch of weakref de-referencing.
-        if parent and cls._parent_first and priority >= 0:
-            for obj in parent.get_lineage():
-                yield obj
-        if priority == 0:
+        if yielded is None:
+            yielded = set()
+        if cls.parent_first and priority >= 0:
+            for base in cls.__bases__:
+                if issubclass(base, HasParent):
+                    for obj in base.get_lineage(yielded=yielded):
+                        yield obj
+        if priority == 0 and cls not in yielded and cls is not HasParent:
+            yielded.add(cls)
             yield cls
-        if parent and not cls._parent_first and priority <= 0:
-            for obj in parent.get_lineage():
-                yield obj
+        if not cls.parent_first and priority <= 0:
+            for base in cls.__bases__:
+                if issubclass(base, HasParent):
+                    for obj in base.get_lineage(yielded=yielded):
+                        yield obj
 
-    def get_ancestors(cls):
+    def get_ancestors(cls, yielded=None):
         """Return a generator to iterate through this object's ancestors.
 
         :returns generator: An iterator through this object's ancestry
 
         """
-        if cls.parent:
-            yield cls.parent
-            for obj in cls.parent.get_ancestors():
-                yield obj
+        if yielded is None:
+            yielded = set()
+        for base in cls.__bases__:
+            if issubclass(base, HasParent) and base is not HasParent:
+                if base not in yielded:
+                    yielded.add(base)
+                    yield base
+                for obj in base.get_ancestors(yielded):
+                    yield obj
 
     def has_ancestor(cls, obj):
         """Return whether this object has another object as an ancestor.
