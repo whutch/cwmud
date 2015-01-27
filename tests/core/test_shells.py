@@ -6,8 +6,7 @@
 
 import pytest
 
-from atria.core.shells import (AlreadyExists, WeakValueDictionary, Command,
-                               ShellManager, Shell)
+from atria.core.shells import AlreadyExists, Command, ShellManager, Shell
 from atria.core.utils.funcs import joins
 
 
@@ -111,15 +110,6 @@ class TestShells:
         """Test that we can get the prompt for a session."""
         assert self.shell.get_prompt() == "^y>^~ "
 
-    def test_shell_inherited_verbs(self):
-        """Test that we can tell if a shell inherited its verbs."""
-        assert self.shell.inherited_verbs()
-        assert not Shell.inherited_verbs()
-        self.shell_class._verbs = None
-        assert not self.shell.inherited_verbs()
-        self.shell_class._verbs = WeakValueDictionary()
-        assert not self.shell.inherited_verbs()
-
     def test_shell_validate_verb(self):
         """Test that we can validate a command verb."""
         self.shell._validate_verb("say")
@@ -138,14 +128,6 @@ class TestShells:
         assert not self.shell._verbs
         self.shell.add_verbs(Command, "test", "!")
         assert "test" in self.shell._verbs and "!" in self.shell._verbs
-
-    def test_shell_add_verbs_inherited(self):
-        """Test that trying to add verbs to an inherited store fails."""
-        verbs = self.shell_class._verbs
-        delattr(self.shell_class, "_verbs")
-        with pytest.raises(KeyError):
-            self.shell.add_verbs(Command, "nope")
-        self.shell_class._verbs = verbs
 
     def test_shell_add_verbs_not_command(self):
         """Test that trying to add verbs for a non-Command fails."""
@@ -177,14 +159,6 @@ class TestShells:
         assert "test" in self.shell._verbs and "!" in self.shell._verbs
         self.shell.remove_verbs("test", "!", "nope")
         assert not self.shell._verbs
-
-    def test_shell_remove_verbs_inherited(self):
-        """Test that trying to remove verbs from an inherited store fails."""
-        verbs = self.shell_class._verbs
-        delattr(self.shell_class, "_verbs")
-        with pytest.raises(KeyError):
-            self.shell.remove_verbs("nope")
-        self.shell_class._verbs = verbs
 
     def test_shell_one_argument(self):
         """Test that we can break off one argument from some client input."""

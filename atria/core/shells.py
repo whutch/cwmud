@@ -72,21 +72,21 @@ class ShellManager:
 
 
 class _ShellMeta(HasFlagsMeta, HasWeaksMeta, HasParentMeta):
-    # To avoid multiple metaclass errors
-    pass
+
+    def __init__(cls, name, bases, namespace):
+        super().__init__(name, bases, namespace)
+        cls._verbs = WeakValueDictionary()
 
 
 class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
 
     """A shell for processing client input."""
 
-    state = STATES.connected
+    # This is overridden in the metaclass, I just put it here
+    # to avoid a lot of unresolved reference errors in IDE introspection
+    _verbs = None
 
-    # If you want to add or remove verbs from a subclass of Shell, you must
-    # redefine your own _verbs attribute as a new WeakValueDictionary. The
-    # verbs of the parent class will still be accessible with find_verb
-    # because it iterates through the shell lineage.
-    _verbs = WeakValueDictionary()
+    state = STATES.connected
 
     # Delimiters should be a pair of equal-length strings that contain
     # opening and closing delimiter characters. A delimiter at any given index
@@ -135,25 +135,6 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
         """Generate the current prompt for this shell."""
         return "^y>^~ "
 
-    @classmethod
-    def inherited_verbs(cls):
-        """Return whether this shell inherited its verbs through subclassing.
-
-        This is an important distinction, as you cannot add or remove verbs
-        from a shell that inherited its verb store, as that would affect the
-        store of the parent and any of that parent's other subclasses that
-        also inherit the store.
-
-        """
-        if cls is Shell or cls._verbs is None:
-            return False
-        # noinspection PyUnresolvedReferences,PyProtectedMember
-        if super(cls, cls)._verbs is cls._verbs:
-            # We have the same verb store as our parent class.
-            return True
-        # We must have declared our own, good on us.
-        return False
-
     @staticmethod
     def _validate_verb(verb):
         if not verb or not isinstance(verb, str):
@@ -173,13 +154,10 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
         :param Command command: The command that will be executed
         :param str verbs: A sequence of verbs that trigger the command
         :returns None:
-        :raises KeyError: If this shell inherited its verb store
         :raises TypeError: If the given command is not a Command subclass
         :raises ValueError: If any of the verbs are not valid verbs
 
         """
-        if cls.inherited_verbs():
-            raise KeyError("cannot add verbs without explicit verb store")
         if not isinstance(command, type) or not issubclass(command, Command):
             raise TypeError("cannot add verbs for non-Command class")
         for verb in verbs:
@@ -195,11 +173,8 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
 
         :param str verbs: A sequence of verbs to remove
         :returns None:
-        :raises KeyError: If this shell inherited its verb store
 
         """
-        if cls.inherited_verbs():
-            raise KeyError("cannot remove verbs without explicit verb store")
         for verb in verbs:
             if verb in cls._verbs:
                 del cls._verbs[verb]
