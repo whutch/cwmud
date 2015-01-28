@@ -140,8 +140,6 @@ class Menu(HasWeaks, metaclass=_MenuMeta):
         self.session = session
         self._entries = self._entries.copy()
         self._entry_order = []
-        self._init()
-        self._update_order()
 
         # TODO: Find out why these next two prevent these from being
         # garbage collected. I know that bound methods create circular
@@ -163,6 +161,10 @@ class Menu(HasWeaks, metaclass=_MenuMeta):
 
         self.add_entry = _add_entry
         self.remove_entry = _remove_entry
+
+        # Perform any instance-specific finalization
+        self._init()
+        self._update_order()
 
     @property
     def session(self):
