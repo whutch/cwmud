@@ -6,8 +6,10 @@
 
 import re
 
+from .commands import COMMANDS, Command
 from .entities import ENTITIES, Entity, Attribute
 from .logs import get_logger
+from .shells import SHELLS, STATES, Shell
 from .storage import STORES
 from .utils.funcs import joins
 from .opt.pickle import PickleStore
@@ -95,3 +97,83 @@ class CharacterTitle(Attribute):
     """A character title."""
 
     _default = "the newbie"
+
+
+@SHELLS.register
+class CharacterShell(Shell):
+
+    """The base shell for characters."""
+
+    state = STATES.playing
+
+
+@COMMANDS.register
+class QuitCommand(Command):
+
+    """A command for quitting the server."""
+
+    def _action(self):
+        from .accounts import AccountMenu
+        self.session.menu = AccountMenu
+        self.session.shell = None
+
+
+@COMMANDS.register
+class ReloadCommand(Command):
+
+    """A command to reload the game server, hopefully without interruption.
+
+    This is similar to the old ROM-style copyover, except that we try and
+    preserve a complete game state rather than just the open connections.
+
+    """
+
+    def _action(self):
+        from .server import SERVER
+        self.session.send("Starting server reload, hold on to your butt.")
+        SERVER.reload()
+
+
+@COMMANDS.register
+class SayCommand(Command):
+
+    """A command for saying stuff on the server."""
+
+    no_parse = True
+
+    def _action(self):
+        message = self.args[0].strip()
+        self.session.send(joins("You say, '", message, "'.", sep=""))
+
+
+@COMMANDS.register
+class TestCommand(Command):
+
+    """A command to test something."""
+
+    def _action(self):
+        self.session.send("Great success!")
+
+
+@COMMANDS.register
+class TimeCommand(Command):
+
+    """A command to display the current server time.
+
+    This can be replaced in a game shell to display special in-game time, etc.
+
+    """
+
+    def _action(self):
+        from datetime import datetime as dt
+        from .timing import TIMERS
+        timestamp = dt.fromtimestamp(TIMERS.time).strftime("%c")
+        self.session.send("Current time: ", timestamp,
+                          " (", TIMERS.get_time_code(), ")", sep="")
+
+
+CharacterShell.add_verbs(QuitCommand, "quit")
+CharacterShell.add_verbs(ReloadCommand, "reload")
+CharacterShell.add_verbs(SayCommand, "say", "'")
+CharacterShell.add_verbs(TestCommand, "test")
+CharacterShell.add_verbs(TimeCommand, "time")

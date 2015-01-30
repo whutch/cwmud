@@ -6,6 +6,7 @@
 
 import re
 
+from .characters import Character
 from .entities import ENTITIES, Entity, DataBlob, Attribute, Unset
 from .logs import get_logger
 from .menus import MENUS, Menu
@@ -397,7 +398,7 @@ class AccountMenu(Menu):
 
 @AccountMenu.add_entry("L", "Enter lobby")
 def _account_menu_enter_lobby(session):
-    session.shell = SHELLS["ChatShell"]
+    session.shell = SHELLS["CharacterShell"]
     session.menu = None
     session.send("")  # Send a newline.
 
