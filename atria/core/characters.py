@@ -141,6 +141,30 @@ class CharacterTitle(Attribute):
     _default = "the newbie"
 
 
+# noinspection PyUnresolvedReferences
+def create_character(session, callback, character=None):
+    """Perform a series of requests to create a new character.
+
+    :param sessions._Session session: The session creating a character
+    :param callable callback: A callback for when the character is created
+    :param Character character: The character in the process of being created
+    :returns None:
+
+    """
+    if not character:
+        character = Character()
+        character._savable = False
+    if not character.name:
+        def _set_name(_session, new_name):
+            character.name = new_name
+            create_character(_session, callback, character)
+        session.request(RequestNewCharacterName, _set_name)
+    else:
+        character.account = session.account
+        character._savable = True
+        callback(session, character)
+
+
 @SHELLS.register
 class CharacterShell(Shell):
 
