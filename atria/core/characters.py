@@ -9,6 +9,7 @@ import re
 from .commands import COMMANDS, Command
 from .entities import ENTITIES, Entity, Attribute
 from .logs import get_logger
+from .requests import REQUESTS, Request
 from .shells import SHELLS, STATES, Shell
 from .storage import STORES
 from .utils.funcs import joins
@@ -89,6 +90,27 @@ class CharacterName(Attribute):
 
         """
         return name in cls.RESERVED
+
+
+# noinspection PyProtectedMember
+@REQUESTS.register
+class RequestNewCharacterName(Request):
+
+    """A request for a new character name."""
+
+    initial_prompt = joins("Enter a new character name (character names must"
+                           " be between", CharacterName._min_len, "and",
+                           CharacterName._max_len, "letters in length): ")
+    repeat_prompt = "New character name: "
+    confirm = Request.CONFIRM_YES
+    confirm_prompt_yn = "'{data}', is that correct? (Y/N) "
+
+    def _validate(self, data):
+        try:
+            new_name = CharacterName._validate(data)
+        except ValueError as exc:
+            raise Request.ValidationFailed(*exc.args)
+        return new_name
 
 
 @Character.register_attr("title")
