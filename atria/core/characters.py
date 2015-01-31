@@ -7,7 +7,7 @@
 import re
 
 from .commands import COMMANDS, Command
-from .entities import ENTITIES, Entity, Attribute
+from .entities import ENTITIES, Entity, Attribute, Unset
 from .logs import get_logger
 from .requests import REQUESTS, Request
 from .shells import SHELLS, STATES, Shell
@@ -49,6 +49,26 @@ class Character(Entity):
 
         """
         self._set_weak("session", new_session)
+
+
+@Character.register_attr("account")
+class CharacterAccount(Attribute):
+
+    """The account tied to a character."""
+
+    @classmethod
+    def _serialize(cls, value):
+        if value is Unset:
+            return value
+        # Save character accounts by UID
+        return value.uid
+
+    @classmethod
+    def _deserialize(cls, value):
+        if not value:
+            return value
+        from .accounts import Account
+        return Account.find("uid", value, n=1)
 
 
 @Character.register_attr("name")
