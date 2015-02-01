@@ -405,7 +405,5 @@ def _account_menu_enter_lobby(session):
 
 @AccountMenu.add_entry("Q", "Quit")
 def _account_menu_quit(session):
-    if session.account:
-        session.account.save()
     session.close("Okay, goodbye!",
                   log_msg=joins(session, "has quit"))

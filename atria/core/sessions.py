@@ -428,6 +428,8 @@ class _Session(HasFlags):
 
     def _close(self):
         """Really close a session's socket."""
+        if self.account:
+            self.account.save()
         if self._client:
             self._client.sock.close()
             self._client.active = False
