@@ -271,7 +271,6 @@ def _connect_menu_login(session):
             else:
                 _session.send(SESSIONS.login_greeting_ascii)
             _session.account = account
-            account.session = _session
         _session.menu = AccountMenu
 
     def _fail(_session, account):
@@ -288,7 +287,6 @@ def _connect_menu_create_account(session):
     def _callback(_session, account):
         _session.send("\n^WWelcome ", account.name, "!^~", sep="")
         _session.account = account
-        account.session = _session
         _session.menu = AccountMenu
     create_account(session, _callback)
 
