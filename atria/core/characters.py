@@ -50,6 +50,14 @@ class Character(Entity):
         """
         self._set_weak("session", new_session)
 
+    def resume(self):
+        """Bring this character into play."""
+        self.active = True
+
+    def suspend(self):
+        """Remove this character from play."""
+        self.active = False
+
 
 @Character.register_attr("account")
 class CharacterAccount(Attribute):

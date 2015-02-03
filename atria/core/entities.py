@@ -414,6 +414,11 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         # for removing the old UID from the store, updating UID links, or
         # anything else like that. Bad things will happen!
         self._uid = None
+
+        # An active entity is considered "in play", inactive entities are
+        # hidden from the game world.
+        self.active = False
+
         if data is not None:
             self.deserialize(data)
         if self._uid is None:
