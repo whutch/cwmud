@@ -10,6 +10,7 @@ from os.path import exists, join
 from ..libs.miniboa import ANSI_CODES
 from .. import __version__, settings
 from .accounts import Account
+from .characters import Character
 from .events import EVENTS
 from .logs import get_logger
 from .menus import Menu
@@ -108,6 +109,7 @@ class _Session(HasFlags):
         self._menu = None
         self._shell = None
         self._account = None
+        self._character = None
         self._client = client
         if shell:
             self.shell = shell
@@ -223,6 +225,27 @@ class _Session(HasFlags):
             if new_account.options.width:
                 self.width = new_account.options.width
             self.color = bool(new_account.options.color)
+
+    @property
+    def character(self):
+        """Return the current character for this session."""
+        return self._character
+
+    @character.setter
+    def character(self, new_character):
+        """Set the current character for this session.
+
+        :param characters.Character new_character: The character to assign
+        :return None:
+
+        """
+        if new_character is None:
+            self._character = None
+        else:
+            if not isinstance(new_character, Character):
+                raise TypeError("argument must be a Character instance")
+            self._character = new_character
+            new_character.session = self
 
     @property
     def color(self):
@@ -430,6 +453,8 @@ class _Session(HasFlags):
         """Really close a session's socket."""
         if self.account:
             self.account.save()
+        if self.character:
+            self.character.save()
         if self._client:
             self._client.sock.close()
             self._client.active = False
@@ -494,6 +519,7 @@ def _hook_server_save_state(state):
             class_name(session.shell) if session.shell else None,
             class_name(session.menu) if session.menu else None,
             session.account.email if session.account else None,
+            session.character.name if session.character else None,
             session.width,
             session.color)
     state["sessions"] = sessions
@@ -506,7 +532,8 @@ def _hook_server_load_state(state):
     from .menus import MENUS
     from .net import CLIENTS
     sessions = state["sessions"]
-    for port, (output, shell, menu, email, width, color) in sessions.items():
+    for port, (output, shell, menu, email,
+               char, width, color) in sessions.items():
         client = CLIENTS.find_by_port(port)
         if not client:
             # The client is gone, so no need for the session
@@ -524,5 +551,8 @@ def _hook_server_load_state(state):
         session._menu = menu
         if email:
             session.account = Account.load(email)
+        if char:
+            session.character = Character.load(char)
+            session.character.resume()
         session.width = width
         session.color = color
