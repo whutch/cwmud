@@ -4,9 +4,10 @@
 # :copyright: (c) 2008 - 2015 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
+from functools import partial
 import re
 
-from .characters import Character
+from .characters import Character, create_character
 from .entities import ENTITIES, Entity, DataBlob, Attribute, Unset
 from .logs import get_logger
 from .menus import MENUS, Menu
@@ -395,15 +396,41 @@ class AccountMenu(Menu):
     title = "ACCOUNT MENU:"
     ordering = Menu.ORDER_BY_ALPHA
 
+    def _init(self):
+        """Add account-specific entries to the menu."""
+        account = self.session.account
+        if not account:
+            log.warn("AccountMenu assigned to session with no account!")
+            return
+        # Add entries for the account's characters
+        for n, char in enumerate(Character.find("account", account,
+                                                "account", account.uid,
+                                                match=any), 1):
+            self.add_entry(str(n), char.name,
+                           partial(_account_menu_select_char, char=char))
 
-@AccountMenu.add_entry("L", "Enter lobby")
-def _account_menu_enter_lobby(session):
+
+def _account_menu_select_char(session, char=None):
+    if not char:
+        return
+    session.character = char
     session.shell = SHELLS["CharacterShell"]
     session.menu = None
-    session.send("")  # Send a newline.
+    session.send("Welcome", char.name, "!\n")
+    char.resume()
 
 
 @AccountMenu.add_entry("Q", "Quit")
 def _account_menu_quit(session):
     session.close("Okay, goodbye!",
                   log_msg=joins(session, "has quit"))
+
+
+@AccountMenu.add_entry("C", "Create character")
+def _account_menu_create_character(session):
+    def _callback(_session, character):
+        # Save the character before it gets garbage collected
+        character.save()
+        # Build a new menu with an entry for the character
+        _session.menu = AccountMenu
+    create_character(session, _callback)
