@@ -182,14 +182,28 @@ class CharacterShell(Shell):
 
 
 @COMMANDS.register
-class QuitCommand(Command):
+class LogoutCommand(Command):
 
-    """A command for quitting the server."""
+    """A command for logging out of the game."""
 
     def _action(self):
+        if self.session.character:
+            self.session.character.suspend()
         from .accounts import AccountMenu
-        self.session.menu = AccountMenu
         self.session.shell = None
+        self.session.menu = AccountMenu
+
+
+@COMMANDS.register
+class QuitCommand(Command):
+
+    """A command for quitting the game."""
+
+    def _action(self):
+        if self.session.character:
+            self.session.character.suspend()
+        self.session.close("Okay, goodbye!",
+                           log_msg=joins(self.session, "has quit"))
 
 
 @COMMANDS.register
@@ -246,6 +260,7 @@ class TimeCommand(Command):
                           " (", TIMERS.get_time_code(), ")", sep="")
 
 
+CharacterShell.add_verbs(LogoutCommand, "logout")
 CharacterShell.add_verbs(QuitCommand, "quit")
 CharacterShell.add_verbs(ReloadCommand, "reload")
 CharacterShell.add_verbs(SayCommand, "say", "'")
