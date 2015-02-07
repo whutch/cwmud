@@ -6,7 +6,7 @@
 
 import re
 
-from .entities import ENTITIES, Entity, Attribute
+from .entities import ENTITIES, Entity, Attribute, Unset
 from .logs import get_logger
 from .storage import STORES
 from .utils.funcs import joins
@@ -27,7 +27,17 @@ class Room(Entity):
 
     def __repr__(self):
         name = self.name if self.name else "(unnamed)"
-        return joins("Room<", name, ">", sep="")
+        return joins("Room<", name, ":", self.get_coord_str(), ">", sep="")
+
+    def get_coord_str(self):
+        """Return a string representing the coordinates for this room.
+
+        :returns str: The coordinate string
+
+        """
+        if self.x is Unset or self.y is Unset or self.z is Unset:
+            return "invalid coordinates"
+        return "{},{},{}".format(self.x, self.y, self.z)
 
 
 @Room.register_attr("name")
@@ -65,4 +75,49 @@ class RoomDescription(Attribute):
     def _validate(cls, new_value):
         if not isinstance(new_value, str):
             raise ValueError("Room descriptions must be strings.")
+        return new_value
+
+
+@Room.register_attr("x")
+class RoomX(Attribute):
+
+    """The X coordinate of a room."""
+
+    _min_val = -1000
+    _max_val = 1000
+
+    @classmethod
+    def _validate(cls, new_value):
+        if not isinstance(new_value, int):
+            raise ValueError("Room coordinates must be integers.")
+        return new_value
+
+
+@Room.register_attr("y")
+class RoomY(Attribute):
+
+    """The Y coordinate of a room."""
+
+    _min_val = -1000
+    _max_val = 1000
+
+    @classmethod
+    def _validate(cls, new_value):
+        if not isinstance(new_value, int):
+            raise ValueError("Room coordinates must be integers.")
+        return new_value
+
+
+@Room.register_attr("z")
+class RoomZ(Attribute):
+
+    """The Z coordinate of a room."""
+
+    _min_val = -1000
+    _max_val = 1000
+
+    @classmethod
+    def _validate(cls, new_value):
+        if not isinstance(new_value, int):
+            raise ValueError("Room coordinates must be integers.")
         return new_value
