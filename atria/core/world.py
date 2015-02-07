@@ -29,6 +29,11 @@ class Room(Entity):
         name = self.name if self.name else "(unnamed)"
         return joins("Room<", name, ":", self.get_coord_str(), ">", sep="")
 
+    @property
+    def coords(self):
+        """Return a tuple of this room's x,y,z coordinates."""
+        return self.x, self.y, self.z
+
     def get_coord_str(self):
         """Return a string representing the coordinates for this room.
 
