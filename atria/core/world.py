@@ -5,6 +5,7 @@
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
 import re
+from weakref import WeakSet
 
 from .entities import ENTITIES, Entity, Attribute, Unset
 from .logs import get_logger
@@ -25,9 +26,23 @@ class Room(Entity):
     _store_key = "uid"
     _uid_code = "R"
 
+    def __init__(self, data=None):
+        super().__init__(data)
+        self._chars = WeakSet()  # The Characters currently in this room
+
     def __repr__(self):
         name = self.name if self.name else "(unnamed)"
         return joins("Room<", name, ":", self.get_coord_str(), ">", sep="")
+
+    @property
+    def chars(self):
+        """Return this room's character set.
+
+        You shouldn't need to add or remove Characters from this set directly,
+        it is done automatically when the Character.room attribute is changed.
+
+        """
+        return self._chars
 
     @property
     def coords(self):

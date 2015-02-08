@@ -12,6 +12,7 @@ from .logs import get_logger
 from .requests import REQUESTS, Request
 from .shells import SHELLS, STATES, Shell
 from .storage import STORES
+from .world import Room
 from .utils.funcs import joins
 from .opt.pickle import PickleStore
 
@@ -52,11 +53,15 @@ class Character(Entity):
 
     def resume(self):
         """Bring this character into play."""
+        if self.room:
+            self.room.chars.add(self)
         self.active = True
 
     def suspend(self):
         """Remove this character from play."""
         self.active = False
+        if self.room and self in self.room.chars:
+            self.room.chars.remove(self)
 
 
 @Character.register_attr("account")
@@ -77,6 +82,42 @@ class CharacterAccount(Attribute):
             return value
         from .accounts import Account
         return Account.find("uid", value, n=1)
+
+
+@Character.register_attr("room")
+class CharacterRoom(Attribute):
+
+    """The room a character is in."""
+
+    @classmethod
+    def _validate(cls, new_value):
+        if not isinstance(new_value, Room):
+            raise ValueError("Character room must be a Room instance.")
+        return new_value
+
+    # noinspection PyProtectedMember
+    @classmethod
+    def _changed(cls, blob, old_value, new_value):
+        char = blob._entity
+        if char.active:
+            # Update the rooms' character sets
+            if old_value and char in old_value.chars:
+                old_value.chars.remove(char)
+            if new_value:
+                new_value.chars.add(char)
+
+    @classmethod
+    def _serialize(cls, value):
+        if value is Unset:
+            return value
+        # Save character rooms by UID
+        return value.uid
+
+    @classmethod
+    def _deserialize(cls, value):
+        if not value:
+            return value
+        return Room.load(value)
 
 
 @Character.register_attr("name")

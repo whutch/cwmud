@@ -413,6 +413,11 @@ class AccountMenu(Menu):
 def _account_menu_select_char(session, char=None):
     if not char:
         return
+    if not char.room:
+        from .world import Room
+        start_room = Room.find("x", 0, "y", 0, "z", 0, n=1)
+        if start_room:
+            char.room = start_room
     session.character = char
     session.shell = SHELLS["CharacterShell"]
     session.menu = None
