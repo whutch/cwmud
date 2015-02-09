@@ -56,12 +56,36 @@ class Character(Entity):
         if self.room:
             self.room.chars.add(self)
         self.active = True
+        self.show_room()
 
     def suspend(self):
         """Remove this character from play."""
         self.active = False
         if self.room and self in self.room.chars:
             self.room.chars.remove(self)
+
+    def show_room(self, room=None):
+        """Show a room's contents to the session controlling this character.
+
+        :param world.Room room: Optional, the room to show to this character;
+                                if None, their current room will be shown
+        :returns None:
+
+        """
+        if not self.session:
+            return
+        if not room:
+            if not self.room:
+                return
+            room = self.room
+        char_list = "\n".join(["^G{} ^g{}^g is here.^~".format(
+                               char.name, char.title)
+                               for char in room.chars if char is not self])
+        output = joins("^Y", room.name or "An Unnamed Room", "^~\n",
+                       "^m", room.description, "^~\n",
+                       char_list, "\n" if char_list else "",
+                       "^b", "[Exits: nowhere]", "^~", sep="")
+        self.session.send(output)
 
 
 @Character.register_attr("account")
@@ -301,9 +325,26 @@ class TimeCommand(Command):
                           " (", TIMERS.get_time_code(), ")", sep="")
 
 
+@COMMANDS.register
+class LookCommand(Command):
+
+    """A command to allow a character to look at things."""
+
+    def _action(self):
+        char = self.session.character
+        if not char:
+            self.session.send("You're not playing a character!")
+            return
+        if not char.room:
+            self.session.send("You're not in a room!")
+            return
+        char.show_room()
+
+
 CharacterShell.add_verbs(LogoutCommand, "logout")
 CharacterShell.add_verbs(QuitCommand, "quit")
 CharacterShell.add_verbs(ReloadCommand, "reload")
 CharacterShell.add_verbs(SayCommand, "say", "'")
 CharacterShell.add_verbs(TestCommand, "test")
 CharacterShell.add_verbs(TimeCommand, "time")
+CharacterShell.add_verbs(LookCommand, "look")
