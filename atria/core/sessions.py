@@ -553,6 +553,6 @@ def _hook_server_load_state(state):
             session.account = Account.load(email)
         if char:
             session.character = Character.load(char)
-            session.character.resume()
+            session.character.resume(quiet=True)
         session.width = width
         session.color = color

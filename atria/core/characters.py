@@ -51,15 +51,26 @@ class Character(Entity):
         """
         self._set_weak("session", new_session)
 
-    def resume(self):
-        """Bring this character into play."""
+    def resume(self, quiet=False):
+        """Bring this character into play.
+
+        :param bool quiet: Whether to suppress output from resuming or not
+        :returns None:
+
+        """
         if self.room:
             self.room.chars.add(self)
         self.active = True
-        self.show_room()
+        if not quiet:
+            self.show_room()
 
-    def suspend(self):
-        """Remove this character from play."""
+    def suspend(self, quiet=False):
+        """Remove this character from play.
+
+        :param bool quiet: Whether to suppress output from resuming or not
+        :returns None:
+
+        """
         self.active = False
         if self.room and self in self.room.chars:
             self.room.chars.remove(self)
