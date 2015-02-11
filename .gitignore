@@ -16,4 +16,7 @@ build/
 
 # Deployment
 .env/
+.venv/
+data/
 logs/
+dump.rdb
