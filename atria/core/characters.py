@@ -75,6 +75,50 @@ class Character(Entity):
         if self.room and self in self.room.chars:
             self.room.chars.remove(self)
 
+    def act(self, message, context=None, target=None, to=(), and_self=True):
+        """Generate and send contextualized Character-based messages.
+
+        This is largely a shortcut and convenience function to avoid a lot of
+        individual char.session.send calls with custom-built messages.
+        One benefit of keeping the functionality in one place is that we can
+        later expand it to cache the generated messages, keyed by template
+        string and context.
+
+        :param str message: A specially formatted string that is used to
+                            generate the messages.
+        :param dict context: The context for the messages.
+        :param Character target: A contextual target for the message.
+        :param iterable<Character> to: The recipient(s) of the messages
+                                       (not including the actor).
+        :param bool and_self: Whether to send a message to the actor as well.
+
+        """
+        if not context:
+            context = {}
+        if and_self:
+            context["s"] = "you"
+            context["ss"] = ""
+            if target:
+                context["t"] = target.name
+                context["ts"] = "s"
+            self.session.send(message.format(**context).capitalize())
+        if target:
+            context["s"] = self.name
+            context["ss"] = "s"
+            context["t"] = "you"
+            context["ts"] = ""
+            target.session.send(message.format(**context).capitalize())
+        if to:
+            context["s"] = self.name
+            context["ss"] = "s"
+            if target:
+                context["t"] = target.name
+                context["ts"] = "s"
+            msg = message.format(**context).capitalize()
+            for char in to:
+                if char is not self and char is not target:
+                    char.session.send(msg)
+
     def show_room(self, room=None):
         """Show a room's contents to the session controlling this character.
 
