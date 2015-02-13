@@ -350,8 +350,10 @@ class SayCommand(Command):
     no_parse = True
 
     def _action(self):
+        char = self.session.character
         message = self.args[0].strip()
-        self.session.send(joins("You say, '", message, "'.", sep=""))
+        char.act("{s} say{ss}, '{msg}'.", {"msg": message},
+                 to=char.room.chars)
 
 
 @COMMANDS.register
