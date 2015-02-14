@@ -142,6 +142,29 @@ class Character(Entity):
                        "^b", "[Exits: nowhere]", "^~", sep="")
         self.session.send(output)
 
+    def move_to_room(self, room, depart_msg="", arrive_msg="",
+                     depart_context=None, arrive_context=None):
+        """Move this character to a room.
+
+        :param world.Room room: The room to move this character to
+        :param str depart_msg: Optional, an act message for departure
+        :param str arrive_msg: Optional, an act message for arrival
+        :param dict depart_context: Optional, a context for the departure
+        :param dict arrive_context: Optional, a context for the arrival
+        :returns None:
+
+        """
+        if not room:
+            return
+        if depart_msg:
+            self.act(depart_msg, depart_context, to=self.room.chars)
+        # noinspection PyAttributeOutsideInit
+        self.room = room
+        if arrive_msg:
+            self.act(arrive_msg, arrive_context,
+                     to=self.room.chars, and_self=False)
+        self.show_room()
+
 
 @Character.register_attr("account")
 class CharacterAccount(Attribute):
