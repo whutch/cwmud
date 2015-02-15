@@ -141,3 +141,24 @@ class RoomZ(Attribute):
         if not isinstance(new_value, int):
             raise ValueError("Room coordinates must be integers.")
         return new_value
+
+
+# These are used to generate Character.act messages
+_movement_strings = {
+    (1, 0, 0): ("east", "the west"),
+    (-1, 0, 0): ("west", "the east"),
+    (0, 1, 0): ("north", "the south"),
+    (0, -1, 0): ("south", "the north"),
+    (0, 0, 1): ("up", "below"),
+    (0, 0, -1): ("down", "above"),
+}
+
+
+def get_movement_strings(change):
+    """Return a pair of strings to describe bi-directional character movement.
+
+    :param tuple<int,int,int> change: A tuple of the (x,y,z) change
+    :returns tuple<str,str>: The relevant to and from strings
+
+    """
+    return _movement_strings.get(change, ("nowhere", "nowhere"))
