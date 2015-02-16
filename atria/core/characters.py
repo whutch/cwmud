@@ -12,7 +12,7 @@ from .logs import get_logger
 from .requests import REQUESTS, Request
 from .shells import SHELLS, STATES, Shell
 from .storage import STORES
-from .world import Room
+from .world import Room, get_movement_strings
 from .utils.funcs import joins
 from .opt.pickle import PickleStore
 
@@ -164,6 +164,31 @@ class Character(Entity):
             self.act(arrive_msg, arrive_context,
                      to=self.room.chars, and_self=False)
         self.show_room()
+
+    def move_direction(self, x=0, y=0, z=0):
+        """Move this character to the room in a given direction.
+
+        :param int x: The change in the X coordinate
+        :param int y: The change in the Y coordinate
+        :param int z: The change in the Z coordinate
+        :returns None:
+
+        """
+        if not x and not y and not z:
+            # They apparently don't want to go anywhere..
+            return
+        if not self.room:
+            # Can't move somewhere from nowhere.
+            return
+        to_x, to_y, to_z = map(sum, zip(self.room.coords, (x, y, z)))
+        room = Room.find("x", to_x, "y", to_y, "z", to_z, n=1)
+        if not room:
+            self.session.send("You can't go that way.")
+            return
+        to_dir, from_dir = get_movement_strings((x, y, z))
+        self.move_to_room(room, "{s} move{ss} {dir}.",
+                          "{s} arrives from {dir}.",
+                          {"dir": to_dir}, {"dir": from_dir})
 
 
 @Character.register_attr("account")
