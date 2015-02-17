@@ -446,6 +446,38 @@ class LookCommand(Command):
         char.show_room()
 
 
+@COMMANDS.register
+class NorthCommand(Command):
+
+    """A command to allow a character to move north."""
+
+    def _action(self):
+        char = self.session.character
+        if not char:
+            self.session.send("You're not playing a character!")
+            return
+        if not char.room:
+            self.session.send("You're not in a room!")
+            return
+        char.move_direction(y=1)
+
+
+@COMMANDS.register
+class SouthCommand(Command):
+
+    """A command to allow a character to move south."""
+
+    def _action(self):
+        char = self.session.character
+        if not char:
+            self.session.send("You're not playing a character!")
+            return
+        if not char.room:
+            self.session.send("You're not in a room!")
+            return
+        char.move_direction(y=-1)
+
+
 CharacterShell.add_verbs(LogoutCommand, "logout")
 CharacterShell.add_verbs(QuitCommand, "quit")
 CharacterShell.add_verbs(ReloadCommand, "reload")
@@ -453,3 +485,5 @@ CharacterShell.add_verbs(SayCommand, "say", "'")
 CharacterShell.add_verbs(TestCommand, "test")
 CharacterShell.add_verbs(TimeCommand, "time")
 CharacterShell.add_verbs(LookCommand, "look")
+CharacterShell.add_verbs(NorthCommand, "north")
+CharacterShell.add_verbs(SouthCommand, "south")
