@@ -447,7 +447,7 @@ class _Session(HasFlags):
             # Send them a prompt if there was any input or output.
             if ((data is not None or output is not None) and self.active
                     and "close" not in self.flags):
-                self._send(self._get_prompt())
+                self._send(joins("\n", self._get_prompt(), sep=""))
 
     def _close(self):
         """Really close a session's socket."""

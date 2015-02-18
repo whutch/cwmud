@@ -161,7 +161,7 @@ class TestSessions:
         self.session.poll()
         assert not self.client.cmd_ready
         assert self.client._output.pop(0) == "You sent: test\n"
-        assert self.client._output.pop(0) == self.prompt
+        assert self.client._output.pop(0) == "\n" + self.prompt
         assert not self.client._output
 
     def test_session_poll_no_command(self):
@@ -169,7 +169,7 @@ class TestSessions:
         self.session.send("Hello!")
         self.session.poll()
         assert self.client._output.pop(0) == "\nHello!\n"
-        assert self.client._output.pop(0) == self.prompt
+        assert self.client._output.pop(0) == "\n" + self.prompt
         assert not self.client._output
 
     def test_session_check_idle(self):
@@ -215,7 +215,7 @@ class TestSessions:
         # The second session should have been parsed and output returned.
         assert not sessions[1]._client.cmd_ready
         assert sessions[1]._client._output.pop(0) == "You sent: test\n"
-        assert sessions[1]._client._output.pop(0) == self.prompt
+        assert sessions[1]._client._output.pop(0) == "\n" + self.prompt
         assert not sessions[1]._client._output
         assert sessions[1].active
         # And the third session didn't do anything, so should be unchanged.
