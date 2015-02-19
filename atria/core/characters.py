@@ -93,6 +93,9 @@ class Character(Entity):
         :param bool and_self: Whether to send a message to the actor as well.
 
         """
+        def _build_msg(template, _context):
+            return ".".join([part[:1].upper() + part[1:] for part in
+                             template.format(**_context).split(".")])
         if not context:
             context = {}
         if and_self:
@@ -101,20 +104,20 @@ class Character(Entity):
             if target:
                 context["t"] = target.name
                 context["ts"] = "s"
-            self.session.send(message.format(**context).capitalize())
+            self.session.send(_build_msg(message, context))
         if target:
             context["s"] = self.name
             context["ss"] = "s"
             context["t"] = "you"
             context["ts"] = ""
-            target.session.send(message.format(**context).capitalize())
+            target.session.send(_build_msg(message, context))
         if to:
             context["s"] = self.name
             context["ss"] = "s"
             if target:
                 context["t"] = target.name
                 context["ts"] = "s"
-            msg = message.format(**context).capitalize()
+            msg = _build_msg(message, context)
             for char in to:
                 if char is not self and char is not target:
                     char.session.send(msg)
