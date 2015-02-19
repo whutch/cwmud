@@ -355,8 +355,8 @@ class LogoutCommand(Command):
     """A command for logging out of the game."""
 
     def _action(self):
-        if self.session.character:
-            self.session.character.suspend()
+        if self.session.char:
+            self.session.char.suspend()
         from .accounts import AccountMenu
         self.session.shell = None
         self.session.menu = AccountMenu
@@ -368,8 +368,8 @@ class QuitCommand(Command):
     """A command for quitting the game."""
 
     def _action(self):
-        if self.session.character:
-            self.session.character.suspend()
+        if self.session.char:
+            self.session.char.suspend()
         self.session.close("Okay, goodbye!",
                            log_msg=joins(self.session, "has quit"))
 
@@ -398,7 +398,7 @@ class SayCommand(Command):
     no_parse = True
 
     def _action(self):
-        char = self.session.character
+        char = self.session.char
         message = self.args[0].strip()
         char.act("{s} say{ss}, '{msg}'.", {"msg": message},
                  to=char.room.chars)
@@ -436,7 +436,7 @@ class LookCommand(Command):
     """A command to allow a character to look at things."""
 
     def _action(self):
-        char = self.session.character
+        char = self.session.char
         if not char:
             self.session.send("You're not playing a character!")
             return
@@ -452,7 +452,7 @@ class NorthCommand(Command):
     """A command to allow a character to move north."""
 
     def _action(self):
-        char = self.session.character
+        char = self.session.char
         if not char:
             self.session.send("You're not playing a character!")
             return
@@ -468,7 +468,7 @@ class SouthCommand(Command):
     """A command to allow a character to move south."""
 
     def _action(self):
-        char = self.session.character
+        char = self.session.char
         if not char:
             self.session.send("You're not playing a character!")
             return

@@ -109,7 +109,7 @@ class _Session(HasFlags):
         self._menu = None
         self._shell = None
         self._account = None
-        self._character = None
+        self._char = None
         self._client = client
         if shell:
             self.shell = shell
@@ -227,25 +227,25 @@ class _Session(HasFlags):
             self.color = bool(new_account.options.color)
 
     @property
-    def character(self):
+    def char(self):
         """Return the current character for this session."""
-        return self._character
+        return self._char
 
-    @character.setter
-    def character(self, new_character):
+    @char.setter
+    def char(self, new_char):
         """Set the current character for this session.
 
-        :param characters.Character new_character: The character to assign
+        :param characters.Character new_char: The character to assign
         :return None:
 
         """
-        if new_character is None:
-            self._character = None
+        if new_char is None:
+            self._char = None
         else:
-            if not isinstance(new_character, Character):
+            if not isinstance(new_char, Character):
                 raise TypeError("argument must be a Character instance")
-            self._character = new_character
-            new_character.session = self
+            self._char = new_char
+            new_char.session = self
 
     @property
     def color(self):
@@ -453,8 +453,8 @@ class _Session(HasFlags):
         """Really close a session's socket."""
         if self.account:
             self.account.save()
-        if self.character:
-            self.character.save()
+        if self.char:
+            self.char.save()
         if self._client:
             self._client.sock.close()
             self._client.active = False
@@ -519,7 +519,7 @@ def _hook_server_save_state(state):
             class_name(session.shell) if session.shell else None,
             class_name(session.menu) if session.menu else None,
             session.account.email if session.account else None,
-            session.character.name if session.character else None,
+            session.char.name if session.char else None,
             session.width,
             session.color)
     state["sessions"] = sessions
@@ -552,7 +552,7 @@ def _hook_server_load_state(state):
         if email:
             session.account = Account.load(email)
         if char:
-            session.character = Character.load(char)
-            session.character.resume(quiet=True)
+            session.char = Character.load(char)
+            session.char.resume(quiet=True)
         session.width = width
         session.color = color

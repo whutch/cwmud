@@ -418,7 +418,7 @@ def _account_menu_select_char(session, char=None):
         start_room = Room.find("x", 0, "y", 0, "z", 0, n=1)
         if start_room:
             char.room = start_room
-    session.character = char
+    session.char = char
     session.shell = SHELLS["CharacterShell"]
     session.menu = None
     session.send("Welcome", char.name, "!\n")
