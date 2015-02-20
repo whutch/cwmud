@@ -8,6 +8,7 @@ from functools import partial
 import re
 
 from .characters import Character, create_character
+from .const import *
 from .entities import ENTITIES, Entity, DataBlob, Attribute, Unset
 from .logs import get_logger
 from .menus import MENUS, Menu
@@ -194,6 +195,20 @@ class RequestNewAccountPassword(Request):
             return AccountPassword._validate(data)
         except ValueError as exc:
             raise Request.ValidationFailed(*exc.args)
+
+
+@Account.register_attr("trust")
+class AccountTrust(Attribute):
+
+    """An account's trust level."""
+
+    _default = TRUST_PLAYER
+
+    @classmethod
+    def _validate(cls, new_value):
+        if not isinstance(new_value, int):
+            raise TypeError("Account trust must be an integer.")
+        return new_value
 
 
 @Account.register_blob("options")
