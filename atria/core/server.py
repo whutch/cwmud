@@ -12,14 +12,12 @@ import redis
 from ..libs.miniboa import TelnetClient
 from .. import settings
 from .accounts import AccountMenu, authenticate_account, create_account
-from .commands import COMMANDS, Command
 from .entities import ENTITIES, Unset
 from .events import EVENTS
 from .logs import get_logger
 from .menus import MENUS, Menu
 from .net import CLIENTS
 from .sessions import SESSIONS
-from .shells import STATES, SHELLS, Shell, WeakValueDictionary
 from .storage import STORES
 from .timing import TIMERS
 from .utils.exceptions import ServerShutdown, ServerReboot, ServerReload
@@ -300,11 +298,6 @@ def _connect_menu_quit(session):
 @ConnectMenu.add_entry("?", "Help")
 def _connect_menu_help(session):
     session.send("No help yet, sorry.")
-
-
-@EVENTS.hook("account_login")
-def _hook_account_login(account):
-    account.session.send("\nMOTD will go here!")
 
 
 if settings.FORCE_GC_COLLECT:

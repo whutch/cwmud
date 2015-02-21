@@ -10,6 +10,7 @@ import re
 from .characters import Character, create_character
 from .const import *
 from .entities import ENTITIES, Entity, DataBlob, Attribute, Unset
+from .events import EVENTS
 from .logs import get_logger
 from .menus import MENUS, Menu
 from .requests import REQUESTS, Request, RequestString
@@ -454,3 +455,8 @@ def _account_menu_create_character(session):
         # Build a new menu with an entry for the character
         _session.menu = AccountMenu
     create_character(session, _callback)
+
+
+@EVENTS.hook("account_login")
+def _hook_account_login(account):
+    account.session.send("\nMOTD will go here!")
