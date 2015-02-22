@@ -481,12 +481,21 @@ class SouthCommand(Command):
         char.move_direction(y=-1)
 
 
-CharacterShell.add_verbs(LogoutCommand, "logout")
-CharacterShell.add_verbs(QuitCommand, "quit")
-CharacterShell.add_verbs(ReloadCommand, "reload")
-CharacterShell.add_verbs(SayCommand, "say", "'")
-CharacterShell.add_verbs(TestCommand, "test")
-CharacterShell.add_verbs(TimeCommand, "time")
-CharacterShell.add_verbs(LookCommand, "look")
+# Movement commands
 CharacterShell.add_verbs(NorthCommand, "north")
 CharacterShell.add_verbs(SouthCommand, "south")
+
+# Information commands
+CharacterShell.add_verbs(LookCommand, "look")
+CharacterShell.add_verbs(TimeCommand, "time")
+
+# Communication commands
+CharacterShell.add_verbs(SayCommand, "say", "'")
+
+# Connection commands
+CharacterShell.add_verbs(QuitCommand, "quit")
+CharacterShell.add_verbs(LogoutCommand, "logout")
+
+# Admin commands
+CharacterShell.add_verbs(ReloadCommand, "reload")
+CharacterShell.add_verbs(TestCommand, "test")
