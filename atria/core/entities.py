@@ -386,6 +386,11 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
 
     """The base of all persistent objects in the game."""
 
+    # These are overridden in the metaclass, I just put them here
+    # to avoid a lot of unresolved reference errors in IDE introspection
+    _base_blob = None
+    _instances = None
+
     _store = None
     _store_key = "uid"
     _uid_code = "E"
@@ -394,7 +399,6 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
     def __init__(self, data=None):
         super().__init__()
 
-        # noinspection PyProtectedMember
         def _build_base_blob(cls, blob=self._base_blob(self), checked=set()):
             # Recursively update our base blob with the blobs of our parents.
             for base in cls.__bases__:
@@ -403,6 +407,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
                 # because we're abusing the mutability of default arguments.
             if issubclass(cls, Entity):
                 if cls not in checked:
+                    # noinspection PyProtectedMember
                     blob._update(cls._base_blob(self))
                     checked.add(cls)
             return blob
@@ -423,7 +428,6 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
             self.deserialize(data)
         if self._uid is None:
             self._uid = self.make_uid()
-        # noinspection PyUnresolvedReferences
         self._instances[self._uid] = self
 
     def __repr__(self):
@@ -516,7 +520,6 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         cls._uid_history[cls._uid_code] = (last_time, last_count)
         return uid
 
-    # noinspection PyProtectedMember,PyUnresolvedReferences
     @classmethod
     def exists(cls, key):
         """Check if an entity with the given key exists.
@@ -540,7 +543,6 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
                     return True
         return False
 
-    # noinspection PyProtectedMember,PyUnresolvedReferences
     @classmethod
     def find(cls, *attr_value_pairs, cache=True, store=True, match=all, n=0):
         """Find one or more entities by one of their attribute values.
@@ -595,7 +597,6 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         else:
             return list(found)
 
-    # noinspection PyProtectedMember,PyUnresolvedReferences
     @classmethod
     def load(cls, key, from_cache=True):
         """Load an entity from storage.
