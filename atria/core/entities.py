@@ -589,6 +589,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
                                for attr, value in pairs]
                     if match(matches):
                         entity = cls(data)
+                        entity._dirty = False
                         found.add(entity)
                         if n and len(found) >= n:
                             break
@@ -628,6 +629,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
                     log.warn("No uid for %s loaded with key: %s",
                              class_name(cls), key)
                 entity = cls(data)
+                entity._dirty = False
                 return entity
         raise KeyError(joins("couldn't load", class_name(cls),
                        "with key:", key))
@@ -656,6 +658,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         if self.uid != data["uid"]:
             raise ValueError(joins("uid mismatch trying to revert", self))
         self.deserialize(data)
+        self._dirty = False
 
     def clone(self, new_key):
         """Create a new entity with a copy of this entity's data.
