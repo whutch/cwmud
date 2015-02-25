@@ -599,6 +599,15 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
             return list(found)
 
     @classmethod
+    def all(cls):
+        """Return all active instances of this entity.
+
+        :returns list: All active instances of this entity type
+        """
+        return [instance for instance in cls._instances.values()
+                if instance.active]
+
+    @classmethod
     def load(cls, key, from_cache=True):
         """Load an entity from storage.
 
