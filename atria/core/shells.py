@@ -200,11 +200,11 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
         :returns Command|None: The command with that verb or None
 
         """
+        verb = verb.lower()
         for shell in cls.get_lineage():
             command = shell.get_command(verb)
             if command:
                 return command
-        return None
 
     @classmethod
     def _one_argument(cls, data):
