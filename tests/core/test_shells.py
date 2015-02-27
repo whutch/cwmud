@@ -113,13 +113,10 @@ class TestShells:
     def test_shell_validate_verb(self):
         """Test that we can validate a command verb."""
         self.shell._validate_verb("say")
-        self.shell._validate_verb("'")
         with pytest.raises(ValueError):
             self.shell._validate_verb("")
         with pytest.raises(ValueError):
             self.shell._validate_verb(5)
-        with pytest.raises(ValueError):
-            self.shell._validate_verb("a")
         with pytest.raises(ValueError):
             self.shell._validate_verb("b33p")
 

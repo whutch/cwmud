@@ -139,13 +139,8 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
     def _validate_verb(verb):
         if not verb or not isinstance(verb, str):
             raise ValueError(joins("invalid verb:", repr(verb)))
-        if len(verb) == 1:
-            # This is a shortcut verb, it can't be a letter
-            if verb.isalpha():
-                raise ValueError("single-character verbs cannot be letters")
-        else:
-            if not verb.isalpha():
-                raise ValueError("verbs can only contain letters")
+        if len(verb) > 1 and not verb.isalpha():
+            raise ValueError("non-shortcut verbs can only contain letters")
 
     @classmethod
     def add_verbs(cls, command, *verbs):
@@ -160,12 +155,27 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
         """
         if not isinstance(command, type) or not issubclass(command, Command):
             raise TypeError("cannot add verbs for non-Command class")
+        # This first pass is validation only, as we don't want to add one verb
+        # only then to find out that another is bad and try and clean up.
         for verb in verbs:
             cls._validate_verb(verb)
+            if len(verb) == 1 and verb.isalpha():
+                raise ValueError("shortcut verbs cannot be letters")
             if verb in cls._verbs:
                 raise AlreadyExists(verb, cls._verbs[verb], command)
         for verb in verbs:
             cls._verbs[verb.lower()] = command
+            # Check all the shorter forms and add them if they're valid.
+            # We're trading off the memory of a bigger dict to store the
+            # truncated entries versus the CPU time it would take to search
+            # a store of full commands for a partial match.
+            verb = verb[:-1]
+            while verb:
+                if verb not in cls._verbs:
+                    # First come, first served. If you want a command to have
+                    # truncated priority over another, register it first.
+                    cls._verbs[verb.lower()] = command
+                verb = verb[:-1]
 
     @classmethod
     def remove_verbs(cls, *verbs):
@@ -176,8 +186,14 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
 
         """
         for verb in verbs:
-            if verb in cls._verbs:
+            command = cls._verbs.get(verb)
+            if command:
                 del cls._verbs[verb]
+                verb = verb[:-1]
+                while verb:
+                    if cls._verbs.get(verb) is command:
+                        del cls._verbs[verb]
+                    verb = verb[:-1]
 
     @classmethod
     def get_command(cls, verb):
