@@ -5,6 +5,7 @@
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
 from collections import OrderedDict
+from itertools import chain
 
 from .logs import get_logger
 from .utils.exceptions import AlreadyExists
@@ -148,7 +149,11 @@ class DataStore:
 
     def keys(self):
         """Return an iterator through this store's keys."""
-        return self._keys()
+        # We also need to include keys that are only in the transaction and
+        # not yet saved to the store.
+        trans_keys = self._transaction.keys()
+        return chain(trans_keys, (key for key in self._keys()
+                                  if key not in trans_keys))
 
     def has(self, key):
         """Return whether this store has a given key or not.
