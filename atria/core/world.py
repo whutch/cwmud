@@ -59,6 +59,21 @@ class Room(Entity):
             return "invalid coordinates"
         return "{},{},{}".format(self.x, self.y, self.z)
 
+    def get_exits(self):
+        """Return the rooms this room connects to.
+
+        :returns dict: The connecting rooms, keyed by direction name
+
+        """
+        # This is an inefficient placeholder until an Exit type is in
+        found = {}
+        for change, (dir_name, rev_name) in _movement_strings.items():
+            x, y, z = map(sum, zip(self.coords, change))
+            room = Room.find("x", x, "y", y, "z", z, n=1)
+            if room:
+                found[dir_name] = room
+        return found
+
 
 @Room.register_attr("name")
 class RoomName(Attribute):
