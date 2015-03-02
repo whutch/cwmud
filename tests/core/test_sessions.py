@@ -182,11 +182,14 @@ class TestSessions:
         self.session._check_idle()
         assert "idle" in self.session.flags
         assert "close" not in self.session.flags
+        assert (self.session._output_queue.popleft() ==
+                "You are whisked away into the void.\n")
         # They came back.
         self.client._idle = 0
         self.session._check_idle()
         assert not self.session.flags.has_any("idle", "close")
-        assert not self.session._output_queue
+        assert (self.session._output_queue.popleft() ==
+                "You have returned from the void.\n")
         assert self.session.active
         # Now they've been idle for a really long time.
         self.client._idle = settings.IDLE_TIME_MAX

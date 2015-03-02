@@ -323,11 +323,13 @@ class _Session(HasFlags):
             elif "idle" not in self.flags:
                 with EVENTS.fire("session_idle"):
                     log.info("%s is now idle", self)
+                    self.send("You are whisked away into the void.")
                     self.flags.add("idle")
         elif "idle" in self.flags:
             # They came back, huzzah.
             with EVENTS.fire("session_idle_return"):
                 log.info("%s is no longer idle", self)
+                self.send("You have returned from the void.")
                 self.flags.drop("idle")
 
     def _parse_input(self, data):
