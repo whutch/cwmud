@@ -11,6 +11,7 @@ from ..libs.miniboa import ANSI_CODES
 from .. import __version__, settings
 from .accounts import Account
 from .characters import Character
+from .const import *
 from .events import EVENTS
 from .logs import get_logger
 from .menus import Menu
@@ -318,6 +319,9 @@ class _Session(HasFlags):
                     not self._shell or self._shell.state < STATES.playing):
                 # They've been idle long enough, dump them. If they haven't
                 # even logged in yet, don't wait for the max idle time.
+                if (self.account and
+                        self.account.trust >= TRUST_BUILDER):
+                    return
                 self.close("^RDisconnecting due to inactivity. Goodbye!^~",
                            log_msg=joins("Disconnecting idle", self))
             elif "idle" not in self.flags:
