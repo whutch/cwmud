@@ -481,9 +481,77 @@ class SouthCommand(Command):
         char.move_direction(y=-1)
 
 
+@COMMANDS.register
+class WestCommand(Command):
+
+    """A command to allow a character to move west."""
+
+    def _action(self):
+        char = self.session.char
+        if not char:
+            self.session.send("You're not playing a character!")
+            return
+        if not char.room:
+            self.session.send("You're not in a room!")
+            return
+        char.move_direction(x=-1)
+
+
+@COMMANDS.register
+class EastCommand(Command):
+
+    """A command to allow a character to move east."""
+
+    def _action(self):
+        char = self.session.char
+        if not char:
+            self.session.send("You're not playing a character!")
+            return
+        if not char.room:
+            self.session.send("You're not in a room!")
+            return
+        char.move_direction(x=1)
+
+
+@COMMANDS.register
+class UpCommand(Command):
+
+    """A command to allow a character to move up."""
+
+    def _action(self):
+        char = self.session.char
+        if not char:
+            self.session.send("You're not playing a character!")
+            return
+        if not char.room:
+            self.session.send("You're not in a room!")
+            return
+        char.move_direction(z=1)
+
+
+@COMMANDS.register
+class DownCommand(Command):
+
+    """A command to allow a character to move down."""
+
+    def _action(self):
+        char = self.session.char
+        if not char:
+            self.session.send("You're not playing a character!")
+            return
+        if not char.room:
+            self.session.send("You're not in a room!")
+            return
+        char.move_direction(z=-1)
+
+
 # Movement commands
 CharacterShell.add_verbs(NorthCommand, "north")
 CharacterShell.add_verbs(SouthCommand, "south")
+CharacterShell.add_verbs(WestCommand, "west")
+CharacterShell.add_verbs(EastCommand, "east")
+CharacterShell.add_verbs(UpCommand, "up")
+CharacterShell.add_verbs(DownCommand, "down")
 
 # Information commands
 CharacterShell.add_verbs(LookCommand, "look")
