@@ -7,6 +7,7 @@
 import re
 
 from .commands import COMMANDS, Command
+from .const import *
 from .entities import ENTITIES, Entity, Attribute, Unset
 from .logs import get_logger
 from .requests import REQUESTS, Request
@@ -144,6 +145,36 @@ class Character(Entity):
                        char_list, "\n" if char_list else "",
                        "^b", "[Exits: nowhere]", "^~", sep="")
         self.session.send(output)
+
+    def show_exits(self, room=None, short=False):
+        """Show a room's exits to the session controlling this character.
+
+        :param world.Room room: Optional, the room to show the exits for;
+                                if None, their current room's exits are shown
+        :param bool short: Whether to show the exits in short form or long
+        :returns None:
+
+        """
+        if not self.session:
+            return
+        if not room:
+            if not self.room:
+                return
+            room = self.room
+        is_builder = self.session.account.trust >= TRUST_BUILDER
+        exits = room.get_exits()
+        if short:
+            exits_string = "^b[Exits: {}]^~".format(
+                " ".join(sorted(exits.keys())) if exits else "none")
+        else:
+            exits_string = "^bExits:\n{}^~".format(
+                "\n".join(["  {} - {}{}".format(dir_name, room.name,
+                                                " ({})".format(
+                                                    room.get_coord_str())
+                                                if is_builder else "")
+                           for dir_name, room in sorted(exits.items())])
+                if exits else "  none")
+        self.session.send(exits_string)
 
     def move_to_room(self, room, depart_msg="", arrive_msg="",
                      depart_context=None, arrive_context=None):
