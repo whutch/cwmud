@@ -429,7 +429,7 @@ class ReloadCommand(Command):
 @COMMANDS.register
 class SayCommand(Command):
 
-    """A command for saying stuff on the server."""
+    """A command for room-specific communication."""
 
     no_parse = True
 
@@ -438,6 +438,20 @@ class SayCommand(Command):
         message = self.args[0].strip()
         char.act("{s} say{ss}, '{msg}'.", {"msg": message},
                  to=char.room.chars)
+
+
+@COMMANDS.register
+class GossipCommand(Command):
+
+    """A command for global communication."""
+
+    no_parse = True
+
+    def _action(self):
+        char = self.session.char
+        message = self.args[0].strip()
+        char.act("^M{s} gossip{ss}, '{msg}'.^~", {"msg": message},
+                 to=Character.all())
 
 
 @COMMANDS.register
@@ -609,6 +623,7 @@ CharacterShell.add_verbs(TimeCommand, "time")
 
 # Communication commands
 CharacterShell.add_verbs(SayCommand, "say", "'")
+CharacterShell.add_verbs(GossipCommand, "gossip", "\"")
 
 # Connection commands
 CharacterShell.add_verbs(QuitCommand, "quit")
