@@ -608,6 +608,43 @@ class ExitsCommand(Command):
                         self.args[0] == "short" else False)
 
 
+@COMMANDS.register
+class DigCommand(Command):
+
+    """A command for creating new rooms."""
+
+    _dirs = {
+        "east": (1, 0, 0),
+        "west": (-1, 0, 0),
+        "north": (0, 1, 0),
+        "south": (0, -1, 0),
+        "up": (0, 0, 1),
+        "down": (0, 0, -1),
+    }
+
+    def _action(self):
+        char = self.session.char
+        if not char.room:
+            self.session.send("You're not in a room!")
+            return
+        for dir_name, change in self._dirs.items():
+            if dir_name.startswith(self.args[0]):
+                break
+        else:
+            self.session.send("That's not a direction.")
+            return
+        x, y, z = map(sum, zip(char.room.coords, change))
+        room = Room.find("x", x, "y", y, "z", z, n=1)
+        if room:
+            self.session.send("There's already a room over there!")
+            return
+        room = Room()
+        room.x, room.y, room.z = x, y, z
+        room.save()
+        char.move_to_room(room, "{s} tunnel{ss} out a new room to the {dir}!",
+                          depart_context={"dir": dir_name})
+
+
 # Movement commands
 CharacterShell.add_verbs(NorthCommand, "north")
 CharacterShell.add_verbs(SouthCommand, "south")
@@ -632,3 +669,6 @@ CharacterShell.add_verbs(LogoutCommand, "logout")
 # Admin commands
 CharacterShell.add_verbs(ReloadCommand, "reload")
 CharacterShell.add_verbs(TestCommand, "test")
+
+# OLC commands
+CharacterShell.add_verbs(DigCommand, "dig")
