@@ -645,6 +645,37 @@ class DigCommand(Command):
                           depart_context={"dir": dir_name})
 
 
+@COMMANDS.register
+class NameCommand(Command):
+
+    """A command for naming things."""
+
+    no_parse = True
+
+    def _action(self):
+        # This will later be a general OLC command for naming anything but
+        # for now you can just name rooms.
+        char = self.session.char
+        if not char.room:
+            self.session.send("You're not in a room!")
+            return
+        char.room.name = self.args[0].strip().title()
+        self.session.send("Ok.")
+
+
+@COMMANDS.register
+class CommitCommand(Command):
+
+    """A command to force a global store commit."""
+
+    def _action(self):
+        from .entities import ENTITIES
+        from .storage import STORES
+        ENTITIES.save()
+        STORES.commit()
+        self.session.send("Ok.")
+
+
 # Movement commands
 CharacterShell.add_verbs(NorthCommand, "north")
 CharacterShell.add_verbs(SouthCommand, "south")
@@ -669,6 +700,8 @@ CharacterShell.add_verbs(LogoutCommand, "logout")
 # Admin commands
 CharacterShell.add_verbs(ReloadCommand, "reload")
 CharacterShell.add_verbs(TestCommand, "test")
+CharacterShell.add_verbs(CommitCommand, "commit")
 
 # OLC commands
 CharacterShell.add_verbs(DigCommand, "dig")
+CharacterShell.add_verbs(NameCommand, "name")
