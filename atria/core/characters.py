@@ -233,6 +233,13 @@ class CharacterAccount(Attribute):
     """The account tied to a character."""
 
     @classmethod
+    def _validate(cls, new_value):
+        from .accounts import Account
+        if not isinstance(new_value, Account):
+            raise ValueError("Character account must be an Account instance.")
+        return new_value
+
+    @classmethod
     def _serialize(cls, value):
         # Save character accounts by UID
         return value.uid
