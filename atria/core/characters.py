@@ -8,7 +8,7 @@ import re
 
 from .commands import COMMANDS, Command
 from .const import *
-from .entities import ENTITIES, Entity, Attribute, Unset
+from .entities import ENTITIES, Entity, Attribute
 from .logs import get_logger
 from .requests import REQUESTS, Request
 from .shells import SHELLS, STATES, Shell
@@ -234,15 +234,11 @@ class CharacterAccount(Attribute):
 
     @classmethod
     def _serialize(cls, value):
-        if value is Unset:
-            return value
         # Save character accounts by UID
         return value.uid
 
     @classmethod
     def _deserialize(cls, value):
-        if not value:
-            return value
         from .accounts import Account
         return Account.find("uid", value, n=1)
 
@@ -271,15 +267,11 @@ class CharacterRoom(Attribute):
 
     @classmethod
     def _serialize(cls, value):
-        if value is Unset:
-            return value
         # Save character rooms by UID
         return value.uid
 
     @classmethod
     def _deserialize(cls, value):
-        if not value:
-            return value
         return Room.load(value)
 
 

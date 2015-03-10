@@ -152,8 +152,10 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
             if key in data:
                 raise KeyError(joins("duplicate blob key:", key))
             value = self._attr_values.get(key)
-            # noinspection PyProtectedMember
-            data[key] = attr._serialize(value)
+            if value is not Unset:
+                # noinspection PyProtectedMember
+                value = attr._serialize(value)
+            data[key] = value
         return data
 
     def deserialize(self, data):
@@ -167,8 +169,9 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
         """
         for key, value in data.items():
             if key in self._attrs:
-                # noinspection PyProtectedMember
-                value = self._attrs[key]._deserialize(value)
+                if value is not Unset:
+                    # noinspection PyProtectedMember
+                    value = self._attrs[key]._deserialize(value)
                 self._set_attr_val(key, value, validate=False)
             elif key in self._blobs:
                 self._blobs[key].deserialize(value)
