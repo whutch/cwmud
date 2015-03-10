@@ -183,6 +183,9 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
 
 class _UnsetMeta(type):
 
+    def __repr__(cls):
+        return "Unset"
+
     def __bool__(cls):
         return False
 
