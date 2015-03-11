@@ -5,6 +5,12 @@
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
 
+# Session states
+STATE_CONNECTED = 0
+STATE_LOGIN = 10
+STATE_PLAYING = 20
+
+
 # Trust levels
 TRUST_JAIL = 0
 TRUST_GUEST = 10

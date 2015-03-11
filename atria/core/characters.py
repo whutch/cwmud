@@ -11,7 +11,7 @@ from .const import *
 from .entities import ENTITIES, Entity, Attribute
 from .logs import get_logger
 from .requests import REQUESTS, Request
-from .shells import SHELLS, STATES, Shell
+from .shells import SHELLS, Shell
 from .storage import STORES
 from .world import Room, get_movement_strings
 from .utils.funcs import joins
@@ -381,7 +381,7 @@ class CharacterShell(Shell):
 
     """The base shell for characters."""
 
-    state = STATES.playing
+    state = STATE_PLAYING
 
 
 @COMMANDS.register

@@ -8,6 +8,7 @@ from weakref import WeakValueDictionary
 
 from .logs import get_logger
 from .commands import Command
+from .const import *
 from .utils.exceptions import AlreadyExists
 from .utils.funcs import joins
 from .utils.mixins import (HasFlagsMeta, HasFlags, HasWeaksMeta, HasWeaks,
@@ -15,19 +16,6 @@ from .utils.mixins import (HasFlagsMeta, HasFlags, HasWeaksMeta, HasWeaks,
 
 
 log = get_logger("shells")
-
-
-class STATES:
-
-    """A collection of values to describe the state a shell is in.
-
-    This is a placeholder for a more sophisticated solution later.
-
-    """
-
-    connected = 0
-    login = 1
-    playing = 2
 
 
 class ShellManager:
@@ -86,7 +74,7 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
     # to avoid a lot of unresolved reference errors in IDE introspection
     _verbs = None
 
-    state = STATES.connected
+    state = STATE_CONNECTED
 
     # Delimiters should be a pair of equal-length strings that contain
     # opening and closing delimiter characters. A delimiter at any given index
@@ -352,7 +340,7 @@ class EchoShell(Shell):
 
     """A simple shell that echos back anything the client sends."""
 
-    state = STATES.playing
+    state = STATE_PLAYING
 
     def parse(self, data):
         """Echo any input back to the client.

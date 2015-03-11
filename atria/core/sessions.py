@@ -15,7 +15,7 @@ from .const import *
 from .events import EVENTS
 from .logs import get_logger
 from .menus import Menu
-from .shells import SHELLS, STATES, Shell
+from .shells import SHELLS, Shell
 from .utils.exceptions import AlreadyExists
 from .utils.funcs import class_name, joins
 from .utils.mixins import HasFlags
@@ -316,7 +316,7 @@ class _Session(HasFlags):
         idle = self._client.idle()
         if idle >= settings.IDLE_TIME:
             if (idle >= settings.IDLE_TIME_MAX or
-                    not self._shell or self._shell.state < STATES.playing):
+                    not self._shell or self._shell.state < STATE_PLAYING):
                 # They've been idle long enough, dump them. If they haven't
                 # even logged in yet, don't wait for the max idle time.
                 if (self.account and
