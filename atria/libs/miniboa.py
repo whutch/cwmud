@@ -459,7 +459,7 @@ class TelnetClient(object):
             cmd = self.recv_buffer[:mark].strip()
             self.command_list.append(cmd)
             self.cmd_ready = True
-            self.recv_buffer = self.recv_buffer[mark+1:]
+            self.recv_buffer = self.recv_buffer[mark + 1:]
 
     def _recv_byte(self, byte):
         """Process receiving a single byte.

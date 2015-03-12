@@ -171,8 +171,8 @@ class Server:
             # Wait for the new process to pick up the state
             while True:
                 msg = self._channels.get_message()
-                if (msg and msg["type"] == "message"
-                        and msg["channel"] == "reload-complete"):
+                if (msg and msg["type"] == "message" and
+                        msg["channel"] == "reload-complete"):
                     pid = int(msg["data"])
                     if pid == exc.new_pid:
                         break

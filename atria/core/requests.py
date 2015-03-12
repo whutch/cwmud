@@ -121,11 +121,11 @@ class Request(HasFlags, HasWeaks, metaclass=_RequestMeta):
         if self._confirm:
             confirm = self.options.get("confirm") or self.confirm
             if confirm == Request.CONFIRM_YES:
-                prompt = (self.options.get("confirm_prompt_yn")
-                          or self.confirm_prompt_yn)
+                prompt = (self.options.get("confirm_prompt_yn") or
+                          self.confirm_prompt_yn)
             elif confirm == Request.CONFIRM_REPEAT:
-                prompt = (self.options.get("confirm_prompt_repeat")
-                          or self.confirm_prompt_repeat)
+                prompt = (self.options.get("confirm_prompt_repeat") or
+                          self.confirm_prompt_repeat)
             else:
                 raise ValueError(joins("bad value for request option "
                                        "'confirm':", confirm))
@@ -133,8 +133,8 @@ class Request(HasFlags, HasWeaks, metaclass=_RequestMeta):
         else:
             if not self.flags.has("prompted"):
                 self.flags.add("prompted")
-                initial_prompt = (self.options.get("initial_prompt")
-                                  or self.initial_prompt)
+                initial_prompt = (self.options.get("initial_prompt") or
+                                  self.initial_prompt)
                 if initial_prompt:
                     return initial_prompt
             return self.options.get("repeat_prompt") or self.repeat_prompt
