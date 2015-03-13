@@ -84,7 +84,6 @@ if __name__ == "__main__":
     listener = TelnetServer(address=settings.BIND_ADDRESS,
                             port=settings.BIND_PORT,
                             timeout=0,
-                            on_disconnect=lambda client: None,
                             create_client=False)
     channels.subscribe(**{"reload-request": _handle_reload_request})
     try:

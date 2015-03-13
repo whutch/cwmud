@@ -752,32 +752,12 @@ class TelnetClient(object):
         self.send("{}{}{}".format(IAC, WONT, option))
 
 
-def _on_connect(client):
-    """Process a new connection.
-
-    A placeholder used as the default on_connect argument for TelnetServer.
-
-    """
-    logging.info("++ Opened connection to {}, sending greeting..."
-                 .format(client.addrport()))
-    client.send("Greetings from Miniboa-py3!\n")
-
-
-def _on_disconnect(client):
-    """Process a lost connection.
-
-    A placeholder used as the default on_disconnect argument for TelnetServer.
-
-    """
-    logging.info("-- Lost connection to %s".format(client.addrport()))
-
-
 class TelnetServer(object):
 
     """A select-based Telnet server."""
 
-    def __init__(self, port=23, address='', on_connect=_on_connect,
-                 on_disconnect=_on_disconnect, max_connections=MAX_CONNECTIONS,
+    def __init__(self, port=23, address='', on_connect=None,
+                 on_disconnect=None, max_connections=MAX_CONNECTIONS,
                  timeout=0.1, server_socket=None, create_client=True):
         """ Create a new Telnet server.
 
@@ -875,7 +855,8 @@ class TelnetServer(object):
             if client.active:
                 recv_list.append(client.fileno)
             else:
-                self.on_disconnect(client)
+                if self.on_disconnect:
+                    self.on_disconnect(client)
                 del_list.append(client.fileno)
 
         # Delete inactive connections from the dictionary.
@@ -924,8 +905,9 @@ class TelnetServer(object):
                     new_client = TelnetClient(sock, addr_tup)
                     # Add the connection to our dictionary and call handler.
                     self.clients[new_client.fileno] = new_client
-                    self.on_connect(new_client)
-                else:
+                    if self.on_connect:
+                        self.on_connect(new_client)
+                elif self.on_connect:
                     self.on_connect(sock, addr_tup)
 
             else:
@@ -935,7 +917,8 @@ class TelnetServer(object):
                 except ConnectionLost:
                     self.clients[sock_fileno].deactivate()
                     # Don't wait another poll to do this.. -WH
-                    self.on_disconnect(self.clients[sock_fileno])
+                    if self.on_disconnect:
+                        self.on_disconnect(self.clients[sock_fileno])
                     del self.clients[sock_fileno]
                     if sock_fileno in slist:
                         slist.remove(sock_fileno)
