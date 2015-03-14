@@ -79,7 +79,9 @@ def _handle_reload_complete(msg):
     del servers[pid]
 
 
-if __name__ == "__main__":
+def main():
+    """Start the first server process and listen for sockets."""
+    global listener
     log.info("%s %s", settings.MUD_NAME_FULL, __version__)
     listener = TelnetServer(address=settings.BIND_ADDRESS,
                             port=settings.BIND_PORT,
@@ -97,3 +99,7 @@ if __name__ == "__main__":
             sleep(0.1)
     except KeyboardInterrupt:
         pass
+
+
+if __name__ == "__main__":
+    main()
