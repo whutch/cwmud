@@ -63,8 +63,6 @@ def _on_connect(new_socket, addr_port):
 
 
 def _handle_reload_request(msg):
-    if msg["type"] != "message":
-        return
     pid = int(msg["data"])
     new_server = ServerProcess()
     listener.on_connect = _on_connect

@@ -54,8 +54,6 @@ class Server:
             log.info("Lost connection from %s", client.addrport())
 
     def _handle_msg(self, msg):
-        if msg["type"] != "message":
-            return
         if msg["channel"] == "reload-start":
             target_pid, source_pid = map(int, msg["data"].split(","))
             if target_pid == self._pid:
