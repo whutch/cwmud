@@ -70,13 +70,6 @@ def _handle_reload_request(msg):
     servers[new_server.pid] = new_server
 
 
-def _handle_reload_complete(msg):
-    if msg["type"] != "message":
-        return
-    pid = int(msg["data"])
-    del servers[pid]
-
-
 def main():
     """Start the first server process and listen for sockets."""
     global listener
@@ -86,11 +79,11 @@ def main():
                             timeout=0,
                             create_client=False)
     channels.subscribe(**{"reload-request": _handle_reload_request})
+    server = ServerProcess()
+    listener.on_connect = _on_connect
+    server.start()
+    servers[server.pid] = server
     try:
-        server = ServerProcess()
-        listener.on_connect = _on_connect
-        server.start()
-        servers[server.pid] = server
         while True:
             listener.poll()
             channels.get_message()
