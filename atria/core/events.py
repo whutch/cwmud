@@ -207,8 +207,8 @@ class _EventContext:
                     hook.callback(*self.args)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if exc_type:
-            raise exc_type(exc_val).with_traceback(exc_tb)
+        if exc_type or exc_val or exc_tb:
+            return
         if not self.opts.get("no_post"):
             for hook in self.event.hooks:
                 if not hook.pre:
