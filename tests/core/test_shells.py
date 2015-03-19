@@ -29,6 +29,22 @@ class TestShells:
 
     session = _FakeSession()
 
+    class TestCommand(Command):
+
+        """A test command."""
+
+        def _action(self):
+            raise NotImplementedError
+
+    class AnotherCommand(Command):
+
+        """Another test command."""
+
+        no_parse = True
+
+        def _action(self):
+            raise NotImplementedError
+
     def test_shell_manager_create(self):
         """Test that we can create a shell manager.
 
@@ -123,8 +139,10 @@ class TestShells:
     def test_shell_add_verbs(self):
         """Test that we can add verbs to a shell's verb store."""
         assert not self.shell._verbs
-        self.shell.add_verbs(Command, "test", "!")
-        assert "test" in self.shell._verbs and "!" in self.shell._verbs
+        self.shell.add_verbs(self.TestCommand, "test", "t", "!")
+        assert ("test" in self.shell._verbs and
+                "t" in self.shell._verbs and
+                "!" in self.shell._verbs)
 
     def test_shell_add_verbs_not_command(self):
         """Test that trying to add verbs for a non-Command fails."""
@@ -136,24 +154,40 @@ class TestShells:
     def test_shell_add_verbs_already_exists(self):
         """Test that trying to re-add a verb to a store fails."""
         with pytest.raises(AlreadyExists):
-            self.shell.add_verbs(Command, "test")
+            self.shell.add_verbs(self.TestCommand, "nope", "test")
+        # All of the verbs should have been validated first, so "nope"
+        # shouldn't have been added either.
+        assert "nope" not in self.shell._verbs
+
+    def test_shell_add_verbs_truncated(self):
+        """Test that truncated verbs are added as well."""
+        self.shell.add_verbs(self.AnotherCommand, "toot")
+        for verb in ("toot", "too", "to"):
+            assert self.shell._verbs[verb] is self.AnotherCommand
+        # "t" was explicitly registered to TestCommand, so it shouldn't
+        # have been overridden by the truncation loop.
+        assert self.shell._verbs["t"] is self.TestCommand
 
     def test_shell_get_command(self):
         """Test that we can get a command by its verb in the shell."""
-        assert self.shell.get_command("test") is Command
-        assert self.shell.get_command("!") is Command
+        assert self.shell.get_command("test") is self.TestCommand
+        assert self.shell.get_command("!") is self.TestCommand
         assert not self.shell.get_command("nope")
 
     def test_shell_find_command(self):
         """Test that we can find a command in the shell's lineage."""
-        Shell.add_verbs(Command, "beep")
-        self.shell_class.parent = Shell
+        Shell.add_verbs(self.TestCommand, "beep")
         assert not self.shell.get_command("beep")
-        assert self.shell.find_command("beep") is Command
+        assert self.shell.find_command("beep") is self.TestCommand
 
     def test_shell_remove_verbs(self):
         """Test that we can remove verbs from a shell's verb store."""
-        assert "test" in self.shell._verbs and "!" in self.shell._verbs
+        self.shell.remove_verbs("toot")
+        for verb in ("toot", "too", "to"):
+            assert verb not in self.shell._verbs
+        # "t" is registered to TestCommand, and shouldn't have been removed.
+        assert "t" in self.shell._verbs
+        # Remove everything else.
         self.shell.remove_verbs("test", "!", "nope")
         assert not self.shell._verbs
 
