@@ -676,16 +676,16 @@ class CommitCommand(Command):
 
 
 # Movement commands
-CharacterShell.add_verbs(NorthCommand, "north")
-CharacterShell.add_verbs(SouthCommand, "south")
-CharacterShell.add_verbs(WestCommand, "west")
-CharacterShell.add_verbs(EastCommand, "east")
-CharacterShell.add_verbs(UpCommand, "up")
-CharacterShell.add_verbs(DownCommand, "down")
-CharacterShell.add_verbs(ExitsCommand, "exits")
+CharacterShell.add_verbs(NorthCommand, "north", "n")
+CharacterShell.add_verbs(SouthCommand, "south", "s")
+CharacterShell.add_verbs(WestCommand, "west", "w")
+CharacterShell.add_verbs(EastCommand, "east", "e")
+CharacterShell.add_verbs(UpCommand, "up", "u")
+CharacterShell.add_verbs(DownCommand, "down", "d")
+CharacterShell.add_verbs(ExitsCommand, "exits", "ex")
 
 # Information commands
-CharacterShell.add_verbs(LookCommand, "look")
+CharacterShell.add_verbs(LookCommand, "look", "l")
 CharacterShell.add_verbs(TimeCommand, "time")
 
 # Communication commands
