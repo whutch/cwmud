@@ -64,15 +64,17 @@ class _ShellMeta(HasFlagsMeta, HasWeaksMeta, HasParentMeta):
     def __init__(cls, name, bases, namespace):
         super().__init__(name, bases, namespace)
         cls._verbs = WeakValueDictionary()
+        cls._truncated_verbs = WeakValueDictionary()
 
 
 class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
 
     """A shell for processing client input."""
 
-    # This is overridden in the metaclass, I just put it here
+    # These are overridden in the metaclass, I just put them here
     # to avoid a lot of unresolved reference errors in IDE introspection
     _verbs = None
+    _truncated_verbs = None
 
     state = STATE_CONNECTED
 
@@ -147,12 +149,13 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
         # only then to find out that another is bad and try and clean up.
         for verb in verbs:
             cls._validate_verb(verb)
-            if len(verb) == 1 and verb.isalpha():
-                raise ValueError("shortcut verbs cannot be letters")
-            if verb in cls._verbs:
+            if verb in cls._verbs and verb not in cls._truncated_verbs:
                 raise AlreadyExists(verb, cls._verbs[verb], command)
         for verb in verbs:
-            cls._verbs[verb.lower()] = command
+            verb = verb.lower()
+            cls._verbs[verb] = command
+            if verb in cls._truncated_verbs:
+                del cls._truncated_verbs[verb]
             # Check all the shorter forms and add them if they're valid.
             # We're trading off the memory of a bigger dict to store the
             # truncated entries versus the CPU time it would take to search
@@ -162,7 +165,8 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
                 if verb not in cls._verbs:
                     # First come, first served. If you want a command to have
                     # truncated priority over another, register it first.
-                    cls._verbs[verb.lower()] = command
+                    cls._verbs[verb] = command
+                    cls._truncated_verbs[verb] = command
                 verb = verb[:-1]
 
     @classmethod
