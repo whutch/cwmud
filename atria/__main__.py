@@ -4,7 +4,7 @@
 # :copyright: (c) 2008 - 2015 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, Value
 from time import sleep
 
 import redis
@@ -39,8 +39,12 @@ class ServerProcess:
         return self._process.pid
 
     @staticmethod
-    def _start(_socket_queue, reload_from=None):
+    def _start(pid, _socket_queue, reload_from=None):
         from .core.server import SERVER
+        # Wait for our pid
+        while not pid.value:
+            continue
+        SERVER._pid = pid.value
         SERVER.boot(_socket_queue, reload_from)
         SERVER.loop()
 
@@ -52,10 +56,12 @@ class ServerProcess:
 
         """
         assert not self._process, "server instance already started"
+        pid = Value("i")
         self._process = Process(target=self._start,
-                                args=(socket_queue,),
+                                args=(pid, socket_queue),
                                 kwargs={"reload_from": reload_from})
         self._process.start()
+        pid.value = self._process.pid
 
 
 def _on_connect(new_socket, addr_port):

@@ -4,7 +4,6 @@
 # :copyright: (c) 2008 - 2015 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
-from os import getpid
 from time import sleep
 
 import redis
@@ -34,7 +33,7 @@ class Server:
 
     def __init__(self):
         self._socket_queue = None
-        self._pid = getpid()
+        self._pid = None
         self._rdb = redis.StrictRedis(decode_responses=True)
         self._channels = self._rdb.pubsub(ignore_subscribe_messages=True)
         self._store = PickleStore("server")
