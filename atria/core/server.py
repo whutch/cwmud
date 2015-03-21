@@ -53,7 +53,7 @@ class Server:
             log.info("Lost connection from %s", client.addrport())
 
     def _handle_msg(self, msg):
-        if msg["channel"] == "reload-start":
+        if msg["channel"] == "server-reload":
             target_pid, source_pid = map(int, msg["data"].split(","))
             if target_pid == self._pid:
                 # We received a reload command from a new process
@@ -96,7 +96,7 @@ class Server:
         with EVENTS.fire("server_boot"):
             log.info("Booting server")
             # Subscribe to Redis channels
-            self._channels.subscribe("reload-start")
+            self._channels.psubscribe("server-*")
 
         CLIENTS.listen(settings.BIND_ADDRESS,
                        settings.BIND_PORT,
@@ -106,7 +106,7 @@ class Server:
 
         if reload_from:
             self._reloading = True
-            self._rdb.publish("reload-start",
+            self._rdb.publish("server-reload",
                               "{},{}".format(reload_from, self._pid))
             # Wait until the other process is done saving a game state
             while True:
@@ -123,7 +123,7 @@ class Server:
 
         if reload_from:
             log.info("Reload complete for process %s", self._pid)
-            self._rdb.publish("reload-complete", self._pid)
+            self._rdb.publish("server-reload-complete", self._pid)
             self._reloading = False
 
     def loop(self):
@@ -153,7 +153,7 @@ class Server:
             log.info("Received server reboot")
         except ServerReload as exc:
             log.info("Reloading server")
-            self._channels.subscribe("reload-complete")
+            self._channels.subscribe("server-reload-complete")
             self._reloading = True
             # Do one last session and client poll to clear the output queues
             SESSIONS.poll(output_only=True)
@@ -169,7 +169,7 @@ class Server:
             while True:
                 msg = self._channels.get_message()
                 if (msg and msg["type"] == "message" and
-                        msg["channel"] == "reload-complete"):
+                        msg["channel"] == "server-reload-complete"):
                     pid = int(msg["data"])
                     if pid == exc.new_pid:
                         break
@@ -184,7 +184,7 @@ class Server:
 
     def reload(self):
         """Request a reload from the nanny process."""
-        self._rdb.publish("reload-request", self._pid)
+        self._rdb.publish("server-reload-request", self._pid)
 
     def save_state(self):
         """Dump a serialized server state to file.

@@ -84,7 +84,7 @@ def main():
                             port=settings.BIND_PORT,
                             timeout=0,
                             create_client=False)
-    channels.subscribe(**{"reload-request": _handle_reload_request})
+    channels.subscribe(**{"server-reload-request": _handle_reload_request})
     server = ServerProcess()
     listener.on_connect = _on_connect
     server.start()
