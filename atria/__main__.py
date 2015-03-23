@@ -101,6 +101,17 @@ def main():
     servers[server.pid] = server
     try:
         while True:
+            dead_servers = []
+            for server in servers.values():
+                if not server.alive:
+                    log.info("Process %s finished with code %s",
+                             server.pid, server.exit_code)
+                    dead_servers.append(server)
+            for server in dead_servers:
+                del servers[server.pid]
+            if not servers:
+                log.info("No servers running, goodbye")
+                break
             listener.poll()
             channels.get_message()
             sleep(0.1)
