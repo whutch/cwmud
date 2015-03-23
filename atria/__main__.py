@@ -38,6 +38,16 @@ class ServerProcess:
         """Return the PID of this game server process."""
         return self._process.pid
 
+    @property
+    def exit_code(self):
+        """Return the exit code of this process."""
+        return self._process.exitcode
+
+    @property
+    def alive(self):
+        """Return whether this process is alive."""
+        return self._process.is_alive()
+
     @staticmethod
     def _start(pid, _socket_queue, reload_from=None):
         from .core.server import SERVER
