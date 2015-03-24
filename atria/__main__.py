@@ -117,6 +117,9 @@ def main():
             sleep(0.1)
     except KeyboardInterrupt:
         pass
+    finally:
+        listener.stop()
+        channels.unsubscribe()
 
 
 if __name__ == "__main__":
