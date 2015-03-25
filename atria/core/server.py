@@ -57,7 +57,6 @@ class Server:
             target_pid, source_pid = map(int, msg["data"].split(","))
             if target_pid == self._pid:
                 # We received a reload command from a new process
-                log.info("Received reload request from process %s", source_pid)
                 raise ServerReload(new_pid=source_pid)
 
     # noinspection PyProtectedMember

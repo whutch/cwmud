@@ -80,6 +80,10 @@ def _on_connect(new_socket, addr_port):
 
 def _handle_reload_request(msg):
     pid = int(msg["data"])
+    if pid not in servers:
+        # There may be more than one nanny process running
+        return
+    log.info("Received reload request from process %s", pid)
     new_server = ServerProcess()
     listener.on_connect = _on_connect
     new_server.start(reload_from=pid)
