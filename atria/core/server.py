@@ -53,11 +53,19 @@ class Server:
             log.info("Lost connection from %s", client.addrport())
 
     def _handle_msg(self, msg):
-        if msg["channel"] == "server-reload":
+        if msg["channel"] == "server-reboot":
+            target_pid = int(msg["data"])
+            if target_pid == self._pid:
+                raise ServerReboot
+        elif msg["channel"] == "server-reload":
             target_pid, source_pid = map(int, msg["data"].split(","))
             if target_pid == self._pid:
                 # We received a reload command from a new process
                 raise ServerReload(new_pid=source_pid)
+        elif msg["channel"] == "server-shutdown":
+            target_pid = int(msg["data"])
+            if target_pid == self._pid:
+                raise ServerShutdown
 
     # noinspection PyProtectedMember
     def _check_new_sockets(self):
@@ -125,6 +133,8 @@ class Server:
             self._rdb.publish("server-reload-complete", self._pid)
             self._reloading = False
 
+        self._rdb.publish("server-boot-complete", self._pid)
+
     def loop(self):
         """Start the main server loop and loop until stopped."""
         try:
@@ -173,13 +183,13 @@ class Server:
                     if pid == exc.new_pid:
                         break
                 sleep(0.1)
-            log.info("Done with old process %s", self._pid)
         finally:
             if not self._reloading:
                 with EVENTS.fire("server_shutdown", no_post=True):
                     ENTITIES.save()
                     STORES.commit()
                     log.info("Server shutdown complete")
+                    self._rdb.publish("server-shutdown-complete", self._pid)
 
     def reload(self):
         """Request a reload from the nanny process."""
