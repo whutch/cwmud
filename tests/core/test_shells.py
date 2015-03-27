@@ -205,9 +205,12 @@ class TestShells:
         assert next(args) == "this"
         assert next(args) == "is"
         assert next(args) == "a test"
+        assert (tuple(self.shell._iter_arguments("")) ==
+                tuple(self.shell._iter_arguments(" ")) == ())
 
     def test_shell_get_arguments(self):
         """Test that we can parse arguments from input."""
+        assert self.shell._get_arguments(" '' ") == []
         assert self.shell._get_arguments("test") == ["test"]
         assert (self.shell._get_arguments('`testing` 1 ``2 "3"') ==
                 ["testing", "1", "2", "3"])
@@ -221,5 +224,16 @@ class TestShells:
     def test_shell_parse(self):
         """Test that we can parse client input."""
         self.shell.parse("test")
+        # There are no commands registered yet
         assert self.session._output.pop() == "Huh?\n"
+        self.shell.parse("")
         assert not self.session._output
+        self.shell.parse(" ")
+        assert self.session._output.pop() == "Huh?\n"
+        # Re-register the command so we know it can be executed
+        self.shell.add_verbs(self.TestCommand, "test")
+        self.shell.add_verbs(self.AnotherCommand, "!")
+        with pytest.raises(NotImplementedError):
+            self.shell.parse("test")
+        with pytest.raises(NotImplementedError):
+            self.shell.parse("!bloop")

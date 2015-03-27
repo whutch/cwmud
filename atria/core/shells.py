@@ -352,7 +352,7 @@ class EchoShell(Shell):
         :param str data: Input from the client
 
         """
-        if data.strip() == "quit":
+        if data.strip() == "quit":  # pragma: no cover
             self.session.close("Okay, goodbye!",
                                log_msg=joins(self.session, "has quit"))
         else:
