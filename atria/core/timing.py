@@ -181,7 +181,8 @@ class TimerManager:
         for n in range(pulses):
             self._time = now()
             if self._time < self._next_pulse:
-                sleep(self._next_pulse - self.time)
+                sleep(self._next_pulse - self._time)
+                self._time = now()
             with EVENTS.fire("time_pulse", self._time):
                 self._next_pulse += _PULSE_TIME
 
