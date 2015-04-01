@@ -44,6 +44,10 @@ class TestPickleStores:
         assert exists(self.store_path)
         assert self.store
 
+    def test_picklestore_create_second(self):
+        """Test that we can create a second pickle store with the same path."""
+        assert PickleStore("test")
+
     def test_picklestore_get_key_path(self):
         """Test that we can get the full path of a pickle file by key."""
         assert self.store._get_key_path("test") == self.pickle_path
@@ -60,6 +64,10 @@ class TestPickleStores:
         with pytest.raises(OSError):
             self.store._get_key_path("../../test")
 
+    def test_picklestore_no_keys(self):
+        """Test that we can check if a pickle store has no keys."""
+        assert not tuple(self.store.keys())
+
     def test_picklestore_put(self):
         """Test that we can put data into a pickle store."""
         assert not exists(self.pickle_path)
@@ -70,6 +78,16 @@ class TestPickleStores:
         """Test that we can tell if this store has a key."""
         assert self.store._has("test")
         assert not self.store._has("nonexistent_key")
+
+    def test_picklestore_keys(self):
+        """Test that we can iterate through a pickle store's keys."""
+        # We need to stick a non-pickle file in there to ensure it isn't
+        # picked up as a key.
+        with open(join(self.store_path, "nope.txt"), "w") as out:
+            out.write("\n")
+        # And let's put another valid key in for good measure
+        self.store._put("yeah", {})
+        assert tuple(sorted(self.store._keys())) == ("test", "yeah")
 
     def test_picklestore_get(self):
         """Test that we can get data from a pickle store."""
