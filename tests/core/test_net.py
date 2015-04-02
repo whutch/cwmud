@@ -43,6 +43,11 @@ class TestClients:
         type(self).clients = ClientManager()
         assert self.clients
 
+    def test_poll_no_server(self):
+        """Test that polling with no server does nothing."""
+        assert not self.clients._server
+        self.clients.poll()
+
     def test_listen_bad_callback(self):
         """Test that opening the listener with a bad callback fails."""
         with pytest.raises(TypeError):
@@ -58,6 +63,14 @@ class TestClients:
         assert self.clients.address == self.address
         assert self.clients.port == self.port
 
+    def test_listen_existing_socket(self):
+        """Test that we can start listening with an existing socket."""
+        server_socket = self.clients._server.server_fileno
+        self.clients.listen(self.address, self.port,
+                            self._on_connect, self._on_disconnect,
+                            server_socket=server_socket)
+        assert self.clients.listening
+
     def test_client_connect(self):
         """Test that we can accept new client connections."""
         assert not self.opened_clients
@@ -71,6 +84,12 @@ class TestClients:
         assert self.clients.clients
         for client in self.clients.clients.values():
             assert client in self.opened_clients
+
+    def test_find_client_by_port(self):
+        """Test that we can find a client by their port's file number."""
+        client = self.opened_clients[0]
+        assert self.clients.find_by_port(0) is None
+        assert self.clients.find_by_port(client.port) is client
 
     def test_read_from_client(self):
         """Test that we can read from a client."""
