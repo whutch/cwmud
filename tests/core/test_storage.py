@@ -154,9 +154,16 @@ class TestDataStores:
         """Test that we can tell that a store has no pending transaction."""
         assert not self.store.pending
 
-    def test_commit_no_transaction(self):
+    def test_store_commit_no_transaction(self):
         """Test that committing an empty transaction does nothing."""
         assert not self.store._transaction and not self.store._stored
+        self.store.commit()
+        assert not self.store._transaction and not self.store._stored
+
+    def test_store_commit_none(self):
+        """Test that committing None to a non-existent key does nothing."""
+        self.store.put("test", None)
+        assert "test" in self.store._transaction
         self.store.commit()
         assert not self.store._transaction and not self.store._stored
 
@@ -260,3 +267,25 @@ class TestDataStores:
         self.store.close(commit=False)
         assert "test" in self.store._transaction
         assert not self.store.is_open
+
+    def test_store_manager_commit(self):
+        """Test that we can commit all stores in a store manager."""
+        assert self.store.pending
+        # There's a delete pending still
+        self.stores.commit()
+        assert not self.store.has("test")
+        # Try committing nothing
+        assert not self.store.pending
+        self.stores.commit()
+        assert not self.store._stored
+
+    def test_store_manager_abort(self):
+        """Test that we can abort all stores in a store manager."""
+        self.store.put("test", self.data)
+        assert self.store.pending
+        self.stores.abort()
+        assert not self.store.has("test")
+        # Try aborting nothing
+        assert not self.store.pending
+        self.stores.abort()
+        assert not self.store._stored
