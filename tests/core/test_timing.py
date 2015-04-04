@@ -146,14 +146,20 @@ class TestTimerManager:
         assert timer.count == 0 and timer.repeat == 1
         assert self.calls == 1
 
-    def test_timer_kill_from_manager(self):
+    def test_timer_manager_kill_bad_name(self):
+        """Test that killing a timer by name doesn't error if not found."""
+        self.timers.kill("nope")
+        assert self.timer.live
+        assert self.timer in self.timers
+
+    def test_timer_manager_kill(self):
         """Test that we can kill a timer from its manager."""
         # noinspection PyTypeChecker
         self.timers.kill(self.timer)
         assert not self.timer.live
         assert self.timer not in self.timers
 
-    def test_timer_kill_from_timer(self):
+    def test_timer_kill(self):
         """Test that we can kill a timer from itself."""
         timer = self.timers["test"]
         timer.kill()
@@ -215,12 +221,18 @@ class TestTimerManager:
         """Test sleeping a timer manager until the next pulse."""
         next_pulse = self.timers._next_pulse
         self.timers.sleep_excess()
+        assert self.timers.time >= next_pulse
         next_pulse += _PULSE_TIME
         assert next_pulse == self.timers._next_pulse
         self.timers.sleep_excess(pulses=2)
+        assert self.timers.time >= next_pulse
         next_pulse += _PULSE_TIME
         next_pulse += _PULSE_TIME
         assert next_pulse == self.timers._next_pulse
+        # Test that the next pulse gets updated even if we don't sleep
+        self.timers._next_pulse -= _PULSE_TIME
+        self.timers.sleep_excess()
+        assert self.timers.time < next_pulse
 
     def test_timer_create_with_decorator(self):
         """Test that we can create a timer with a decorator."""
@@ -232,3 +244,9 @@ class TestTimerManager:
         assert timer
         assert timer is _timer
         timer.kill()
+
+    def test_timer_manager_get_time_code(self):
+        """Test that we can create time codes."""
+        time_code = self.timers.get_time_code()
+        assert time_code
+        assert time_code == self.timers.get_time_code()
