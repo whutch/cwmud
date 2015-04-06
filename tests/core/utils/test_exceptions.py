@@ -43,3 +43,17 @@ def test_exception_server_reboot():
         raise exceptions.ServerReboot()
     except exceptions.ServerReboot:
         pass
+
+
+def test_exception_server_reload():
+    """Test that raising ServerReload works as intended.
+
+    The logic of what raising this does to the server is handled in server.py
+    and __main__.py, and thus tested in test_server.py and test_main.py,
+    not here.
+
+    """
+    try:
+        raise exceptions.ServerReload(1)
+    except exceptions.ServerReload as exc:
+        assert exc.new_pid == 1
