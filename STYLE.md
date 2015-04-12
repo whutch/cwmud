@@ -44,8 +44,66 @@ All public modules, classes, methods, and functions should have docstrings, and 
 Overview:
  * The first line of all module and class docstrings should be a one-line statement of what that module or class is. (`"""A class that does some stuff."""`)
  * The first line of all function and method docstrings should be a one-line imperative statement that describes what it does. (`"""Do this and that."""`)
- * Multi-line docstrings should have the first line of docstring on the same line as the opening quotes, then a blank line, then any remaining comments, followed by another blank line before the closing quotes.
+ * Multi-line docstrings should have the first line of docstring on the same line as the opening quotes, then a blank line, then any remaining comments, followed by another blank line before the closing quotes (see an example below).
  * If it is a docstring for a class or a function/method that is broken up by blank lines into logical sections, the docstring should be surrounded by single blank lines.
+
+
+## Example
+
+```python
+# -*- coding: utf-8 -*-
+"""Example module full of examples."""
+# Part of Atria MUD Server (https://github.com/whutch/atria)
+# :copyright: (c) {year} {your name}
+# :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
+
+import os
+from os.path import exists
+import sys
+from time import time as now
+
+import redis
+
+from .. import get_version, settings
+from .account import Account
+from .const import *
+from .entities import Attribute, Entity
+
+
+SOME_CONSTANT = 5
+
+
+def foo_bar(baz):
+    """Do something to a baz.
+
+    :param Baz baz: The baz to do something to
+    :returns None:
+
+    """
+    baz.something = SOME_CONSTANT
+
+
+class ExampleThing:
+
+    """An example class."""
+
+    def __init__(self):
+        """Create a new example."""
+        self.foo = "bar"
+
+    def do_something(self, value):
+        """Make something happen.
+
+        A note about the thing that happens.
+
+        :param int value: A value used for something
+        :returns str: A message about something
+        :raises ValueError: If `value` isn't positive
+
+        """
+        self.foo = value
+        ...
+```
 
 
 [flake8]: https://pypi.python.org/pypi/flake8
