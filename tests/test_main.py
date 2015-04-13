@@ -24,7 +24,7 @@ class TestMain:
 
     rdb = redis.StrictRedis(decode_responses=True)
 
-    # @pytest.mark.timeout(2)
+    @pytest.mark.timeout(2)
     def test_main(self):
 
         """Test that the nanny process runs properly."""
@@ -41,7 +41,7 @@ class TestMain:
         worker.stop()
         reload(main)
 
-    # @pytest.mark.timeout(2)
+    @pytest.mark.timeout(2)
     def test_main_reload(self):
 
         """Test that the nanny process can handle a reload request."""
