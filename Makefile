@@ -22,6 +22,6 @@ coverage: clean-coverage clean-test
 nothing:
 
 test: clean-test
-	py.test --pep8 atria tests
+	py.test --flake8 atria tests
 
 tests: test
