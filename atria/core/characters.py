@@ -170,11 +170,11 @@ class Character(Entity):
                 " ".join(sorted(exits.keys())) if exits else "none")
         else:
             exits_string = "^bExits:\n{}^~".format(
-                "\n".join(["  {} - {}{}".format(dir_name, room.name,
+                "\n".join(["  {} - {}{}".format(dir_name, _room.name,
                                                 " ({})".format(
-                                                    room.get_coord_str())
+                                                    _room.get_coord_str())
                                                 if is_builder else "")
-                           for dir_name, room in sorted(exits.items())])
+                           for dir_name, _room in sorted(exits.items())])
                 if exits else "  none")
         self.session.send(exits_string)
 

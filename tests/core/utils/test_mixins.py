@@ -7,8 +7,6 @@
 import gc
 from weakref import finalize
 
-import pytest
-
 from atria.core.utils.mixins import HasFlags, HasParent, HasWeaks
 
 

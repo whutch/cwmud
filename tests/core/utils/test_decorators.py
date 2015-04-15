@@ -5,7 +5,7 @@
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
 # noinspection PyUnresolvedReferences
-import atria.core.utils.decorators  # To satisfy test coverage
+import atria.core.utils.decorators  # To satisfy test coverage # noqa
 
 
 # There was something here but not anymore! Keeping file for future use.

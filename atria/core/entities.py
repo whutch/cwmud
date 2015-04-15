@@ -575,8 +575,8 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         if cache:
             # Check the cache
             for entity in cls._instances.values():
-                matches = [getattr(entity, attr) == value
-                           for attr, value in pairs]
+                matches = [getattr(entity, _attr) == _value
+                           for _attr, _value in pairs]
                 if match(matches):
                     found.add(entity)
                     if n and len(found) >= n:
@@ -591,8 +591,8 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
                     continue
                 data = cls._store.get(key)
                 if data:
-                    matches = [data.get(attr) == value
-                               for attr, value in pairs]
+                    matches = [data.get(_attr) == _value
+                               for _attr, _value in pairs]
                     if match(matches):
                         entity = cls(data)
                         entity._dirty = False
