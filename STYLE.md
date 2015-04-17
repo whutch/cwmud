@@ -1,9 +1,11 @@
-# Atria Coding Style
+Atria Coding Style
+==================
 
 A uniform coding style is critical to a happy and productive collaboration among coders. Having a clear standard can greatly increase readability and maintainability, and reduces headaches when it comes time to merge. Please do your best to adhere to these specifications when contributing.
 
 
-## General
+General
+-------
 
 All Python code should follow the [PEP-8][pep8] specifications, unless otherwise noted here.
 
@@ -25,7 +27,8 @@ And additions:
 A quick way to check if your code conforms with most of these standards is to run it through [flake8][flake8] (all contributions will be checked against this anyway as it is included in our test suite).
 
 
-## Imports
+Imports
+-------
 
 The import block should contain up to three sections, in this order:
  * Standard library imports
@@ -37,7 +40,8 @@ Each section should be separated by a single blank line. The whole block should 
 Each section should be sorted alphabetically. If multiple objects are imported from a module, the list of objects should also be alphabetized.
 
 
-## Docstrings
+Docstrings
+----------
 
 All public modules, classes, methods, and functions should have docstrings, and all docstrings should follow the [PEP-257][pep257] specifications, unless otherwise noted here. Private classes, methods, and functions (`_foo`, `__foo`, or `__foo__`) do not require docstrings, but it is encouraged where documentation would be helpful.
 
@@ -48,7 +52,8 @@ Overview:
  * If it is a docstring for a class or a function/method that is broken up by blank lines into logical sections, the docstring should be surrounded by single blank lines.
 
 
-## Example
+Example
+-------
 
 ```python
 # -*- coding: utf-8 -*-
