@@ -7,6 +7,9 @@
 from functools import partial
 import re
 
+# noinspection PyUnresolvedReferences
+from passlib.hash import bcrypt_sha256
+
 from .characters import Character, create_character
 from .const import *
 from .entities import ENTITIES, Entity, DataBlob, Attribute, Unset
@@ -176,7 +179,7 @@ class AccountPassword(Attribute):
         if len(new_value) < 8:
             raise ValueError(joins("Account passwords must be at least",
                                    cls._min_len, "characters in length."))
-        return new_value
+        return bcrypt_sha256.encrypt(new_value)
 
 
 # noinspection PyProtectedMember
@@ -395,7 +398,8 @@ def authenticate_account(session, success=None, fail=None, account=None):
                     fail(_session, account)
             else:
                 # Check the given password against the account
-                if password and password == account.password:
+                if password and bcrypt_sha256.verify(password,
+                                                     account.password):
                     success(_session, account)
                 else:
                     fail(_session, account)
