@@ -141,3 +141,42 @@ def make_time_codes(chars, source):
             time //= base
         places.append(chars[time])
         yield "".join(reversed(places))
+
+
+def int_to_base_n(integer, charset):
+    """Convert an integer into a base-N string using a given character set.
+
+    :param int integer: The integer to convert
+    :param str charset: The character set to use for the conversion
+    :returns str: The converted string
+    :raises ValueError: If `charset` contains duplicate characters
+
+    """
+    if len(charset) > len(set(charset)):
+        raise ValueError("character set contains duplicate characters")
+    base = len(charset)
+    integer = int(integer)
+    places = []
+    while integer > base:
+        places.append(charset[integer % base])
+        integer //= base
+    places.append(charset[integer])
+    return "".join(reversed(places))
+
+
+def base_n_to_int(string, charset):
+    """Convert a base-N string into an integer using a given character set.
+
+    :param str string: The string to convert
+    :param str charset: The character set to use for the conversion
+    :returns str: The converted string
+    :raises ValueError: If `charset` contains duplicate characters
+
+    """
+    if len(charset) > len(set(charset)):
+        raise ValueError("character set contains duplicate characters")
+    base = len(charset)
+    integer = 0
+    for index, char in enumerate(reversed(string)):
+        integer += charset.index(char) * (base ** index)
+    return integer
