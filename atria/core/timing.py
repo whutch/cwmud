@@ -101,7 +101,7 @@ class TimerManager:
     @property
     def uptime(self):
         """Return how long since this started, in seconds since the epoch."""
-        return now() - self._start_time
+        return self._time - self._start_time
 
     def __contains__(self, timer):
         return timer in self._timers

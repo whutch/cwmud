@@ -66,7 +66,8 @@ class TestTimerManager:
         """Test that the properties on a timer manager return something."""
         assert self.timers.time
         assert self.timers.started
-        assert self.timers.uptime
+        # Uptime should be 0 until the first _update_time call
+        assert not self.timers.uptime
 
     def test_create_timer_unnamed(self):
         """Test that we can create an unnamed timer."""
