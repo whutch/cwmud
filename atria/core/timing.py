@@ -80,7 +80,8 @@ class TimerManager:
 
     def __init__(self):
         """Create a new timer manager."""
-        self._start_time = self._time = now()
+        self._time = now()
+        self._start_time = self._time
         self._next_pulse = self._time + _PULSE_TIME
         self._timers = OrderedDict()
         self._time_codes = make_time_codes(TIMECODE_CHARSET,
@@ -108,6 +109,14 @@ class TimerManager:
 
     def __getitem__(self, timer):
         return self._timers[timer]
+
+    def _update_time(self):
+        """Update the current time.
+
+        This is the only place that self._time should be changed.
+
+        """
+        self._time = now()
 
     def create(self, duration, name=None, repeat=0, save=True, callback=None):
         """Create a timer that will call a function every so often.
@@ -179,10 +188,10 @@ class TimerManager:
 
         """
         for n in range(pulses):
-            self._time = now()
+            self._update_time()
             if self._time < self._next_pulse:
                 sleep(self._next_pulse - self._time)
-                self._time = now()
+                self._update_time()
             with EVENTS.fire("time_pulse", self._time):
                 self._next_pulse += _PULSE_TIME
 
