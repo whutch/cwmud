@@ -1,7 +1,7 @@
 Atria MUD Server
 ================
 
-Atria is a pure-Python MUD server designed with modularity and ease of development in mind. It was originally created as an exercise, as I had always wanted to write a MUD from scratch, and as such does not make use of many third-party libraries (just [miniboa][miniboa-py3] for Telnet protocol handling and [redis-py] for inter-process messaging, neither of which are wheels that I wanted to reinvent).
+Atria is a pure-Python MUD server designed with modularity and ease of development in mind. It was originally created as an exercise, as I had always wanted to write a MUD from scratch, and as such does not make use of many third-party libraries (just [miniboa][miniboa-py3] for Telnet protocol handling, [redis-py] for inter-process messaging, and [passlib]/[py-bcrypt] for password hashing; none of which are wheels that I wanted to reinvent).
 
 
 Installation
@@ -25,7 +25,7 @@ Dependencies
 
 Atria runs on [Python 3.4][python] and is as yet untested on any later versions. There are currently no plans to support earlier versions.
 
-Atria requires a running [Redis][redis] server for messages, as well as the [Redis Python bindings][redis-py]. It also makes use of [miniboa-py3], a Python 3 port of [miniboa], which is a tiny, asynchronous Telnet server. Our modified copy of miniboa is included in `atria/libs`.
+Atria requires a running [Redis][redis] server and the [Redis Python bindings][redis-py] for messages, and [passlib]/[py-bcrypt] for password hashing. It also makes use of [miniboa-py3], a Python 3 port of [miniboa], which is a tiny, asynchronous Telnet server. Our modified copy of miniboa is included in `atria/libs`.
 
 To install the Python package dependencies, run:
 ```
@@ -100,6 +100,8 @@ You can also email me questions and comments at <will@whutch.com>.
 
 [miniboa]: https://code.google.com/p/miniboa
 [miniboa-py3]: https://github.com/pR0Ps/miniboa-py3
+[passlib]: https://pypi.python.org/pypi/passlib
+[py-bcrypt]: https://code.google.com/p/py-bcrypt
 [pytest]: https://pytest.org/latest
 [python]: https://www.python.org
 [redis]: http://redis.io
