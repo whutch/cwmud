@@ -11,7 +11,7 @@ from time import sleep, time as now
 from .events import EVENTS
 from .logs import get_logger
 from .utils.exceptions import AlreadyExists
-from .utils.funcs import is_hashable, make_time_codes
+from .utils.funcs import is_hashable
 
 
 log = get_logger("time")
@@ -24,7 +24,6 @@ SECS_PER_DAY = 24 * SECS_PER_HOUR
 # Timing
 PULSE_PER_SECOND = 25
 _PULSE_TIME = 1.0 / PULSE_PER_SECOND
-
 # Increasing the pulses per second will increase the server responsiveness
 # as there will be less potential lag time between IO queueing and the
 # server processing it, but the increased number of loops and the processing
@@ -32,13 +31,6 @@ _PULSE_TIME = 1.0 / PULSE_PER_SECOND
 # hooks to events that fire each pulse loop ("server_loop", "time_pulse", etc).
 
 SECS_PER_TICK = 60
-
-
-# Do NOT change this after your server has started generating UIDs or you
-# risk running into streaks of duplicate UIDs.
-TIMECODE_CHARSET = "0123456789abcdefghijkLmnopqrstuvwxyz"
-# I used a capital "L" to avoid issues with "l" and "1" being too hard
-# to distinguish with some fonts.
 
 
 _match_secs = re.compile(r"(\d+)\s*s(?:ec(?:ond)?(?:s)?)?$")
@@ -84,10 +76,6 @@ class TimerManager:
         self._start_time = self._time
         self._next_pulse = self._time + _PULSE_TIME
         self._timers = OrderedDict()
-        self._time_codes = make_time_codes(TIMECODE_CHARSET,
-                                           lambda: self._time)
-        self._time_code = None
-        self._time_code_time = None
 
     @property
     def time(self):
@@ -194,13 +182,6 @@ class TimerManager:
                 self._update_time()
             with EVENTS.fire("time_pulse", self._time):
                 self._next_pulse += _PULSE_TIME
-
-    def get_time_code(self):
-        """Return a time code for the current time."""
-        if self._time != self._time_code_time:
-            self._time_code = next(self._time_codes)
-            self._time_code_time = self._time
-        return self._time_code
 
 
 class _Timer:

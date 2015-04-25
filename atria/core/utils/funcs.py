@@ -116,33 +116,6 @@ def find_by_attr(collection, attr, value):
     return matches
 
 
-def make_time_codes(chars, source):
-    """Generate time codes using a given set of characters.
-
-    The time will be converted into base N under the given character set,
-    where N is the length of the set. Duplicate characters will be stripped
-    from the set and the set will be sorted before use.
-
-    :param str chars: The character set to build the codes from
-    :param callable source: A callable object that yields the current time
-    :returns str: The current time in a constructed time code
-    :raises TypeError: If `source` is not callable
-
-    """
-    if not callable(source):
-        raise TypeError("source must be callable")
-    chars = "".join(sorted(set(chars), key=lambda c: c.lower()))
-    base = len(chars)
-    while True:
-        time = int(source())
-        places = []
-        while time > base:
-            places.append(chars[time % base])
-            time //= base
-        places.append(chars[time])
-        yield "".join(reversed(places))
-
-
 def int_to_base_n(integer, charset):
     """Convert an integer into a base-N string using a given character set.
 

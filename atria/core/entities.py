@@ -10,12 +10,23 @@ from weakref import WeakValueDictionary
 from .logs import get_logger
 from .timing import TIMERS
 from .utils.exceptions import AlreadyExists
-from .utils.funcs import class_name, joins
+from .utils.funcs import class_name, joins, int_to_base_n
 from .utils.mixins import (HasFlags, HasFlagsMeta, HasTags,
                            HasWeaks, HasWeaksMeta)
 
 
 log = get_logger("entities")
+
+
+# Do NOT change these after your server has started generating UIDs or you
+# risk running into streaks of duplicate UIDs.
+_uid_timecode_multiplier = 10000
+_uid_timecode_charset = ("0123456789aAbBcCdDeEfFgGhHijJkKLmM"
+                         "nNopPqQrRstTuUvVwWxXyYzZ")
+# I left out "I", "l", "O", and "S" to make time codes easier to distinguish
+# regardless of font. If my base 58 math is to be believed, this character set
+# should generate eight-digit time codes with 100 microsecond precision until
+# October 25th, 2375, and then nine-digit codes well into the 26th millennium.
 
 
 # noinspection PyDocstring
@@ -400,7 +411,8 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
     _store = None
     _store_key = "uid"
     _uid_code = "E"
-    _uid_history = {}  # Don't redefine on subclasses
+
+    __uid_timecode = 0  # Used internally for UID creation
 
     def __init__(self, data=None):
         super().__init__()
@@ -504,26 +516,20 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
     def make_uid(cls):
         """Create a UID for this entity.
 
-        UIDs are in the form "X-YYYYYY-Z", where X is the entity code, Y is
-        the current time code, and Z is the number of UIDs created during
-        the same time code. (Ex. "E-ngfazj-0")
-
-        If my base 36 math is to be believed, the time codes should remain
-        six digits until December 23rd 2038, and after that will remain
-        seven digits until the year 4453.
+        UIDs are in the form "C-TTTTTTTT", where C is the entity code and T
+        is the current time code. (Ex. "E-6jQZ4zvH")
 
         :returns str: The new UID
 
         """
-        time_code = TIMERS.get_time_code()
-        last_time, last_count = cls._uid_history.get(cls._uid_code, (0, 0))
-        if time_code == last_time:
-            last_count += 1
+        big_time = TIMERS.time * _uid_timecode_multiplier
+        if big_time > Entity.__uid_timecode:
+            Entity.__uid_timecode = big_time
         else:
-            last_time = time_code
-            last_count = 0
-        uid = "-".join((cls._uid_code, time_code, str(last_count)))
-        cls._uid_history[cls._uid_code] = (last_time, last_count)
+            Entity.__uid_timecode += 1
+        timecode_string = int_to_base_n(Entity.__uid_timecode,
+                                        _uid_timecode_charset)
+        uid = "-".join((cls._uid_code, timecode_string))
         return uid
 
     @classmethod

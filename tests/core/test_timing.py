@@ -245,9 +245,3 @@ class TestTimerManager:
         assert timer
         assert timer is _timer
         timer.kill()
-
-    def test_timer_manager_get_time_code(self):
-        """Test that we can create time codes."""
-        time_code = self.timers.get_time_code()
-        assert time_code
-        assert time_code == self.timers.get_time_code()
