@@ -10,7 +10,7 @@ from shutil import rmtree
 import pytest
 
 from atria import settings
-from atria.core.opt.pickle import PickleStore
+from atria.core.pickle import PickleStore
 
 
 class TestPickleStores:

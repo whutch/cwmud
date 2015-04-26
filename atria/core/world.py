@@ -9,9 +9,9 @@ from weakref import WeakSet
 
 from .entities import ENTITIES, Entity, Attribute, Unset
 from .logs import get_logger
+from .pickle import PickleStore
 from .storage import STORES
 from .utils.funcs import joins
-from .opt.pickle import PickleStore
 
 
 log = get_logger("world")

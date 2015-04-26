@@ -10,12 +10,12 @@ from .commands import COMMANDS, Command
 from .const import *
 from .entities import ENTITIES, Entity, Attribute
 from .logs import get_logger
+from .pickle import PickleStore
 from .requests import REQUESTS, Request
 from .shells import SHELLS, Shell
 from .storage import STORES
 from .world import Room, get_movement_strings
 from .utils.funcs import joins
-from .opt.pickle import PickleStore
 
 
 log = get_logger("characters")
