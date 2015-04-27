@@ -10,7 +10,7 @@ from shutil import rmtree
 import pytest
 
 from atria import settings
-from atria.core.opt.json import JSONStore
+from atria.contrib.json import JSONStore
 
 
 class TestJSONStores:

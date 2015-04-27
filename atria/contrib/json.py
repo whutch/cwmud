@@ -8,9 +8,9 @@ from os import listdir, makedirs, remove
 from os.path import abspath, exists, join, splitext
 import json
 
-from ... import settings
-from ..storage import DataStore
-from ..utils.funcs import joins
+from .. import settings
+from ..core.storage import DataStore
+from ..core.utils.funcs import joins
 
 
 class JSONStore(DataStore):
