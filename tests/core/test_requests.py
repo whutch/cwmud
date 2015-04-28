@@ -47,7 +47,6 @@ class TestRequests:
         @self.requests.register
         class TestRequest(Request):
             """A test request."""
-            pass
 
         type(self).request_class = TestRequest
         assert "TestRequest" in self.requests._requests

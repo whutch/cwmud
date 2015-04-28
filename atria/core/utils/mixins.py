@@ -158,7 +158,6 @@ class HasFlags(metaclass=HasFlagsMeta):
         Override this to perform any necessary post-change actions.
 
         """
-        pass
 
 
 # noinspection PyProtectedMember
@@ -234,7 +233,6 @@ class HasTags:
         Override this to perform any necessary post-change actions.
 
         """
-        pass
 
 
 class HasWeaksMeta(type):

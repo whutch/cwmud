@@ -205,8 +205,6 @@ class Unset(metaclass=_UnsetMeta):
 
     """A unique value to note that an attribute hasn't been set."""
 
-    pass
-
 
 class Attribute:
 
@@ -252,7 +250,6 @@ class Attribute:
         :returns None:
 
         """
-        pass
 
     @classmethod
     def _serialize(cls, value):

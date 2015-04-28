@@ -47,7 +47,6 @@ class TestMenus:
         @self.menus.register
         class TestMenu(Menu):
             """A test menu."""
-            pass
 
         type(self).menu_class = TestMenu
         assert "TestMenu" in self.menus._menus

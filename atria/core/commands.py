@@ -101,9 +101,8 @@ class Command(HasFlags, HasWeaks, metaclass=_CommandMeta):
         self._action()
 
     # noinspection PyMethodMayBeStatic
-    def _action(self):
+    def _action(self):  # pragma: no cover
         """Do something; override this to add your functionality."""
-        pass  # pragma: no cover
 
 
 # We create a global CommandManager here for convenience, and while the server

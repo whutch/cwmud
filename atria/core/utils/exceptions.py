@@ -27,8 +27,6 @@ class ServerReboot(Exception):
 
     """Exception to signal that the server should be rebooted."""
 
-    pass
-
 
 class ServerReload(Exception):
 

@@ -218,7 +218,6 @@ class AccountTrust(Attribute):
 @Account.register_blob("options")
 class AccountOptions(DataBlob):
     """A collection of account and client options."""
-    pass
 
 
 @AccountOptions.register_attr("reader")

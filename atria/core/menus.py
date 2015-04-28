@@ -189,7 +189,6 @@ class Menu(HasWeaks, metaclass=_MenuMeta):
         entry management specific to the session.
 
         """
-        pass
 
     def _inst_add_entry(self, key, description, callback=None):
         """Add an entry to this menu.
