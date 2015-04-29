@@ -52,7 +52,7 @@ class ServerProcess:
     def _start(pid, _socket_queue, reload_from=None):
         from .core.server import SERVER
         # Wait for our pid
-        while not pid.value:
+        while not pid.value:  # pragma: no cover
             continue
         SERVER._pid = pid.value
         SERVER.boot(_socket_queue, reload_from)
@@ -74,13 +74,13 @@ class ServerProcess:
         pid.value = self._process.pid
 
 
-def _on_connect(new_socket, addr_port):
+def _on_connect(new_socket, addr_port):  # pragma: no cover
     socket_queue.put((new_socket, addr_port))
 
 
 def _handle_reload_request(msg):
     pid = int(msg["data"])
-    if pid not in servers:
+    if pid not in servers:  # pragma: no cover
         # There may be more than one nanny process running
         return
     log.info("Received reload request from process %s", pid)
@@ -119,11 +119,11 @@ def main():
             listener.poll()
             channels.get_message()
             sleep(0.1)
-    except KeyboardInterrupt:
+    except KeyboardInterrupt:  # pragma: no cover
         pass
     finally:
         listener.stop()
-        channels.unsubscribe()
+        channels.unsubscribe()  # pragma: no cover
 
 
 if __name__ == "__main__":
