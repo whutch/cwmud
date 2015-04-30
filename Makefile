@@ -17,7 +17,7 @@ clean-test:
 	-rm -r .cache
 
 coverage: clean-coverage clean-test
-	py.test --cov-report html --cov atria
+	py.test --cov-report html --cov atria tests
 
 nothing:
 
