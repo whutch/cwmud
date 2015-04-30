@@ -130,7 +130,7 @@ def int_to_base_n(integer, charset):
     base = len(charset)
     integer = int(integer)
     places = []
-    while integer > base:
+    while integer >= base:
         places.append(charset[integer % base])
         integer //= base
     places.append(charset[integer])

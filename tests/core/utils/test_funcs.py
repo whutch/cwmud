@@ -4,6 +4,10 @@
 # :copyright: (c) 2008 - 2015 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
+import string
+
+import pytest
+
 from atria.core.utils import funcs
 
 
@@ -69,6 +73,7 @@ def test_is_iterable():
     """Test that we can determine if an object is iterable."""
     assert funcs.is_iterable("test") is True
     assert funcs.is_iterable([1, 2, 3]) is True
+    assert funcs.is_iterable({}) is True
     assert funcs.is_iterable(0) is False
 
 
@@ -97,3 +102,29 @@ def test_find_by_attr():
     assert len(funcs.find_by_attr(instances, "value", 1)) == 2
     assert len(funcs.find_by_attr(instances, "value", 4)) == 3
     assert not funcs.find_by_attr(instances, "fake_value", None)
+
+
+def test_int_to_base_n():
+
+    """Test that we can convert an integer to a base-N string."""
+
+    # Test for duplicate characters in the character set
+    with pytest.raises(ValueError):
+        assert funcs.int_to_base_n(1337, "lololol")
+
+    assert funcs.int_to_base_n(123, "01") == "1111011"
+    assert funcs.int_to_base_n(555, string.octdigits) == "1053"
+    assert funcs.int_to_base_n(48879, string.hexdigits[:16]) == "beef"
+
+
+def test_base_n_to_int():
+
+    """Test that we can convert a base-N string to an integer."""
+
+    # Test for duplicate characters in the character set
+    with pytest.raises(ValueError):
+        assert funcs.base_n_to_int("nope", "lololol")
+
+    assert funcs.base_n_to_int("1111011", "01") == 123
+    assert funcs.base_n_to_int("1053", string.octdigits) == 555
+    assert funcs.base_n_to_int("beef", string.hexdigits[:16]) == 48879
