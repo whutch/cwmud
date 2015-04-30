@@ -14,6 +14,7 @@ dependencies:
 
 test:
   override:
-    - py.test --cov-report html --pep8 tests --pep8 atria --cov atria
+    - make tests
+    - make coverage
   post:
     - coveralls
