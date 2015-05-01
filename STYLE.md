@@ -37,7 +37,7 @@ The import block should contain up to three sections, in this order:
 
 Each section should be separated by a single blank line. The whole block should be separated from the preceding header comments by a single blank line, and from the subsequent code by two blank lines.
 
-Each section should be sorted alphabetically. If multiple objects are imported from a module, the list of objects should also be alphabetized.
+Each section should be sorted alphabetically (ignoring capitalization). If multiple objects are imported from a module, the list of objects should also be alphabetized.
 
 
 Docstrings
