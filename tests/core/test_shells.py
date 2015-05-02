@@ -6,7 +6,7 @@
 
 import pytest
 
-from atria.core.shells import AlreadyExists, Command, ShellManager, Shell
+from atria.core.shells import AlreadyExists, Command, Shell, ShellManager
 from atria.core.utils.funcs import joins
 
 

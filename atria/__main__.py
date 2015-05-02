@@ -11,9 +11,9 @@ import redis
 
 # Note: Any modules imported here are not reloadable by the game server,
 # you'll need to do a full reboot to reload changes to them.
-from .libs.miniboa import TelnetServer
 from . import __version__, settings
 from .core.logs import get_logger
+from .libs.miniboa import TelnetServer
 
 
 log = get_logger("main")

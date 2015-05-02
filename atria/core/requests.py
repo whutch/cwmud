@@ -7,7 +7,7 @@
 from .logs import get_logger
 from .utils.exceptions import AlreadyExists
 from .utils.funcs import joins
-from .utils.mixins import HasFlagsMeta, HasFlags, HasWeaksMeta, HasWeaks
+from .utils.mixins import HasFlags, HasFlagsMeta, HasWeaks, HasWeaksMeta
 
 
 log = get_logger("requests")

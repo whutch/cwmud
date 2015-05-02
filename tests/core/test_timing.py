@@ -7,8 +7,8 @@
 import pytest
 
 # noinspection PyProtectedMember
-from atria.core.timing import (_PULSE_TIME, PULSE_PER_SECOND, AlreadyExists,
-                               duration_to_pulses, TimerManager)
+from atria.core.timing import (AlreadyExists, duration_to_pulses,
+                               PULSE_PER_SECOND, _PULSE_TIME, TimerManager)
 
 
 dtp = duration_to_pulses  # For brevity.

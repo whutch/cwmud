@@ -6,7 +6,7 @@
 
 import pytest
 
-from atria.core.commands import AlreadyExists, CommandManager, Command
+from atria.core.commands import AlreadyExists, Command, CommandManager
 
 
 class TestCommands:

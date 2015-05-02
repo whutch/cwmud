@@ -7,7 +7,7 @@
 import re
 from weakref import WeakSet
 
-from .entities import ENTITIES, Entity, Attribute, Unset
+from .entities import Attribute, ENTITIES, Entity, Unset
 from .logs import get_logger
 from .pickle import PickleStore
 from .storage import STORES

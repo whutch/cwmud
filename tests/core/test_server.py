@@ -8,7 +8,7 @@ from multiprocessing import Queue
 
 import pytest
 
-from atria.core.server import EVENTS, CLIENTS, SERVER
+from atria.core.server import CLIENTS, EVENTS, SERVER
 
 
 def test_boot():

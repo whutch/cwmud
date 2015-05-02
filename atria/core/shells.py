@@ -6,13 +6,13 @@
 
 from weakref import WeakValueDictionary
 
-from .logs import get_logger
 from .commands import Command
 from .const import *
+from .logs import get_logger
 from .utils.exceptions import AlreadyExists
 from .utils.funcs import joins
-from .utils.mixins import (HasFlagsMeta, HasFlags, HasWeaksMeta, HasWeaks,
-                           HasParentMeta, HasParent)
+from .utils.mixins import (HasFlags, HasFlagsMeta, HasParent, HasParentMeta,
+                           HasWeaks, HasWeaksMeta)
 
 
 log = get_logger("shells")

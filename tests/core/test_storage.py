@@ -6,7 +6,7 @@
 
 import pytest
 
-from atria.core.storage import AlreadyExists, DataStoreManager, DataStore
+from atria.core.storage import AlreadyExists, DataStore, DataStoreManager
 
 
 class TestDataStores:

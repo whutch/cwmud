@@ -7,15 +7,15 @@
 from collections import deque
 from os.path import exists, join
 
-from ..libs.miniboa import ANSI_CODES
 from .. import __version__, settings
+from ..libs.miniboa import ANSI_CODES
 from .accounts import Account
 from .characters import Character
 from .const import *
 from .events import EVENTS
 from .logs import get_logger
 from .menus import Menu
-from .shells import SHELLS, Shell
+from .shells import Shell, SHELLS
 from .utils.exceptions import AlreadyExists
 from .utils.funcs import class_name, joins
 from .utils.mixins import HasFlags

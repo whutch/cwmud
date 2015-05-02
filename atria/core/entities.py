@@ -10,7 +10,7 @@ from weakref import WeakValueDictionary
 from .logs import get_logger
 from .timing import TIMERS
 from .utils.exceptions import AlreadyExists
-from .utils.funcs import class_name, joins, int_to_base_n
+from .utils.funcs import class_name, int_to_base_n, joins
 from .utils.mixins import (HasFlags, HasFlagsMeta, HasTags,
                            HasWeaks, HasWeaksMeta)
 

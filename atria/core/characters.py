@@ -6,16 +6,16 @@
 
 import re
 
-from .commands import COMMANDS, Command
+from .commands import Command, COMMANDS
 from .const import *
-from .entities import ENTITIES, Entity, Attribute
+from .entities import Attribute, ENTITIES, Entity
 from .logs import get_logger
 from .pickle import PickleStore
-from .requests import REQUESTS, Request
-from .shells import SHELLS, Shell
+from .requests import Request, REQUESTS
+from .shells import Shell, SHELLS
 from .storage import STORES
-from .world import Room, get_movement_strings
 from .utils.funcs import joins
+from .world import get_movement_strings, Room
 
 
 log = get_logger("characters")

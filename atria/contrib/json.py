@@ -4,9 +4,9 @@
 # :copyright: (c) 2008 - 2015 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
+import json
 from os import listdir, makedirs, remove
 from os.path import abspath, exists, join, splitext
-import json
 
 from .. import settings
 from ..core.storage import DataStore

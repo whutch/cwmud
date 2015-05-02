@@ -6,7 +6,7 @@
 
 import pytest
 
-from atria.core.menus import AlreadyExists, MenuManager, Menu
+from atria.core.menus import AlreadyExists, Menu, MenuManager
 from atria.core.utils.funcs import joins
 
 

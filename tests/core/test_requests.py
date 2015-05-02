@@ -6,7 +6,7 @@
 
 import pytest
 
-from atria.core.requests import AlreadyExists, RequestManager, Request
+from atria.core.requests import AlreadyExists, Request, RequestManager
 from atria.core.utils.funcs import joins
 
 

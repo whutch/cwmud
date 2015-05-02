@@ -8,19 +8,19 @@ from time import sleep
 
 import redis
 
-from ..libs.miniboa import TelnetClient
 from .. import settings
+from ..libs.miniboa import TelnetClient
 from .accounts import AccountMenu, authenticate_account, create_account
 from .entities import ENTITIES, Unset
 from .events import EVENTS
 from .logs import get_logger
-from .menus import MENUS, Menu
+from .menus import Menu, MENUS
 from .net import CLIENTS
 from .pickle import PickleStore
 from .sessions import SESSIONS
 from .storage import STORES
 from .timing import TIMERS
-from .utils.exceptions import ServerShutdown, ServerReboot, ServerReload
+from .utils.exceptions import ServerReboot, ServerReload, ServerShutdown
 from .utils.funcs import joins
 
 
