@@ -23,7 +23,7 @@ class ShellManager:
     """A manager for shell registration.
 
     This is a convenience manager and is not required for the server to
-    function. All of its functionality can be achieved by subclassing,
+    function.  All of its functionality can be achieved by subclassing,
     instantiating, and referencing shells directly.
 
     """
@@ -72,16 +72,16 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
     """A shell for processing client input."""
 
     # These are overridden in the metaclass, I just put them here
-    # to avoid a lot of unresolved reference errors in IDE introspection
+    # to avoid a lot of unresolved reference errors in IDE introspection.
     _verbs = None
     _truncated_verbs = None
 
     state = STATE_CONNECTED
 
     # Delimiters should be a pair of equal-length strings that contain
-    # opening and closing delimiter characters. A delimiter at any given index
+    # opening and closing delimiter characters.  A delimiter at any given index
     # in the first string will be the opening delimiter that will pair with a
-    # closing delimiter at the same index in the second string. This allows
+    # closing delimiter at the same index in the second string.  This allows
     # shells to delimit arguments using non-equal pairs such as braces,
     # brackets, and parentheses.
     delimiters = ("\"'`", "\"'`")
@@ -163,7 +163,7 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
             verb = verb[:-1]
             while verb:
                 if verb not in cls._verbs:
-                    # First come, first served. If you want a command to have
+                    # First come, first served.  If you want a command to have
                     # truncated priority over another, register it first.
                     cls._verbs[verb] = command
                     cls._truncated_verbs[verb] = command
@@ -306,18 +306,18 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
             return
         command = None
         if not data[0].isalpha():
-            # Check for verb shortcuts
+            # Check for verb shortcuts.
             command = self.find_command(data[0])
         if command:
-            # We found a shortcut, everything else is args
+            # We found a shortcut, everything else is part of an argument.
             data = data[1:]
         else:
-            # No shortcut, so find a verb
+            # No shortcut, so find a verb.
             arg, data = self._one_argument(data)
             command = self.find_command(arg)
         if command:
             if command.no_parse:
-                # Let this command do its own argument parsing
+                # Let this command do its own argument parsing.
                 args = [data]
             else:
                 args = self._get_arguments(data)
@@ -326,7 +326,7 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
                 instance = command(self.session, args)
                 instance.execute()
             except:
-                # To be expanded later with some checking and logging
+                # To be expanded later with some checking and logging.
                 raise
         else:
             self.session.send("Huh?")
@@ -338,7 +338,7 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
 SHELLS = ShellManager()
 
 
-# This is an example shell that overrides parse and sets a higher state
+# This is an example shell that overrides parse and sets a higher state.
 @SHELLS.register
 class EchoShell(Shell):
 

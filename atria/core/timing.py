@@ -27,7 +27,7 @@ _PULSE_TIME = 1.0 / PULSE_PER_SECOND
 # Increasing the pulses per second will increase the server responsiveness
 # as there will be less potential lag time between IO queueing and the
 # server processing it, but the increased number of loops and the processing
-# overhead can greatly impact performance. Be especially mindful if you have
+# overhead can greatly impact performance.  Be especially mindful if you have
 # hooks to events that fire each pulse loop ("server_loop", "time_pulse", etc).
 
 SECS_PER_TICK = 60
@@ -42,7 +42,7 @@ def duration_to_pulses(duration):
     """Convert an amount of time into pulses.
 
     Accepts `duration` in pulses, seconds, or minutes, in a range of
-    abbreviated forms. An unspecified measurement of time will be
+    abbreviated forms.  An unspecified measurement of time will be
     converted into pulses.
 
     :param str|int duration: The amount of time to convert
@@ -246,11 +246,11 @@ class _Timer:
         self._count += 1
         if self._count < self.pulses:
             return
-        # Time's up
+        # Time's up.
         self.callback()
         if self.repeat != 0:
             # Either there are still repetitions to go (1+)
-            #  or it loops until killed (-1)
+            # or it loops until killed (-1).
             self._count = 0
             if self.repeat > 0:
                 self.repeat -= 1
@@ -258,7 +258,7 @@ class _Timer:
             self.kill()
 
     def kill(self):
-        """Kill this timer. Just murder it dead."""
+        """Kill this timer.  Just murder it dead."""
         self._live = False
         if self.key in self._manager:
             self._manager.kill(self.key)

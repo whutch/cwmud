@@ -17,7 +17,7 @@ class CommandManager:
     """A manager for command registration and control.
 
     This is a convenience manager and is not required for the server to
-    function. All of its functionality can be achieved by subclassing,
+    function.  All of its functionality can be achieved by subclassing,
     instantiating, and referencing commands directly.
 
     """
@@ -62,7 +62,7 @@ class CommandManager:
 
 
 class _CommandMeta(HasFlagsMeta, HasWeaksMeta):
-    # To avoid multiple metaclass errors
+    # To avoid multiple metaclass errors.
     pass
 
 

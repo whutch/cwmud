@@ -85,7 +85,7 @@ class TestJSONStores:
         # picked up as a key.
         with open(join(self.store_path, "nope.pkl"), "w") as out:
             out.write("\n")
-        # And let's put another valid key in for good measure
+        # And let's put another valid key in for good measure.
         self.store._put("yeah", {})
         assert tuple(sorted(self.store._keys())) == ("test", "yeah")
 

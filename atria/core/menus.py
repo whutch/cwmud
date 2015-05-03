@@ -21,7 +21,7 @@ class MenuManager:
     """A manager for menu registration.
 
     This is a convenience manager and is not required for the server to
-    function. All of its functionality can be achieved by subclassing,
+    function.  All of its functionality can be achieved by subclassing,
     instantiating, and referencing menus directly.
 
     """
@@ -116,11 +116,11 @@ class Menu(HasWeaks, metaclass=_MenuMeta):
 
     """A text menu."""
 
-    # Constants, don't change these
+    # Constants, don't change these.
     ORDER_BY_ADDED = 1
     ORDER_BY_ALPHA = 2
 
-    # Defaults, override these on subclasses
+    # Defaults, override these on subclasses.
     title = "MENU:"
     prompt = ": "
     error = "Bad menu key: {key}"
@@ -142,9 +142,9 @@ class Menu(HasWeaks, metaclass=_MenuMeta):
         self._entry_order = []
 
         # TODO: Find out why these next two prevent these from being
-        # garbage collected. I know that bound methods create circular
+        # garbage collected.  I know that bound methods create circular
         # references with the instances but Python should detect that and
-        # free both objects. It's not.
+        # free both objects.  It's not.
 
         # self.add_entry = self._inst_add_entry
         # self.remove_entry = self._inst_remove_entry
@@ -162,7 +162,7 @@ class Menu(HasWeaks, metaclass=_MenuMeta):
         self.add_entry = _add_entry
         self.remove_entry = _remove_entry
 
-        # Perform any instance-specific finalization
+        # Perform any instance-specific finalization.
         self._init()
         self._update_order()
 

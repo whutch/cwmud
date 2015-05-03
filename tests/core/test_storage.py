@@ -271,10 +271,10 @@ class TestDataStores:
     def test_store_manager_commit(self):
         """Test that we can commit all stores in a store manager."""
         assert self.store.pending
-        # There's a delete pending still
+        # There's a delete pending still.
         self.stores.commit()
         assert not self.store.has("test")
-        # Try committing nothing
+        # Try committing nothing.
         assert not self.store.pending
         self.stores.commit()
         assert not self.store._stored
@@ -285,7 +285,7 @@ class TestDataStores:
         assert self.store.pending
         self.stores.abort()
         assert not self.store.has("test")
-        # Try aborting nothing
+        # Try aborting nothing.
         assert not self.store.pending
         self.stores.abort()
         assert not self.store._stored

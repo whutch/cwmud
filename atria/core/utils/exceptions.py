@@ -7,7 +7,7 @@
 
 class AlreadyExists(Exception):
 
-    """Exception for adding an item to a collection its already in."""
+    """Exception for adding an item to a collection it is already in."""
 
     def __init__(self, key, old, new=None):
         self.key = key

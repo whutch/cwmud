@@ -24,7 +24,7 @@ def joins(*parts, sep=" "):
 def type_name(obj):
     """Fetch the type name of an object.
 
-    This is a cosmetic shortcut. I find the normal method very ugly.
+    This is a cosmetic shortcut.  I find the normal method very ugly.
 
     :param any obj: The object you want the type name of
     :returns str: The type name
@@ -36,7 +36,7 @@ def type_name(obj):
 def class_name(obj):
     """Fetch the class name of an object (class or instance).
 
-    Another cosmetic shortcut. The builtin way of getting an instance's class
+    Another cosmetic shortcut.  The builtin way of getting an instance's class
     name is pretty disgusting (and long), accessing two hidden attributes in
     a row just feels wrong.
 
@@ -45,10 +45,10 @@ def class_name(obj):
 
     """
     if type_name(obj) == "type":
-        # It's a class
+        # It's a class.
         return obj.__name__
     else:
-        # It's an instance of a class
+        # It's an instance of a class.
         return obj.__class__.__name__
 
 

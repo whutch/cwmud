@@ -51,7 +51,7 @@ class ServerProcess:
     @staticmethod
     def _start(pid, _socket_queue, reload_from=None):
         from .core.server import SERVER
-        # Wait for our pid
+        # Wait for our pid.
         while not pid.value:  # pragma: no cover
             continue
         SERVER._pid = pid.value
@@ -81,7 +81,7 @@ def _on_connect(new_socket, addr_port):  # pragma: no cover
 def _handle_reload_request(msg):
     pid = int(msg["data"])
     if pid not in servers:  # pragma: no cover
-        # There may be more than one nanny process running
+        # There may be more than one nanny process running.
         return
     log.info("Received reload request from process %s", pid)
     new_server = ServerProcess()

@@ -11,7 +11,7 @@ import pytest
 from atria.core.utils import funcs
 
 
-# Tests for the 'joins' string joining utility function
+# Tests for the 'joins' string joining utility function.
 
 def test_joins_nothing():
     """Test that joining nothing gets us nothing."""
@@ -38,7 +38,7 @@ def test_joins_given_separator():
     assert funcs.joins(10, 2, 2014, sep="/") == "10/2/2014"
 
 
-# Tests for the rest of the utility functions
+# Tests for the rest of the utility functions.
 
 def test_type_name():
     """Test that we can get a type name."""
@@ -108,7 +108,7 @@ def test_int_to_base_n():
 
     """Test that we can convert an integer to a base-N string."""
 
-    # Test for duplicate characters in the character set
+    # Test for duplicate characters in the character set.
     with pytest.raises(ValueError):
         assert funcs.int_to_base_n(1337, "lololol")
 
@@ -121,7 +121,7 @@ def test_base_n_to_int():
 
     """Test that we can convert a base-N string to an integer."""
 
-    # Test for duplicate characters in the character set
+    # Test for duplicate characters in the character set.
     with pytest.raises(ValueError):
         assert funcs.base_n_to_int("nope", "lololol")
 

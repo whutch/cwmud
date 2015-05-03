@@ -18,7 +18,7 @@ def test_boot():
     array = []
 
     # noinspection PyUnusedLocal
-    # This one should not fire, as init is not pre-hookable
+    # This one should not fire, as init is not pre-hookable.
     @EVENTS.hook("server_init", pre=True)
     def _init_pre_hook():
         array.append(0)

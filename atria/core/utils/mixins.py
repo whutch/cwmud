@@ -28,7 +28,7 @@ class MyClass(HasFlags, HasWeaks, metaclass=_MyClassMeta):
 # noinspection PyProtectedMember
 class _FlagSet:
 
-    """A set of flags on an object. Used by the HasFlags mix-in.
+    """A set of flags on an object.  Used by the HasFlags mix-in.
 
     A flag can be any hashable object (anything you can put in a set).
 
@@ -163,9 +163,9 @@ class HasFlags(metaclass=HasFlagsMeta):
 # noinspection PyProtectedMember
 class _Tags(MutableMapping):
 
-    """A mapping of tags on an object. Used by the HasTags mix-in.
+    """A mapping of tags on an object.  Used by the HasTags mix-in.
 
-    Tags are used to store arbitrary data on another object. Tag keys and
+    Tags are used to store arbitrary data on another object.  Tag keys and
     values are functionally equivalent to dictionary keys and values.
 
     """

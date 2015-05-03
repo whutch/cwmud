@@ -113,10 +113,10 @@ class TestShells:
     def test_shell_set_session_and_init(self):
         """Test that we can set the session property of a shell and init it."""
         assert not self.session._output
-        # Setting the session to None should not init the shell
+        # Setting the session to None should not init the shell.
         self.shell.session = None
         assert not self.session._output
-        # And setting it to a session should init the shell
+        # And setting it to a session should init the shell.
         self.shell.session = self.session
         assert self.shell.session is self.session
         assert self.session._output.pop() == "you just inited me!\n"
@@ -224,13 +224,13 @@ class TestShells:
     def test_shell_parse(self):
         """Test that we can parse client input."""
         self.shell.parse("test")
-        # There are no commands registered yet
+        # There are no commands registered yet.
         assert self.session._output.pop() == "Huh?\n"
         self.shell.parse("")
         assert not self.session._output
         self.shell.parse(" ")
         assert self.session._output.pop() == "Huh?\n"
-        # Re-register the command so we know it can be executed
+        # Re-register the command so we know it can be executed.
         self.shell.add_verbs(self.TestCommand, "test")
         self.shell.add_verbs(self.AnotherCommand, "!")
         with pytest.raises(NotImplementedError):

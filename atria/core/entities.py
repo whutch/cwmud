@@ -24,7 +24,7 @@ _uid_timecode_multiplier = 10000
 _uid_timecode_charset = ("0123456789aAbBcCdDeEfFgGhHijJkKLmM"
                          "nNopPqQrRstTuUvVwWxXyYzZ")
 # I left out "I", "l", "O", and "S" to make time codes easier to distinguish
-# regardless of font. If my base 58 math is to be believed, this character set
+# regardless of font.  If my base 58 math is to be believed, this character set
 # should generate eight-digit time codes with 100 microsecond precision until
 # October 25th, 2375, and then nine-digit codes well into the 26th millennium.
 
@@ -96,7 +96,7 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
     """A collection of attributes and sub-blobs on an entity."""
 
     # These are overridden in the metaclass, I just put them here
-    # to avoid a lot of unresolved reference errors in IDE introspection
+    # to avoid a lot of unresolved reference errors in IDE introspection.
     _blobs = None
     _attrs = None
 
@@ -130,7 +130,7 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
             value = attr._validate(value)
         entity = self._entity
         if entity._base_blob == self and entity._store_key == name:
-            # We're updating our store key, we need to check for an old one
+            # We're updating our store key, we need to check for an old one.
             entity.tags["_old_key"] = old_value
         self._attr_values[name] = value
         entity.dirty()
@@ -227,7 +227,7 @@ class Attribute:
         """Validate a value for this attribute.
 
         This will be called by the blob when setting the value for this
-        attribute, override it to perform any checks or sanitation. This
+        attribute, override it to perform any checks or sanitation.  This
         should either return a valid value for the attribute or raise an
         exception as to why the value is invalid.
 
@@ -401,7 +401,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
     """The base of all persistent objects in the game."""
 
     # These are overridden in the metaclass, I just put them here
-    # to avoid a lot of unresolved reference errors in IDE introspection
+    # to avoid a lot of unresolved reference errors in IDE introspection.
     _base_blob = None
     _instances = None
 
@@ -409,7 +409,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
     _store_key = "uid"
     _uid_code = "E"
 
-    __uid_timecode = 0  # Used internally for UID creation
+    __uid_timecode = 0  # Used internally for UID creation.
 
     def __init__(self, data=None):
         super().__init__()
@@ -432,7 +432,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         self._savable = True
         # Never, ever manually change an object's UID! There are no checks
         # for removing the old UID from the store, updating UID links, or
-        # anything else like that. Bad things will happen!
+        # anything else like that.  Bad things will happen!
         self._uid = None
 
         # An active entity is considered "in play", inactive entities are
@@ -514,7 +514,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         """Create a UID for this entity.
 
         UIDs are in the form "C-TTTTTTTT", where C is the entity code and T
-        is the current time code. (Ex. "E-6jQZ4zvH")
+        is the current time code.  (Ex. "E-6jQZ4zvH")
 
         :returns str: The new UID
 
@@ -537,10 +537,10 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         :returns bool: True if it exists, else False
 
         """
-        # Check the store first
+        # Check the store first.
         if cls._store and cls._store.has(key):
             return True
-        # Then check unsaved instances
+        # Then check unsaved instances.
         if cls._store_key == "uid":
             if key in cls._instances:
                 return True
@@ -576,7 +576,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         found = set()
         checked_keys = set()
         if cache:
-            # Check the cache
+            # Check the cache.
             for entity in cls._instances.values():
                 matches = [getattr(entity, _attr) == _value
                            for _attr, _value in pairs]
@@ -586,11 +586,11 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
                         break
                 checked_keys.add(entity.key)
         if store and (not n or (n and len(found) < n)):
-            # Check the store
+            # Check the store.
             for key in cls._store.keys():
                 if key in checked_keys:
                     # We already checked this entity when we were checking the
-                    # cache, so don't bother reading from the store
+                    # cache, so don't bother reading from the store.
                     continue
                 data = cls._store.get(key)
                 if data:
@@ -622,7 +622,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
 
         If `from_cache` is True and an instance is found in the _instances
         cache then the found instance will be returned as-is and NOT
-        reloaded from the store. If you want to reset an entity's data to a
+        reloaded from the store.  If you want to reset an entity's data to a
         stored state, use the revert method instead.
 
         :param key: The key the entity's data is stored under

@@ -18,7 +18,7 @@ class RequestManager:
     """A manager for request template registration.
 
     This is a convenience manager and is not required for the server to
-    function. All of its functionality can be achieved by subclassing,
+    function.  All of its functionality can be achieved by subclassing,
     instantiating, and referencing requests directly.
 
     """
@@ -56,7 +56,7 @@ class RequestManager:
 
 
 class _RequestMeta(HasFlagsMeta, HasWeaksMeta):
-    # To avoid multiple metaclass errors
+    # To avoid multiple metaclass errors.
     pass
 
 
@@ -64,11 +64,11 @@ class Request(HasFlags, HasWeaks, metaclass=_RequestMeta):
 
     """A request for input from a client."""
 
-    # Constants, don't change these
+    # Constants, don't change these.
     CONFIRM_YES = 1
     CONFIRM_REPEAT = 2
 
-    # Defaults, override these on subclasses
+    # Defaults, override these on subclasses.
     initial_prompt = None
     repeat_prompt = "? "
     confirm = None
@@ -107,10 +107,10 @@ class Request(HasFlags, HasWeaks, metaclass=_RequestMeta):
     def _validate(self, data):
         """Validate client input toward this request.
 
-        Override this to perform any custom validation on subclasses. This
+        Override this to perform any custom validation on subclasses.  This
         method should either return the validated data or raise the
         ValidationFailed exception with an error message that will be sent to
-        the client, any other exceptions will be re-raised. The data can be
+        the client, any other exceptions will be re-raised.  The data can be
         changed before returning it to allow for normalization, etc.
 
         """
@@ -167,13 +167,13 @@ class Request(HasFlags, HasWeaks, metaclass=_RequestMeta):
             elif confirm == Request.CONFIRM_REPEAT:
                 try:
                     # We have to pass the repeated input through validation
-                    #  so that any normalization that happened to the original
-                    #  input happens to the repeated input as well.
+                    # so that any normalization that happened to the original
+                    # input happens to the repeated input as well.
                     data = _validate(data)
                 except Request.ValidationFailed:
                     # We don't really care if repeated input won't validate,
-                    #  we just want to know if it isn't the same, and the
-                    #  original data can't be None, so..
+                    # we just want to know if it isn't the same, and the
+                    # original data can't be None, so..
                     data = None
                 finally:
                     if data != self._confirm:
@@ -189,13 +189,13 @@ class Request(HasFlags, HasWeaks, metaclass=_RequestMeta):
 
         else:
             # We're not confirming anything yet, do initial validation and
-            #  then figure out if we need to confirm or not.
+            # then figure out if we need to confirm or not.
             try:
                 data = _validate(data)
                 if confirm:
                     # We need to confirm this input, so store it for now and
-                    #  leave the request unresolved. The confirmation prompt
-                    #  will be sent by get_prompt at the end of this poll.
+                    # leave the request unresolved.  The confirmation prompt
+                    # will be sent by get_prompt at the end of this poll.
                     self._confirm = data
                 else:
                     # We don't need to confirm this input, request resolved.

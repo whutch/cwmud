@@ -66,7 +66,7 @@ class TestTimerManager:
         """Test that the properties on a timer manager return something."""
         assert self.timers.time
         assert self.timers.started
-        # Uptime should be 0 until the first _update_time call
+        # Uptime should be 0 until the first _update_time call.
         assert not self.timers.uptime
 
     def test_create_timer_unnamed(self):
@@ -230,7 +230,7 @@ class TestTimerManager:
         next_pulse += _PULSE_TIME
         next_pulse += _PULSE_TIME
         assert next_pulse == self.timers._next_pulse
-        # Test that the next pulse gets updated even if we don't sleep
+        # Test that the next pulse gets updated even if we don't sleep.
         self.timers._next_pulse -= _PULSE_TIME
         self.timers.sleep_excess()
         assert self.timers.time < next_pulse

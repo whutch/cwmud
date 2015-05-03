@@ -25,7 +25,7 @@ class JSONStore(DataStore):
         self._path = join(settings.DATA_DIR, "json", subpath)
         self._indent = indent
         self._separators = separators
-        # Make sure the path to the JSON store exists
+        # Make sure the path to the JSON store exists.
         if not exists(self._path):
             makedirs(self._path)
 

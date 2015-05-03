@@ -23,7 +23,7 @@ class PickleStore(DataStore):
         """Create a new pickle store."""
         super().__init__()
         self._path = join(settings.DATA_DIR, "pickle", subpath)
-        # Make sure the path to the pickle store exists
+        # Make sure the path to the pickle store exists.
         if not exists(self._path):
             makedirs(self._path)
 

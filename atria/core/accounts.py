@@ -340,7 +340,7 @@ def create_account(session, callback, account=None):
     elif account.options.reader is Unset:
         def _set_reader_option(_session, option):
             account.options.reader = option
-            # They don't need color if they are using a screen reader
+            # They don't need color if they are using a screen reader.
             if option is True:
                 account.options.color = False
             create_account(_session, callback, account)
@@ -362,7 +362,7 @@ def authenticate_account(session, success=None, fail=None, account=None):
     and the account (if it exists) as positional arguments.
 
     If `account` is given, it will be used to authenticate against instead
-    of the account already assigned to `session`. If not, and `session` has
+    of the account already assigned to `session`.  If not, and `session` has
     no account assigned, an account name will be requested first;
     otherwise only the password is requested.
 
@@ -396,7 +396,7 @@ def authenticate_account(session, success=None, fail=None, account=None):
                 if fail is not None:
                     fail(_session, account)
             else:
-                # Check the given password against the account
+                # Check the given password against the account.
                 if password and bcrypt_sha256.verify(password,
                                                      account.password):
                     success(_session, account)
@@ -421,7 +421,7 @@ class AccountMenu(Menu):
         if not account:
             log.warn("AccountMenu assigned to session with no account!")
             return
-        # Add entries for the account's characters
+        # Add entries for the account's characters.
         for n, char in enumerate(Character.find("account", account,
                                                 "account", account.uid,
                                                 match=any), 1):
@@ -453,9 +453,9 @@ def _account_menu_quit(session):
 @AccountMenu.add_entry("C", "Create character")
 def _account_menu_create_character(session):
     def _callback(_session, character):
-        # Save the character before it gets garbage collected
+        # Save the character before it gets garbage collected.
         character.save()
-        # Build a new menu with an entry for the character
+        # Build a new menu with an entry for the character.
         _session.menu = AccountMenu
     create_character(session, _callback)
 

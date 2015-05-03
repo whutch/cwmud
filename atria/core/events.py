@@ -14,7 +14,7 @@ class EventManager:
 
     """A manager for event registration and handling.
 
-    Events are lazily created, when you call ``hook`` or ``fire``, if the
+    Events are lazily created; when you call ``hook`` or ``fire``, if the
     target event doesn't already exist, it is implicitly created for you.
     This allows code that hooks an event to be called before the code that
     would have explicitly created it (typically, the module that fires them),
@@ -101,7 +101,7 @@ class EventManager:
         does not exist, nothing happens.
 
         If neither ``namespace`` nor ``callback`` are provided, all hooks
-        will be stripped from the matching event(s). Use cautiously.
+        will be stripped from the matching event(s).  Use cautiously.
 
         :param str event_name: The name of the event to unhook; it can either
                                be an exact match, "name*" for a following
@@ -123,11 +123,11 @@ class EventManager:
                 events = []
         for event in events:
             if callback and namespace is None:
-                # Unhook by callback only
+                # Unhook by callback only.
                 event.hooks = [hook for hook in event.hooks
                                if hook.callback is not callback]
             elif namespace is not None:
-                # Unhook by namespace, with or without a callback
+                # Unhook by namespace, with or without a callback.
                 if callback:
                     event.hooks = [hook for hook in event.hooks
                                    if hook.namespace != namespace or
@@ -136,7 +136,7 @@ class EventManager:
                     event.hooks = [hook for hook in event.hooks
                                    if hook.namespace != namespace]
             else:
-                # Just unhook everything (not recommended)
+                # Just unhook everything (not recommended).
                 event.hooks = []
 
     def fire(self, event_name, *args, **opts):
@@ -217,7 +217,7 @@ class _EventContext:
     def now(self):
         """Enter and exit the context manually.
 
-        A convenience method for if you don't need a context manager. This
+        A convenience method for if you don't need a context manager.  This
         allows you to fire the event on one line:
 
         >>> EVENTS.fire("some_event").now()

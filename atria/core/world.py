@@ -20,7 +20,7 @@ log = get_logger("world")
 @ENTITIES.register
 class Room(Entity):
 
-    """A MUD room. Where the magic happens."""
+    """A MUD room.  Where the magic happens."""
 
     _store = STORES.register("rooms", PickleStore("rooms"))
     _store_key = "uid"
@@ -28,7 +28,7 @@ class Room(Entity):
 
     def __init__(self, data=None):
         super().__init__(data)
-        self._chars = WeakSet()  # The Characters currently in this room
+        self._chars = WeakSet()  # The Characters currently in this room.
 
     def __repr__(self):
         name = self.name if self.name else "(unnamed)"
@@ -65,7 +65,7 @@ class Room(Entity):
         :returns dict: The connecting rooms, keyed by direction name
 
         """
-        # This is an inefficient placeholder until an Exit type is in
+        # This is an inefficient placeholder until an Exit type is in.
         found = {}
         for change, (dir_name, rev_name) in _movement_strings.items():
             x, y, z = map(sum, zip(self.coords, change))
@@ -158,7 +158,7 @@ class RoomZ(Attribute):
         return new_value
 
 
-# These are used to generate Character.act messages
+# These are used to generate Character.act messages.
 _movement_strings = {
     (1, 0, 0): ("east", "the west"),
     (-1, 0, 0): ("west", "the east"),

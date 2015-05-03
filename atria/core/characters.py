@@ -24,7 +24,7 @@ log = get_logger("characters")
 @ENTITIES.register
 class Character(Entity):
 
-    """A MUD character. So full of potential."""
+    """A MUD character.  So full of potential."""
 
     _store = STORES.register("characters", PickleStore("characters"))
     _store_key = "name"
@@ -241,7 +241,7 @@ class CharacterAccount(Attribute):
 
     @classmethod
     def _serialize(cls, value):
-        # Save character accounts by UID
+        # Save character accounts by UID.
         return value.uid
 
     @classmethod
@@ -266,7 +266,7 @@ class CharacterRoom(Attribute):
     def _changed(cls, blob, old_value, new_value):
         char = blob._entity
         if char.active:
-            # Update the rooms' character sets
+            # Update the rooms' character sets.
             if old_value and char in old_value.chars:
                 old_value.chars.remove(char)
             if new_value:
@@ -274,7 +274,7 @@ class CharacterRoom(Attribute):
 
     @classmethod
     def _serialize(cls, value):
-        # Save character rooms by UID
+        # Save character rooms by UID.
         return value.uid
 
     @classmethod

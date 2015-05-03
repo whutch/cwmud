@@ -77,7 +77,7 @@ class DataStore:
 
     """A store for data."""
 
-    # Whether this data store needs to be opened and closed
+    # Whether this data store needs to be opened and closed.
     _opens = False
 
     def __init__(self):

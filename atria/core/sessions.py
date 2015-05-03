@@ -317,7 +317,7 @@ class _Session(HasFlags):
         if idle >= settings.IDLE_TIME:
             if (idle >= settings.IDLE_TIME_MAX or
                     not self._shell or self._shell.state < STATE_PLAYING):
-                # They've been idle long enough, dump them. If they haven't
+                # They've been idle long enough, dump them.  If they haven't
                 # even logged in yet, don't wait for the max idle time.
                 if (self.account and
                         self.account.trust >= TRUST_BUILDER):
@@ -344,7 +344,7 @@ class _Session(HasFlags):
 
         """
         if not data:
-            # They just hit enter, let the prompt repeat itself
+            # They just hit enter, let the prompt repeat itself.
             return
         if self._request_queue:
             if self._request_queue[0].resolve(data):
@@ -542,7 +542,7 @@ def _hook_server_load_state(state):
                char, width, color) in sessions.items():
         client = CLIENTS.find_by_port(port)
         if not client:
-            # The client is gone, so no need for the session
+            # The client is gone, so no need for the session.
             continue
         session = SESSIONS.find_by_client(client)
         if session:

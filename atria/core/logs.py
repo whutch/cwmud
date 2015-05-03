@@ -33,7 +33,7 @@ class _Formatter(logging.Formatter):
         :returns str: A formatted time string
 
         If *datefmt* is provided, it will be used to convert the time through
-        datetime.strftime. If not, it falls back to the formatTime method of
+        datetime.strftime.  If not, it falls back to the formatTime method of
         logging.Formatter, which converts the time through time.strftime.
 
         This custom processing allows for the full range of formatting options

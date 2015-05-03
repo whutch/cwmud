@@ -29,7 +29,7 @@ log = get_logger("server")
 
 class Server:
 
-    """A game server. The beating heart of the MUD."""
+    """A game server.  The beating heart of the MUD."""
 
     def __init__(self):
         self._socket_queue = None
@@ -60,7 +60,7 @@ class Server:
         elif msg["channel"] == "server-reload":
             target_pid, source_pid = map(int, msg["data"].split(","))
             if target_pid == self._pid:
-                # We received a reload command from a new process
+                # We received a reload command from a new process.
                 raise ServerReload(new_pid=source_pid)
         elif msg["channel"] == "server-shutdown":
             target_pid = int(msg["data"])
@@ -102,7 +102,7 @@ class Server:
 
         with EVENTS.fire("server_boot"):
             log.info("Booting server")
-            # Subscribe to Redis channels
+            # Subscribe to Redis channels.
             self._channels.psubscribe("server-*")
 
         CLIENTS.listen(settings.BIND_ADDRESS,
@@ -115,12 +115,12 @@ class Server:
             self._reloading = True
             self._rdb.publish("server-reload",
                               "{},{}".format(reload_from, self._pid))
-            # Wait until the other process is done saving a game state
+            # Wait until the other process is done saving a game state.
             while True:
                 if self._store.has("state"):
                     break
                 sleep(0.1)
-            # Pick up all the sockets from the socket queue
+            # Pick up all the sockets from the socket queue.
             self._check_new_sockets()
 
         if self._store.has("state"):
@@ -139,21 +139,21 @@ class Server:
         """Start the main server loop and loop until stopped."""
         try:
             while True:
-                # First check for messages
+                # First check for messages.
                 msg = self._channels.get_message()
                 while msg:
                     self._handle_msg(msg)
                     msg = self._channels.get_message()
-                # Then do the main game logic
+                # Then do the main game logic.
                 with EVENTS.fire("server_loop"):
-                    TIMERS.pulse()  # Pulse each timer once
+                    TIMERS.pulse()  # Pulse each timer once.
                     self._check_new_sockets()
-                    SESSIONS.poll()  # Process queued IO
-                    CLIENTS.poll()  # Check for new IO
-                    SESSIONS.prune()  # Clean up closed/dead sessions
+                    SESSIONS.poll()  # Process queued IO.
+                    CLIENTS.poll()  # Check for new IO.
+                    SESSIONS.prune()  # Clean up closed/dead sessions.
                 # Any thing you want polled or updated should be done before
                 # this point so that it is considered in the pulse delay.
-                TIMERS.sleep_excess()  # Wait until the next pulse is ready
+                TIMERS.sleep_excess()  # Wait until the next pulse is ready.
         except KeyboardInterrupt:
             log.info("Received keyboard interrupt, stopping")
         except ServerShutdown:
@@ -164,17 +164,17 @@ class Server:
             log.info("Reloading server")
             self._channels.subscribe("server-reload-complete")
             self._reloading = True
-            # Do one last session and client poll to clear the output queues
+            # Do one last session and client poll to clear the output queues.
             SESSIONS.poll(output_only=True)
             CLIENTS.poll()
             SESSIONS.prune()
-            # Save the state data for the new process to resume from
+            # Save the state data for the new process to resume from.
             self.save_state()
-            # Dump all the sockets back into the socket queue
+            # Dump all the sockets back into the socket queue.
             for client in CLIENTS.clients.values():
                 socket_data = (client.sock, (client.address, client.port))
                 self._socket_queue.put(socket_data)
-            # Wait for the new process to pick up the state
+            # Wait for the new process to pick up the state.
             while True:
                 msg = self._channels.get_message()
                 if (msg and msg["type"] == "message" and
