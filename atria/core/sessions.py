@@ -323,16 +323,17 @@ class _Session(HasFlags):
                         self.account.trust >= TRUST_BUILDER):
                     return
                 self.close("^RDisconnecting due to inactivity. Goodbye!^~",
-                           log_msg=joins("Disconnecting idle", self))
+                           log_msg=joins("Disconnecting idle ", self,
+                                         ".", sep=""))
             elif "idle" not in self.flags:
                 with EVENTS.fire("session_idle"):
-                    log.info("%s is now idle", self)
+                    log.info("%s is now idle.", self)
                     self.send("You are whisked away into the void.")
                     self.flags.add("idle")
         elif "idle" in self.flags:
             # They came back, huzzah.
             with EVENTS.fire("session_idle_return"):
-                log.info("%s is no longer idle", self)
+                log.info("%s is no longer idle.", self)
                 self.send("You have returned from the void.")
                 self.flags.drop("idle")
 
@@ -354,7 +355,7 @@ class _Session(HasFlags):
         elif self._shell:
             self._shell.parse(data)
         else:
-            log.warn("Input not handled for %s: %s", self, data)
+            log.warn("Input not handled for %s: '%s'!", self, data)
 
     def _get_prompt(self):
         """Generate the current prompt for this session.
@@ -478,7 +479,7 @@ class _Session(HasFlags):
 
         """
         if not log_msg:
-            log_msg = joins("Closing session", self)
+            log_msg = joins("Closing session ", self, ".", sep="")
         log.info(log_msg)
         self.send(reason)
         self.flags.add("close")

@@ -80,9 +80,9 @@ class ClientManager:
         self._address = address
         self._port = port
         if server_socket:
-            log.info("Using existing listener socket")
+            log.info("Using existing listener socket.")
         elif server_socket is None:
-            log.info("Binding listener to %s on port %s", address, port)
+            log.info("Binding listener to %s on port %s.", address, port)
         self._server = TelnetServer(address=address,
                                     port=port,
                                     timeout=0,
@@ -92,7 +92,7 @@ class ClientManager:
 
     def close(self):
         """Stop the telnet server."""
-        log.info("Closing listener from %s on port %s",
+        log.info("Closing listener from %s on port %s.",
                  self.address, self.port)
         self._server.stop()
         self._server = None

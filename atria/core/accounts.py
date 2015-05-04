@@ -447,7 +447,7 @@ def _account_menu_select_char(session, char=None):
 @AccountMenu.add_entry("Q", "Quit")
 def _account_menu_quit(session):
     session.close("Okay, goodbye!",
-                  log_msg=joins(session, "has quit"))
+                  log_msg=joins(session, "has quit."))
 
 
 @AccountMenu.add_entry("C", "Create character")

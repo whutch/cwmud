@@ -45,12 +45,12 @@ class Server:
     @staticmethod
     def _client_connected(client):
         with EVENTS.fire("client_connected", client, no_pre=True):
-            log.info("Incoming connection from %s", client.addrport())
+            log.info("Incoming connection from %s.", client.addrport())
 
     @staticmethod
     def _client_disconnected(client):
         with EVENTS.fire("client_disconnected", client, no_pre=True):
-            log.info("Lost connection from %s", client.addrport())
+            log.info("Lost connection from %s.", client.addrport())
 
     def _handle_msg(self, msg):
         if msg["channel"] == "server-reboot":
@@ -80,7 +80,7 @@ class Server:
             if not self._reloading:
                 self._client_connected(client)
             else:
-                log.info("Recovering connection from %s", client.addrport())
+                log.info("Recovering connection from %s.", client.addrport())
 
     def boot(self, socket_queue, reload_from=None):
 
@@ -98,10 +98,10 @@ class Server:
         self._socket_queue = socket_queue
 
         with EVENTS.fire("server_init", no_pre=True):
-            log.info("Initializing server process %s", self._pid)
+            log.info("Initializing server process %s.", self._pid)
 
         with EVENTS.fire("server_boot"):
-            log.info("Booting server")
+            log.info("Booting server.")
             # Subscribe to Redis channels.
             self._channels.psubscribe("server-*")
 
@@ -129,7 +129,7 @@ class Server:
             self._store.commit()
 
         if reload_from:
-            log.info("Reload complete for process %s", self._pid)
+            log.info("Reload complete for process %s.", self._pid)
             self._rdb.publish("server-reload-complete", self._pid)
             self._reloading = False
 
@@ -155,13 +155,13 @@ class Server:
                 # this point so that it is considered in the pulse delay.
                 TIMERS.sleep_excess()  # Wait until the next pulse is ready.
         except KeyboardInterrupt:
-            log.info("Received keyboard interrupt, stopping")
+            log.info("Received keyboard interrupt, stopping.")
         except ServerShutdown:
-            log.info("Received server shutdown")
+            log.info("Received server shutdown.")
         except ServerReboot:
-            log.info("Received server reboot")
+            log.info("Received server reboot.")
         except ServerReload as exc:
-            log.info("Reloading server")
+            log.info("Reloading server.")
             self._channels.subscribe("server-reload-complete")
             self._reloading = True
             # Do one last session and client poll to clear the output queues.
@@ -188,7 +188,7 @@ class Server:
                 with EVENTS.fire("server_shutdown", no_post=True):
                     ENTITIES.save()
                     STORES.commit()
-                    log.info("Server shutdown complete")
+                    log.info("Server shutdown complete.")
                     self._rdb.publish("server-shutdown-complete", self._pid)
 
     def reload(self):
@@ -209,14 +209,14 @@ class Server:
         """
         if self._store.has("state"):
             raise KeyError("a server state file already exists")
-        log.info("Starting game state save")
+        log.info("Starting game state save.")
         ENTITIES.save()
         STORES.commit()
         state = {}
         with EVENTS.fire("server_save_state", state):
             self._store.put("state", state)
             self._store.commit()
-        log.info("Game state save successful")
+        log.info("Game state save successful.")
 
     def load_state(self):
         """Load a serialized server state from file.
@@ -232,10 +232,10 @@ class Server:
         """
         if not self._store.has("state"):
             raise KeyError("no server state file exists")
-        log.info("Starting game state load")
+        log.info("Starting game state load.")
         state = self._store.get("state")
         EVENTS.fire("server_load_state", state).now()
-        log.info("Game state load successful")
+        log.info("Game state load successful.")
 
 
 SERVER = Server()
@@ -281,7 +281,8 @@ def _connect_menu_login(session):
         if isinstance(account, str):
             account = joins("unknown account:", account)
         _session.close("^RBad account name or password.^~",
-                       log_msg=joins(session, "failed to log into", account))
+                       log_msg=joins(session, " failed to log into ", account,
+                                     ".", sep=""))
 
     authenticate_account(session, _success, _fail)
 
@@ -298,7 +299,7 @@ def _connect_menu_create_account(session):
 @ConnectMenu.add_entry("Q", "Quit")
 def _connect_menu_quit(session):
     session.close("Okay, goodbye!",
-                  log_msg=joins(session, "has quit"))
+                  log_msg=joins(session, "has quit."))
 
 
 @ConnectMenu.add_entry("?", "Help")

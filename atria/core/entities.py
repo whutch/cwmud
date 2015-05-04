@@ -189,7 +189,7 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
             else:
                 log.warn(joins("Unused data while deserializing ",
                                class_name(self), ": '", key, "':'",
-                               value, "'", sep=""))
+                               value, "'.", sep=""))
 
 
 class _UnsetMeta(type):
@@ -644,7 +644,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
             data = cls._store.get(key)
             if data:
                 if "uid" not in data:
-                    log.warn("No uid for %s loaded with key: %s",
+                    log.warn("No uid for %s loaded with key: %s!",
                              class_name(cls), key)
                 entity = cls(data)
                 entity._dirty = False
@@ -655,7 +655,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
     def save(self):
         """Store this entity."""
         if not self.is_savable:
-            log.warn("Tried to save non-savable entity %s", self)
+            log.warn("Tried to save non-savable entity %s!", self)
             return
         old_key = self.tags.get("_old_key")
         if old_key:

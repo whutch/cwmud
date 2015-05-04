@@ -83,7 +83,7 @@ def _handle_reload_request(msg):
     if pid not in servers:  # pragma: no cover
         # There may be more than one nanny process running.
         return
-    log.info("Received reload request from process %s", pid)
+    log.info("Received reload request from process %s.", pid)
     new_server = ServerProcess()
     listener.on_connect = _on_connect
     new_server.start(reload_from=pid)
@@ -93,7 +93,7 @@ def _handle_reload_request(msg):
 def main():
     """Start the first server process and listen for sockets."""
     global listener
-    log.info("%s %s", settings.MUD_NAME_FULL, __version__)
+    log.info("%s %s.", settings.MUD_NAME_FULL, __version__)
     listener = TelnetServer(address=settings.BIND_ADDRESS,
                             port=settings.BIND_PORT,
                             timeout=0,
@@ -108,13 +108,13 @@ def main():
             dead_servers = []
             for server in servers.values():
                 if not server.alive:
-                    log.info("Process %s finished with code %s",
-                             server.pid, server.exit_code)
+                    log.info("Process %s finished with code %s.",
+                              server.pid, server.exit_code)
                     dead_servers.append(server)
             for server in dead_servers:
                 del servers[server.pid]
             if not servers:
-                log.info("No servers running, goodbye")
+                log.info("No servers running, goodbye.")
                 break
             listener.poll()
             channels.get_message()

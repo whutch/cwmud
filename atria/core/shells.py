@@ -354,6 +354,6 @@ class EchoShell(Shell):
         """
         if data.strip() == "quit":  # pragma: no cover
             self.session.close("Okay, goodbye!",
-                               log_msg=joins(self.session, "has quit"))
+                               log_msg=joins(self.session, "has quit."))
         else:
             self.session.send("You sent:", data)

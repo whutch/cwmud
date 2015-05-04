@@ -406,7 +406,7 @@ class QuitCommand(Command):
         if self.session.char:
             self.session.char.suspend()
         self.session.close("Okay, goodbye!",
-                           log_msg=joins(self.session, "has quit"))
+                           log_msg=joins(self.session, "has quit."))
 
 
 @COMMANDS.register
