@@ -4,6 +4,7 @@
 # :copyright: (c) 2008 - 2015 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
+from gc import collect
 from time import sleep
 
 import redis
@@ -308,8 +309,7 @@ def _connect_menu_help(session):
 
 
 if settings.FORCE_GC_COLLECT:
-    import gc
-    TIMERS.create("1m", "gc_collect", repeat=-1, callback=gc.collect)
+    TIMERS.create("1m", "gc_collect", repeat=-1, callback=collect)
 
 
 @TIMERS.create("3m", "save_and_commit", repeat=-1)
