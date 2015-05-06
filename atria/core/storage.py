@@ -36,7 +36,7 @@ class DataStoreManager:
         :param DataStore store: The data store to be registered
         :returns DataStore: The registered data store
         :raises AlreadyExists: If a store with that name already exists
-        :raises TypeError: If `store` is not an instance of DataStore.
+        :raises TypeError: If `store` is not an instance of DataStore
 
         """
         if not isinstance(store, DataStore):

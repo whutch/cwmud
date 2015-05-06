@@ -43,10 +43,10 @@ class EventManager:
              pre=False, after=None):
         """Hook a callback to an event, optionally through a decorator.
 
-        If an event with the name ``event_name`` does not exist it will be
+        If an event with the name `event_name` does not exist it will be
         implicitly created for you.
 
-        If you do not provide ``callback``, this will instead return a
+        If you do not provide `callback`, this will instead return a
         decorator that will use the decorated function as the callback.
 
         :param str event_name: The name of the event to hook
@@ -97,10 +97,10 @@ class EventManager:
     def unhook(self, event_name, namespace=None, callback=None):
         """Unhook callbacks from an event.
 
-        If an event with the name ``event_name`` or a wildcard matching it
+        If an event with the name `event_name` or a wildcard matching it
         does not exist, nothing happens.
 
-        If neither ``namespace`` nor ``callback`` are provided, all hooks
+        If neither `namespace` nor `callback` are provided, all hooks
         will be stripped from the matching event(s).  Use cautiously.
 
         :param str event_name: The name of the event to unhook; it can either
@@ -142,7 +142,7 @@ class EventManager:
     def fire(self, event_name, *args, **opts):
         """Fire an event.
 
-        If an event with the name ``event_name`` does not exist it will be
+        If an event with the name `event_name` does not exist it will be
         implicitly created and then fired (and likely nothing will happen).
 
         Only positional arguments can be passed on to event callbacks.

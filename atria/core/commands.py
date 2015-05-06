@@ -48,7 +48,7 @@ class CommandManager:
         :returns Command: The registered command
         :raises AlreadyExists: If a command with that class name already exists
         :raises TypeError: If the supplied or decorated class is not a
-                           subclass of Command.
+                           subclass of Command
 
         """
         if (not isinstance(command, type) or

@@ -47,7 +47,7 @@ class ShellManager:
         :returns Shell: The registered shell
         :raises AlreadyExists: If a shell with that class name already exists
         :raises TypeError: If the supplied or decorated class is not a
-                           subclass of Shell.
+                           subclass of Shell
 
         """
         if not isinstance(shell, type) or not issubclass(shell, Shell):
@@ -99,7 +99,7 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
     def session(self, new_session):
         """Set the current session for this shell.
 
-        If ``new_session`` is not None, this shell's init method
+        If `new_session` is not None, this shell's init method
         will be called.
 
         :param _Session new_session: The session tied to this shell
@@ -222,8 +222,8 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
         after parsing one argument, the second value will be an empty string.
         If there was no data worth parsing, both values will be empty strings.
 
-        :param str data: The data to get an argument from.
-        :returns str,str: The parsed argument and any remaining data
+        :param str data: The data to get an argument from
+        :returns tuple<str,str>: The parsed argument and any remaining data
 
         """
         # Dump leading whitespace.
@@ -350,6 +350,7 @@ class EchoShell(Shell):
         """Echo any input back to the client.
 
         :param str data: Input from the client
+        :returns None:
 
         """
         if data.strip() == "quit":  # pragma: no cover

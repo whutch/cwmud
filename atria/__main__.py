@@ -63,6 +63,7 @@ class ServerProcess:
 
         :param int reload_from: Optional, the PID of a running game server
                                 process that this process should reload from
+        :returns None:
 
         """
         assert not self._process, "server instance already started"

@@ -143,6 +143,8 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
         existing on this blob.
 
         :param DataBlob blob: The blob to merge this blob with
+        :returns None:
+
         """
         self._blobs.update(blob._blobs)
         self._attrs.update(blob._attrs)
@@ -303,7 +305,7 @@ class EntityManager:
         :raises KeyError: If an entity with the same _uid_code attribute
                           already exists
         :raises TypeError: If the supplied or decorated class is not a
-                           subclass of Entity.
+                           subclass of Entity
 
         """
         if (not isinstance(entity, type) or
@@ -612,6 +614,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         """Return all active instances of this entity.
 
         :returns list: All active instances of this entity type
+
         """
         return [instance for instance in cls._instances.values()
                 if instance.active]
@@ -684,6 +687,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         :param new_key: The key the new entity will be stored under;
                         new_key can be callable, in which case the return
                         value will be used as the key
+        :returns Entity: The new, cloned entity
 
         """
         if not self._store:

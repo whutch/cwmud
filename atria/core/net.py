@@ -70,7 +70,7 @@ class ClientManager:
                                  listen with; if None, a new listener will be
                                  opened; if 0, no listener is used
         :returns None:
-        :raises TypeError: if on_connect or on_disconnect aren't callable
+        :raises TypeError: If `on_connect` or `on_disconnect` aren't callable
 
         """
         if not callable(on_connect):

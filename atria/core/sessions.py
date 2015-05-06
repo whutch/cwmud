@@ -77,7 +77,7 @@ class SessionManager:
 
         :param bool output_only: Whether to only process the output queue
                                  (this allows you to call poll from inside a
-                                 command without triggering an infinite loop.)
+                                 command without triggering an infinite loop)
         :returns None:
 
         """
@@ -415,7 +415,7 @@ class _Session(HasFlags):
 
         :param bool output_only: Whether to only process the output queue
                                  (this allows you to call poll from inside a
-                                 command without triggering an infinite loop.)
+                                 command without triggering an infinite loop)
         :returns None:
 
         """

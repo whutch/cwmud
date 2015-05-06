@@ -45,7 +45,7 @@ class MenuManager:
         :returns Menu: The registered menu
         :raises AlreadyExists: If a menu with that class name already exists
         :raises TypeError: If the supplied or decorated class is not a
-                           subclass of Menu.
+                           subclass of Menu
 
         """
         if (not isinstance(menu, type) or

@@ -42,7 +42,7 @@ class RequestManager:
         :returns Request: The registered request template
         :raises AlreadyExists: If a request with that class name already exists
         :raises TypeError: If the supplied or decorated class is not a
-                           subclass of Request.
+                           subclass of Request
 
         """
         if (not isinstance(request, type) or

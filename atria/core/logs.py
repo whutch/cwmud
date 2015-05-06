@@ -28,11 +28,7 @@ class _Formatter(logging.Formatter):
     def formatTime(self, record, datefmt=None):
         """Convert a LogRecord's creation time to a string.
 
-        :param LogRecord record: The record to be formatted
-        :param str datefmt: A formatting string to be passed to strftime
-        :returns str: A formatted time string
-
-        If *datefmt* is provided, it will be used to convert the time through
+        If `datefmt` is provided, it will be used to convert the time through
         datetime.strftime.  If not, it falls back to the formatTime method of
         logging.Formatter, which converts the time through time.strftime.
 
@@ -43,6 +39,10 @@ class _Formatter(logging.Formatter):
         converted to 3-digit zero-padded milliseconds, as an alternative to
         the %f argument's usual 6-digit microseconds (because frankly that's
         just too many digits).
+
+        :param LogRecord record: The record to be formatted
+        :param str datefmt: A formatting string to be passed to strftime
+        :returns str: A formatted time string
 
         """
         if datefmt:

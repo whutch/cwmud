@@ -109,8 +109,12 @@ class TimerManager:
     def create(self, duration, name=None, repeat=0, save=True, callback=None):
         """Create a timer that will call a function every so often.
 
-        If you do not provide ``callback``, this will instead return a
+        If you do not provide `callback`, this will instead return a
         decorator that will use the decorated function as the callback.
+
+        Note: It is not a timer's job to know what systems, scripts, objects,
+        etc are associated with it; anything that creates timers should also
+        destroy them when they are unloaded, disabled, destroyed, etc.
 
         :param str|int duration: The amount of time between repetitions
         :param hashable name: Optional, a key for the timer
@@ -120,14 +124,11 @@ class TimerManager:
         :param function callback: Optional, a callback for the timer
         :returns _Timer|function: A timer instance if a callback was provided,
                                   otherwise a decorator to create the timer
-        :raises AlreadyExists: if name is provided and that name already exists
-        :raises KeyError: if name is provided and is not hashable
-        :raises TypeError: if callback or decorated object is not callable
-        :raises ValueError: if duration is invalid or zero
-
-        Note: It is not a timer's job to know what systems, scripts, objects,
-        etc are associated with it; anything that creates timers should also
-        destroy them when they are unloaded, disabled, destroyed, etc.
+        :raises AlreadyExists: If `name` is provided and that name
+                               already exists
+        :raises KeyError: If `name` is provided and is not hashable
+        :raises TypeError: If `callback` or decorated object is not callable
+        :raises ValueError: If `duration` is invalid or zero
 
         """
         def _inner(func):

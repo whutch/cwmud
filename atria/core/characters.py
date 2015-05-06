@@ -92,6 +92,7 @@ class Character(Entity):
         :param iterable<Character> to: The recipient(s) of the messages
                                        (not including the actor).
         :param bool and_self: Whether to send a message to the actor as well.
+        :returns None:
 
         """
         def _build_msg(template, _context):
