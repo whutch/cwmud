@@ -109,7 +109,7 @@ def main():
             dead_servers = []
             for server in servers.values():
                 if not server.alive:
-                    log.info("Process %s finished with code %s.",
+                    log.debug("Process %s finished with code %s.",
                               server.pid, server.exit_code)
                     dead_servers.append(server)
             for server in dead_servers:

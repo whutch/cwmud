@@ -332,7 +332,7 @@ class EntityManager:
                     instance.save()
                     count += 1
         if count:
-            log.info("Saved %s dirty entities.", count)
+            log.debug("Saved %s dirty entities.", count)
 
 
 # noinspection PyDocstring

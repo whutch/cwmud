@@ -99,7 +99,7 @@ class Server:
         self._socket_queue = socket_queue
 
         with EVENTS.fire("server_init", no_pre=True):
-            log.info("Initializing server process %s.", self._pid)
+            log.debug("Initializing server process %s.", self._pid)
 
         with EVENTS.fire("server_boot"):
             log.info("Booting server.")
@@ -130,7 +130,7 @@ class Server:
             self._store.commit()
 
         if reload_from:
-            log.info("Reload complete for process %s.", self._pid)
+            log.debug("Reload complete for process %s.", self._pid)
             self._rdb.publish("server-reload-complete", self._pid)
             self._reloading = False
 

@@ -56,8 +56,8 @@ class DataStoreManager:
                 transaction_count += 1
                 store.commit()
         if item_count or transaction_count:
-            log.info("Commit %s items from %s transactions.",
-                     item_count, transaction_count)
+            log.debug("Commit %s items from %s transactions.",
+                      item_count, transaction_count)
 
     def abort(self):
         """Abort the transactions of all registered data stores."""
@@ -69,8 +69,8 @@ class DataStoreManager:
                 transaction_count += 1
                 store.abort()
         if item_count or transaction_count:
-            log.info("Abort %s items from %s transactions.",
-                     item_count, transaction_count)
+            log.debug("Abort %s items from %s transactions.",
+                      item_count, transaction_count)
 
 
 class DataStore:
