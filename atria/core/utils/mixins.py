@@ -16,7 +16,7 @@ you will need to first create a new metaclass that subclasses the metaclasses
 of each of the mix-ins you are using and then use that as the metaclass for
 your new class. For example:
 
-class _MyClassMeta(HasFlagsMega, HasWeaksMeta):
+class _MyClassMeta(HasFlagsMeta, HasWeaksMeta):
     pass
 
 class MyClass(HasFlags, HasWeaks, metaclass=_MyClassMeta):
