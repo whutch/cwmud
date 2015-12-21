@@ -30,12 +30,12 @@ class EventManager:
         """Fetch an event, implicitly creating it if necessary.
 
         :param str event_name: The name of the event to get or create
-        :returns _Event: The existing or newly created event
+        :returns Event: The existing or newly created event
 
         """
         event = self._events.get(event_name)
         if not event:
-            event = _Event(event_name)
+            event = Event(event_name)
             self._events[event_name] = event
         return event
 
@@ -61,7 +61,7 @@ class EventManager:
         """
         def _inner(func):
             event = self.get_or_make(event_name)
-            new_hook = _EventHook(func, namespace, pre, after)
+            new_hook = EventHook(func, namespace, pre, after)
             event.hooks.append(new_hook)
             if namespace is not None:
                 # Check for existing hooks that should be called after this.
@@ -150,14 +150,14 @@ class EventManager:
         :param str event_name: The name of the event to hook
         :param sequence args: Optional, arguments passed to the event callbacks
         :param mapping opts: Optional, options passed to the event context
-        :returns _EventContext: A context manager for the event
+        :returns EventContext: A context manager for the event
 
         """
         event = self.get_or_make(event_name)
-        return _EventContext(event, args, opts)
+        return EventContext(event, args, opts)
 
 
-class _EventHook:
+class EventHook:
 
     """A callback hooked to an event.
 
@@ -173,7 +173,7 @@ class _EventHook:
         self.after = after
 
 
-class _Event:
+class Event:
 
     """An event, able to be hooked and fired.
 
@@ -187,7 +187,7 @@ class _Event:
         self.hooks = []
 
 
-class _EventContext:
+class EventContext:
 
     """A context manager for an event.
 
