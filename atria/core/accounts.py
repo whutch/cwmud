@@ -50,7 +50,7 @@ class Account(Entity):
     def session(self, new_session):
         """Set the current session for this account.
 
-        :param sessions._Session new_session: The session tied to this account
+        :param sessions.Session new_session: The session tied to this account
         :returns None:
 
         """
@@ -313,7 +313,7 @@ class RequestAccountOptionsWidth(Request):
 def create_account(session, callback, account=None):
     """Perform a series of requests to create a new account.
 
-    :param sessions._Session session: The session creating an account
+    :param sessions.Session session: The session creating an account
     :param callable callback: A callback for when the account is created
     :param Account account: The account in the process of being created
     :returns None:
@@ -366,7 +366,7 @@ def authenticate_account(session, success=None, fail=None, account=None):
     no account assigned, an account name will be requested first;
     otherwise only the password is requested.
 
-    :param sessions._Session session: The session to authenticate
+    :param sessions.Session session: The session to authenticate
     :param callable success: Optional, a callback for successful authentication
     :param callable fail: Optional, a callback for failed authentication
     :param Account account: Optional, an account to authenticate against

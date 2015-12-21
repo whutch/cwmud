@@ -175,7 +175,7 @@ class Menu(HasWeaks, metaclass=_MenuMeta):
     def session(self, new_session):
         """Set the current session for this menu.
 
-        :param _Session new_session: The session tied to this menu
+        :param Session new_session: The session tied to this menu
         :returns None:
 
         """

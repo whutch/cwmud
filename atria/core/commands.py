@@ -88,7 +88,7 @@ class Command(HasFlags, HasWeaks, metaclass=_CommandMeta):
     def session(self, new_session):
         """Set the current session for this command.
 
-        :param _Session new_session: The session tied to this command
+        :param Session new_session: The session tied to this command
         :returns None:
 
         """

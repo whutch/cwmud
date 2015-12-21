@@ -45,7 +45,7 @@ class Character(Entity):
     def session(self, new_session):
         """Set the current session for this character.
 
-        :param sessions._Session new_session: The session tied to this
+        :param sessions.Session new_session: The session tied to this
                                               character
         :returns None:
 
@@ -357,7 +357,7 @@ class CharacterTitle(Attribute):
 def create_character(session, callback, character=None):
     """Perform a series of requests to create a new character.
 
-    :param sessions._Session session: The session creating a character
+    :param sessions.Session session: The session creating a character
     :param callable callback: A callback for when the character is created
     :param Character character: The character in the process of being created
     :returns None:

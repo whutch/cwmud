@@ -92,7 +92,7 @@ class Request(HasFlags, HasWeaks, metaclass=_RequestMeta):
     def session(self, new_session):
         """Set the current session for this request.
 
-        :param _Session new_session: The session tied to this request
+        :param Session new_session: The session tied to this request
         :returns None:
 
         """

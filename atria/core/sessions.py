@@ -40,7 +40,7 @@ class SessionManager:
         """Find a session by its port.
 
         :param int port: The port to search for
-        :returns _Session: A matching session or None
+        :returns Session: A matching session or None
 
         """
         return self._sessions.get(port)
@@ -49,7 +49,7 @@ class SessionManager:
         """Find a session by its client.
 
         :param miniboa.TelnetClient client: The client to search for
-        :returns _Session: A matching session or None
+        :returns Session: A matching session or None
 
         """
         for session in self._sessions.values():
@@ -62,13 +62,13 @@ class SessionManager:
 
         :param miniboa.TelnetClient client: The client to tie to the session
         :param Shell shell: Optional, a shell for the session
-        :returns _Session: The new session
+        :returns Session: The new session
         :raises AlreadyExists: If a session with that client already exists
 
         """
         if self.find_by_client(client):
             raise AlreadyExists(client, self.find_by_client(client))
-        session = _Session(client, shell)
+        session = Session(client, shell)
         self._sessions[session.port] = session
         return session
 
@@ -94,7 +94,7 @@ class SessionManager:
             del self._sessions[port]
 
 
-class _Session(HasFlags):
+class Session(HasFlags):
 
     """A session, sending and receiving data through a client."""
 

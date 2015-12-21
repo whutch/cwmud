@@ -102,7 +102,7 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
         If `new_session` is not None, this shell's init method
         will be called.
 
-        :param _Session new_session: The session tied to this shell
+        :param Session new_session: The session tied to this shell
         :returns None:
 
         """
