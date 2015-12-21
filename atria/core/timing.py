@@ -122,7 +122,7 @@ class TimerManager:
                            to repeat until killed)
         :param bool save: Whether this timer should be saved between reboots
         :param function callback: Optional, a callback for the timer
-        :returns _Timer|function: A timer instance if a callback was provided,
+        :returns Timer|function: A timer instance if a callback was provided,
                                   otherwise a decorator to create the timer
         :raises AlreadyExists: If `name` is provided and that name
                                already exists
@@ -142,7 +142,7 @@ class TimerManager:
             pulses = duration_to_pulses(duration)
             if not pulses:
                 raise ValueError("duration cannot be zero")
-            timer = _Timer(self, pulses, name, repeat, save, func)
+            timer = Timer(self, pulses, name, repeat, save, func)
             self._timers[name if name is not None else timer] = timer
             return timer
         if callback is not None:
@@ -153,14 +153,14 @@ class TimerManager:
     def kill(self, timer=None):
         """Destroy a timer if it exists, by name or reference.
 
-        :param str|_Timer timer: The timer to kill
+        :param str|Timer timer: The timer to kill
         :returns None:
 
         """
         if timer in self._timers:
             timer = self._timers.pop(timer)
-        if isinstance(timer, _Timer) and timer.live:
-            # _Timer.kill and this call each other, so we need to be
+        if isinstance(timer, Timer) and timer.live:
+            # Timer.kill and this call each other, so we need to be
             # mindful of an infinite loop.
             timer.kill()
 
@@ -185,7 +185,7 @@ class TimerManager:
                 self._next_pulse += _PULSE_TIME
 
 
-class _Timer:
+class Timer:
 
     """A timer that calls a function every so often.
 
