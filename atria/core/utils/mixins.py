@@ -40,7 +40,7 @@ class _FlagSet:
 
     @property
     def _owner(self):
-        return self._owner_ref()
+        return self._owner_ref() if self._owner_ref else None
 
     def __contains__(self, flag):
         return flag in self._flags
@@ -176,7 +176,7 @@ class _Tags(MutableMapping):
 
     @property
     def _owner(self):
-        return self._owner_ref()
+        return self._owner_ref() if self._owner_ref else None
 
     def __repr__(self):
         items = ["{}: {}".format(k, v) for k, v in self._tags.items()]
