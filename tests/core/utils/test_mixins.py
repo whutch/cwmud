@@ -7,7 +7,7 @@
 import gc
 from weakref import finalize
 
-from atria.core.utils.mixins import HasFlags, HasParent, HasWeaks
+from atria.core.utils.mixins import HasFlags, HasParent, HasTags, HasWeaks
 
 
 class TestHasFlags:
@@ -96,6 +96,72 @@ class TestHasFlags:
         """Test that we can check for flags through the has_any method."""
         assert not self.instance.flags.has_any("nope", 3, 4)
         assert self.instance.flags.has_any("test", 3, 4)
+
+
+class TestHasTags:
+
+    """A collection of tests for the tagging mix-in class."""
+
+    class _TestClass(HasTags):
+
+        def __init__(self):
+            super().__init__()
+            self.some_attribute = 5
+
+    instance = _TestClass()
+
+    def test_tags_property(self):
+        """Test that the tags property returns a tag set."""
+        assert hasattr(self.instance.tags, "as_dict")
+
+    def test_contains_tag(self):
+        """Test that we can check if the set contains a tag."""
+        assert "test" not in self.instance.tags
+
+    def test_set_tag(self):
+        """Test that we can add a tag to the tag set."""
+        self.instance.tags["test"] = 3
+        assert "test" in self.instance.tags
+
+    def test_get_tag(self):
+        """Test that we can get a tag from the tag set."""
+        assert self.instance.tags["test"] == 3
+
+    def test_tags_as_dict(self):
+        """Test that we can get the current tags as a dictionary."""
+        assert self.instance.tags.as_dict == {"test": 3}
+
+    def test_iter_tags(self):
+        """Test that we can iterate through the tag set."""
+        self.instance.tags["boop"] = True
+        assert {tag for tag in self.instance.tags} == {"test", "boop"}
+
+    def test_tags_length(self):
+        """Test that we can get the number of tags."""
+        assert len(self.instance.tags) == 2
+
+    def test_remove_tag(self):
+        """Test that we can remove a tag from the tag set."""
+        assert "test" in self.instance.tags
+        del self.instance.tags["test"]
+        assert "test" not in self.instance.tags
+
+    def test_tags_as_bool(self):
+        """Test that we can use the tag set in a boolean statement."""
+        assert self.instance.tags
+        del self.instance.tags["boop"]
+        assert not self.instance.tags
+
+    def test_no_owner(self):
+        """Test setting and removing tags with no owner."""
+        owner_ref = self.instance.tags._owner_ref
+        self.instance.tags._owner_ref = None
+        assert "test" not in self.instance.tags
+        self.instance.tags["test"] = 5
+        assert "test" in self.instance.tags
+        del self.instance.tags["test"]
+        assert "test" not in self.instance.tags
+        self.instance.tags._owner_ref = owner_ref
 
 
 class TestHasWeaks:
