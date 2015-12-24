@@ -123,11 +123,13 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
         return self._attr_values.get(name)
 
     # noinspection PyProtectedMember
-    def _set_attr_val(self, name, value, validate=True):
+    def _set_attr_val(self, name, value, validate=True, raw=False):
         attr = self._attrs[name]
         old_value = self._attr_values.get(name)
         if validate:
             value = attr._validate(value)
+        if not raw:
+            value = attr._finalize(value)
         entity = self._entity
         if entity._base_blob == self and entity._store_key == name:
             # We're updating our store key, we need to check for an old one.
@@ -174,7 +176,8 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
     def deserialize(self, data):
         """Update this blob's data using values from a dict.
 
-        All sub-blobs found will in turn be deserialized.
+        All sub-blobs found will in turn be deserialized.  Be careful where
+        you deserialize data from, as it will be loaded raw and unvalidated.
 
         :param dict data: The data to deserialize
         :returns None:
@@ -185,7 +188,7 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
                 if value is not Unset:
                     # noinspection PyProtectedMember
                     value = self._attrs[key]._deserialize(value)
-                self._set_attr_val(key, value, validate=False)
+                self._set_attr_val(key, value, validate=False, raw=True)
             elif key in self._blobs:
                 self._blobs[key].deserialize(value)
             else:
@@ -236,6 +239,19 @@ class Attribute:
         :param new_value: The potential value to validate
         :returns: The validated (and optionally sanitized) value
 
+        """
+        return new_value
+
+    @classmethod
+    def _finalize(cls, new_value):
+        """Finalize the value for this attribute.
+
+        This will be called by the blob when setting the value for this
+        attribute, after validation; override it to perform any sanitation
+        or transformation. The value should be considered valid.
+
+        :param new_value: The new, validated value
+        :returns: The finalized value
         """
         return new_value
 
