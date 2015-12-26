@@ -179,6 +179,10 @@ class AccountPassword(Attribute):
         if len(new_value) < 8:
             raise ValueError(joins("Account passwords must be at least",
                                    cls._min_len, "characters in length."))
+        return new_value
+
+    @classmethod
+    def _finalize(cls, new_value):
         return bcrypt_sha256.encrypt(new_value)
 
 
