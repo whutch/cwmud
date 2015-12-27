@@ -694,13 +694,13 @@ CharacterShell.add_verbs(SayCommand, "say", "'")
 CharacterShell.add_verbs(GossipCommand, "gossip", "\"")
 
 # Connection commands
-CharacterShell.add_verbs(QuitCommand, "quit")
-CharacterShell.add_verbs(LogoutCommand, "logout")
+CharacterShell.add_verbs(QuitCommand, "quit", truncate=False)
+CharacterShell.add_verbs(LogoutCommand, "logout", truncate=False)
 
 # Admin commands
-CharacterShell.add_verbs(ReloadCommand, "reload")
-CharacterShell.add_verbs(TestCommand, "test")
-CharacterShell.add_verbs(CommitCommand, "commit")
+CharacterShell.add_verbs(ReloadCommand, "reload", truncate=False)
+CharacterShell.add_verbs(TestCommand, "test", truncate=False)
+CharacterShell.add_verbs(CommitCommand, "commit", truncate=False)
 
 # OLC commands
 CharacterShell.add_verbs(DigCommand, "dig")
