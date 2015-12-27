@@ -133,11 +133,12 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
             raise ValueError("non-shortcut verbs can only contain letters")
 
     @classmethod
-    def add_verbs(cls, command, *verbs):
+    def add_verbs(cls, command, *verbs, truncate=True):
         """Add verbs to this shell that trigger a given command.
 
         :param Command command: The command that will be executed
         :param str verbs: A sequence of verbs that trigger the command
+        :param bool truncate: Whether to add truncated verbs to the shell
         :returns None:
         :raises TypeError: If the given command is not a Command subclass
         :raises ValueError: If any of the verbs are not valid verbs
@@ -156,18 +157,20 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
             cls._verbs[verb] = command
             if verb in cls._truncated_verbs:
                 del cls._truncated_verbs[verb]
-            # Check all the shorter forms and add them if they're valid.
-            # We're trading off the memory of a bigger dict to store the
-            # truncated entries versus the CPU time it would take to search
-            # a store of full commands for a partial match.
-            verb = verb[:-1]
-            while verb:
-                if verb not in cls._verbs:
-                    # First come, first served.  If you want a command to have
-                    # truncated priority over another, register it first.
-                    cls._verbs[verb] = command
-                    cls._truncated_verbs[verb] = command
+            if truncate:
+                # Check all the shorter forms and add them if they're valid.
+                # We're trading off the memory of a bigger dict to store the
+                # truncated entries versus the CPU time it would take to search
+                # a store of full commands for a partial match.
                 verb = verb[:-1]
+                while verb:
+                    if verb not in cls._verbs:
+                        # First come, first served.  If you want a command to
+                        # have truncated priority over another, register it
+                        # first.
+                        cls._verbs[verb] = command
+                        cls._truncated_verbs[verb] = command
+                    verb = verb[:-1]
 
     @classmethod
     def remove_verbs(cls, *verbs):
