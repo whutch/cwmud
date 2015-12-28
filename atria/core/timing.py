@@ -54,6 +54,9 @@ def duration_to_pulses(duration):
         return duration
     if duration.isdigit():
         return int(duration)
+    duration = duration.lower()
+    if duration == "now":
+        return 1
     match = _match_secs.match(duration)
     if match:
         return int(match.groups()[0]) * PULSE_PER_SECOND
@@ -150,7 +153,7 @@ class TimerManager:
         else:
             return _inner
 
-    def kill(self, timer=None):
+    def kill(self, timer):
         """Destroy a timer if it exists, by name or reference.
 
         :param str|Timer timer: The timer to kill
