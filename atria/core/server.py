@@ -192,6 +192,14 @@ class Server:
                     log.info("Server shutdown complete.")
                     self._rdb.publish("server-shutdown-complete", self._pid)
 
+    def shutdown(self):
+        """Shutdown the server."""
+        raise ServerShutdown
+
+    def reboot(self):
+        """Reboot the server."""
+        raise ServerReboot
+
     def reload(self):
         """Request a reload from the nanny process."""
         self._rdb.publish("server-reload-request", self._pid)

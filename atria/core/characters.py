@@ -411,6 +411,41 @@ class QuitCommand(Command):
 
 
 @COMMANDS.register
+class ShutdownCommand(Command):
+
+    """A command to shutdown the game server."""
+
+    def _action(self):
+        from .timing import duration_to_pulses, PULSE_PER_SECOND, TIMERS
+        from .server import SERVER
+        arg = self.args[0].lower() if self.args else None
+        if arg and arg in ("stop", "cancel"):
+            if "shutdown" not in TIMERS:
+                self.session.send("There is no shutdown in progress.")
+            else:
+                TIMERS.kill("shutdown")
+                self.session.send("Shutdown canceled.")
+            return
+        try:
+            if arg is None:
+                # Default to 10 seconds.
+                when = duration_to_pulses("10s")
+            else:
+                when = duration_to_pulses(self.args[0])
+        except ValueError:
+            self.session.send("Invalid time until shutdown.")
+        else:
+            if when:
+                self.session.send("Shutdown initiated in",
+                                  when // PULSE_PER_SECOND, "seconds!")
+
+            @TIMERS.create(when, "shutdown")
+            def _shutdown():
+                self.session.send("Server is shutting down!")
+                SERVER.shutdown()
+
+
+@COMMANDS.register
 class ReloadCommand(Command):
 
     """A command to reload the game server, hopefully without interruption.
@@ -698,6 +733,7 @@ CharacterShell.add_verbs(QuitCommand, "quit", truncate=False)
 CharacterShell.add_verbs(LogoutCommand, "logout", truncate=False)
 
 # Admin commands
+CharacterShell.add_verbs(ShutdownCommand, "shutdown", truncate=False)
 CharacterShell.add_verbs(ReloadCommand, "reload", truncate=False)
 CharacterShell.add_verbs(TestCommand, "test", truncate=False)
 CharacterShell.add_verbs(CommitCommand, "commit", truncate=False)
