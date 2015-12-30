@@ -9,13 +9,7 @@ from importlib import reload
 import pytest
 import redis
 
-from atria import settings
 import atria.__main__ as main
-
-
-# Use a different listen port, in case the tests are run while a
-# real server is running on the same system.
-settings.BIND_PORT = 4445
 
 
 class TestMain:

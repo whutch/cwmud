@@ -21,6 +21,11 @@ from atria import ROOT_DIR, settings
 # Change the log path during testing.
 settings.LOG_PATH = join(ROOT_DIR, "logs", "test.log")
 
+settings.BIND_ADDRESS = "localhost"
+# Use a different listen port, in case the tests are run while a
+# real server is running on the same system.
+settings.BIND_PORT = 4445
+
 
 from atria.core.logs import get_logger
 
