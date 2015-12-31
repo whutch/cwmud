@@ -126,10 +126,11 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
     def _set_attr_val(self, name, value, validate=True, raw=False):
         attr = self._attrs[name]
         old_value = self._attr_values.get(name)
-        if validate:
-            value = attr._validate(value)
-        if not raw:
-            value = attr._finalize(value)
+        if value is not Unset:
+            if validate:
+                value = attr._validate(value)
+            if not raw:
+                value = attr._finalize(value)
         entity = self._entity
         if entity._base_blob == self and entity._store_key == name:
             # We're updating our store key, we need to check for an old one.
