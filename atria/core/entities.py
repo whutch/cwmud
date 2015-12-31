@@ -430,7 +430,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
 
     __uid_timecode = 0  # Used internally for UID creation.
 
-    def __init__(self, data=None):
+    def __init__(self, data=None, savable=True):
         super().__init__()
 
         def _build_base_blob(cls, blob=self._base_blob(self), checked=set()):
@@ -448,7 +448,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
 
         self._base_blob = _build_base_blob(self.__class__)
         self._dirty = False
-        self._savable = True
+        self._savable = savable
         # Never, ever manually change an object's UID! There are no checks
         # for removing the old UID from the store, updating UID links, or
         # anything else like that.  Bad things will happen!

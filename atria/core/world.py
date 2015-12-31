@@ -26,8 +26,8 @@ class Room(Entity):
     _store_key = "uid"
     _uid_code = "R"
 
-    def __init__(self, data=None):
-        super().__init__(data)
+    def __init__(self, data=None, savable=True):
+        super().__init__(data, savable)
         self._chars = WeakSet()  # The Characters currently in this room.
 
     def __repr__(self):
