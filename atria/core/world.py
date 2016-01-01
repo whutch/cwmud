@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Rooms and areas, the virtual space of the MUD."""
 # Part of Atria MUD Server (https://github.com/whutch/atria)
-# :copyright: (c) 2008 - 2015 Will Hutcheson
+# :copyright: (c) 2008 - 2016 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
 import re
