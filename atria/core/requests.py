@@ -201,9 +201,9 @@ class Request(HasFlags, HasWeaks, metaclass=_RequestMeta):
                     # We don't need to confirm this input, request resolved.
                     resolved = True
             except Request.ValidationFailed as exc:
-                self.session.send(exc.msg)
+                error = exc.msg
 
-        if resolved:
+        if resolved and callable(self.callback):
             self.callback(self.session, data)
         elif error is not None:
             if self._confirm:
