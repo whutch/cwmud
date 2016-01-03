@@ -37,6 +37,7 @@ def test_pulses_to_pulses():
     assert (dtp(5) == dtp("5") ==
             dtp("5p") == dtp("5pulse") == dtp("5pulses") ==
             dtp("5 p") == dtp("5 pulse") == dtp("5 pulses") == 5)
+    assert dtp("now") == 1
 
 
 class TestTimerManager:
