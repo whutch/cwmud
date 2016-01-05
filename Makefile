@@ -21,6 +21,9 @@ coverage: clean-coverage clean-test
 
 nothing:
 
+print-coverage: clean-coverage clean-test
+	py.test --cov atria tests
+
 test: clean-test
 	py.test --flake8 atria tests
 
