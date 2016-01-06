@@ -4,6 +4,12 @@
 # :copyright: (c) 2008 - 2016 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
+from importlib import import_module
+from os import walk
+from os.path import join
+
+from .. import ROOT_DIR
+from .events import EVENTS
 from .logs import get_logger
 from .utils.exceptions import AlreadyExists
 from .utils.mixins import HasFlags, HasFlagsMeta, HasWeaks, HasWeaksMeta
@@ -109,3 +115,13 @@ class Command(HasFlags, HasWeaks, metaclass=_CommandMeta):
 # will generally only need one to work with, they are NOT singletons and you
 # can make more CommandManager instances if you like.
 COMMANDS = CommandManager()
+
+
+@EVENTS.hook("server_boot")
+def _hook_server_boot():
+    # Import commands modules.
+    import_module(".cmds", "atria.core")
+    for root, dirs, files in walk(join(ROOT_DIR, "atria", "core", "cmds")):
+        for file in files:
+            if file.endswith(".py"):
+                import_module(".cmds.{}".format(file[:-3]), "atria.core")
