@@ -21,6 +21,9 @@ from atria import ROOT_DIR, settings
 # Change the log path during testing.
 settings.LOG_PATH = join(ROOT_DIR, "logs", "test.log")
 
+# Change the data path during testing.
+settings.DATA_DIR = join(ROOT_DIR, ".cache", "data")
+
 settings.BIND_ADDRESS = "localhost"
 # Use a different listen port, in case the tests are run while a
 # real server is running on the same system.
