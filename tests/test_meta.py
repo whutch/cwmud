@@ -52,8 +52,8 @@ class TestMain:
             self.client.write(b"c\ntestchar\nyes\n1\n")
             # Do some stuff.
             self.client.write(b"look\n")
-            # Reload and shutdown.
-            self.client.write(b"reload\nshutdown now\n")
+            # Shutdown.
+            self.client.write(b"shutdown now\n")
 
         channels.subscribe(**{"server-boot-complete": _server_booted})
         worker = channels.run_in_thread()
