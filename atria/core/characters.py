@@ -6,7 +6,6 @@
 
 import re
 
-from .commands import Command, COMMANDS
 from .const import *
 from .entities import Attribute, ENTITIES, Entity
 from .logs import get_logger
