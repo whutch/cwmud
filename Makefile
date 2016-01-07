@@ -27,4 +27,7 @@ print-coverage: clean-coverage clean-test
 test: clean-test
 	py.test --flake8 atria tests
 
+test-strict: clean-test
+	py.test --flake8 -x --strict atria tests
+
 tests: test
