@@ -611,7 +611,11 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
                     # We already checked this entity when we were checking the
                     # cache, so don't bother reading from the store.
                     continue
-                data = cls._store.get(key)
+                try:
+                    data = cls._store.get(key)
+                except KeyError:
+                    # This key is pending deletion.
+                    data = None
                 if data:
                     matches = [data.get(_attr) == _value
                                for _attr, _value in pairs]
@@ -719,6 +723,11 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         new_entity = entity_class(data)
         setattr(new_entity, self._store_key, new_key)
         return new_entity
+
+    def delete(self):
+        """Delete this entity from its store."""
+        if self._store:
+            self._store.delete(self.key)
 
 
 # We create a global EntityManager here for convenience, and while the
