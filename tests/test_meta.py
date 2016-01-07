@@ -12,6 +12,8 @@ import redis
 
 from atria import settings
 import atria.__main__ as main
+from atria.core.accounts import Account
+from atria.core.characters import Character
 
 
 class TestMain:
@@ -32,9 +34,22 @@ class TestMain:
             # We have to unsubscribe from the server-boot-complete event
             # so reloading doesn't loop forever.
             channels.unsubscribe("server-boot-complete")
+            # Delete any existing test entities.
+            # We won't need to do this once we have separate test data.
+            account = Account.find("email", "test@account.com", n=1)
+            if account:
+                account.delete()
+            character = Character.find("name", "Testchar", n=1)
+            if character:
+                character.delete()
+            # Connect to the server.
             self.client.open(settings.BIND_ADDRESS, settings.BIND_PORT)
-            # Log in to a test account and character.
-            self.client.write(b"l\ntest@account\ntestpass\n1\n")
+            # Create a new account.
+            self.client.write(b"c\ntest@account.com\ntest@account.com\n")
+            self.client.write(b"testaccount\nyes\n")
+            self.client.write(b"testpassword\ntestpassword\nno\nyes\n")
+            # Create a new character and log into it.
+            self.client.write(b"c\ntestchar\nyes\n1\n")
             # Do some stuff.
             self.client.write(b"look\n")
             # Reload and shutdown.
