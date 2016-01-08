@@ -144,6 +144,49 @@ class TestCharacters:
         character.resume()
         assert character.active
 
+    def test_character_act(self, character):
+        """Test that we can generate 'act' messages for a character."""
+        target = Character(savable=False)
+        target.active = True
+        target.name = "Target"
+        # Character.session is a weak property, so we have to define the
+        # session output the property assignment so it hangs around.
+        target_session = _FakeSession()
+        target.session = target_session
+        assert not character.session._output
+        assert not target.session._output
+        # Generate messages for neither the source nor the target.
+        character.act("a tree falls and nobody is around.", and_self=False)
+        assert not character.session._output
+        assert not target.session._output
+        # Generate messages for the source but not the target.
+        character.act("{s} dance{ss} {x} jigs.", context={"x": "five"})
+        assert character.session._output
+        assert character.session._output.pop() == "You dance five jigs.\n"
+        assert not target.session._output
+        # Generate messages for the target but not the source.
+        character.act("{s} explode{ss}, hard.", target=target, and_self=False)
+        assert not character.session._output
+        assert target.session._output
+        assert target.session._output.pop() == "Testing explodes, hard.\n"
+        # Generate messages for the source and the target.
+        character.act("{s} hit{ss} {t} in the face!", target=target)
+        assert (character.session._output.pop() ==
+                "You hit Target in the face!\n")
+        assert (target.session._output.pop() ==
+                "Testing hits you in the face!\n")
+        character.act("{s} speak{ss} gibberish for a moment.",
+                      to=Character.all())
+        assert (character.session._output.pop() ==
+                "You speak gibberish for a moment.\n")
+        assert (target.session._output.pop() ==
+                "Testing speaks gibberish for a moment.\n")
+        character.act("{s} does something to {t}.", target=target,
+                      to=Character.all(), and_self=False)
+        assert not character.session._output
+        assert (target.session._output.pop() ==
+                "Testing does something to you.\n")
+
     def test_character_serialization(self, character, room):
         """Test that character serialization functions properly."""
         character.room = room
