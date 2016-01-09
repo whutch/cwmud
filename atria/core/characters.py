@@ -188,15 +188,17 @@ class Character(Entity):
         :param dict depart_context: Optional, a context for the departure
         :param dict arrive_context: Optional, a context for the arrival
         :returns None:
+        :raises TypeError: If `room` is not an instance of Room
 
         """
-        if not room:
-            return
-        if depart_msg:
+        if not isinstance(room, Room):
+            raise TypeError("cannot move character to non-room")
+        if self.room and depart_msg:
             self.act(depart_msg, depart_context, to=self.room.chars)
+        had_chars = bool(room.chars)
         # noinspection PyAttributeOutsideInit
         self.room = room
-        if arrive_msg:
+        if had_chars and arrive_msg:
             self.act(arrive_msg, arrive_context,
                      to=self.room.chars, and_self=False)
         self.show_room()
