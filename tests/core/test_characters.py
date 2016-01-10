@@ -4,6 +4,7 @@
 # :copyright: (c) 2008 - 2016 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
+from collections import deque
 import pytest
 
 from atria.core.accounts import Account
@@ -17,8 +18,9 @@ from atria.core.world import Room
 class _FakeSession:
 
     def __init__(self):
-        self._output = []
-        self._request_queue = []
+        self.account = None
+        self._output = deque()
+        self._request_queue = deque()
 
     def send(self, data, *more, sep=" ", end="\n"):
         return self._output.append(joins(data, *more, sep=sep) + end)
@@ -40,10 +42,33 @@ def character():
     return Character(savable=False)
 
 
+# Character.session is a weak property, so we have to define the
+# session outside the property assignment so it hangs around.
+_other_session = _FakeSession()
+
+
+@pytest.fixture(scope="module")
+def other_character():
+    """Create another Character instance for all tests to share."""
+    _character = Character(savable=False)
+    _character.active = True
+    _character.name = "Target"
+    _character.session = _other_session
+    return _character
+
+
 @pytest.fixture(scope="module")
 def room():
     """Create a Room instance for all tests to share."""
-    return Room(savable=False)
+    return Room({"x": 0, "y": 0, "z": 0}, savable=False)
+
+
+@pytest.fixture(scope="module")
+def other_room():
+    """Create another Room instance for all tests to share."""
+    _room = Room({"x": 1, "y": 0, "z": 0}, savable=False)
+    _room.name = "Another Room"
+    return _room
 
 
 @pytest.fixture(scope="module")
@@ -71,6 +96,7 @@ class TestCharacters:
         with pytest.raises(ValueError):
             character.account = "test"
         character.account = account
+        character.session.account = account
         assert character.account is account
 
     def test_character_room(self, character, room):
@@ -144,48 +170,121 @@ class TestCharacters:
         character.resume()
         assert character.active
 
-    def test_character_act(self, character):
+    def test_character_act(self, character, other_character):
         """Test that we can generate 'act' messages for a character."""
-        target = Character(savable=False)
-        target.active = True
-        target.name = "Target"
-        # Character.session is a weak property, so we have to define the
-        # session output the property assignment so it hangs around.
-        target_session = _FakeSession()
-        target.session = target_session
         assert not character.session._output
-        assert not target.session._output
+        assert not other_character.session._output
         # Generate messages for neither the source nor the target.
         character.act("a tree falls and nobody is around.", and_self=False)
         assert not character.session._output
-        assert not target.session._output
+        assert not other_character.session._output
         # Generate messages for the source but not the target.
         character.act("{s} dance{ss} {x} jigs.", context={"x": "five"})
         assert character.session._output
         assert character.session._output.pop() == "You dance five jigs.\n"
-        assert not target.session._output
+        assert not other_character.session._output
         # Generate messages for the target but not the source.
-        character.act("{s} explode{ss}, hard.", target=target, and_self=False)
+        character.act("{s} explode{ss}, hard.", target=other_character,
+                      and_self=False)
         assert not character.session._output
-        assert target.session._output
-        assert target.session._output.pop() == "Testing explodes, hard.\n"
+        assert other_character.session._output
+        assert (other_character.session._output.pop() ==
+                "Testing explodes, hard.\n")
         # Generate messages for the source and the target.
-        character.act("{s} hit{ss} {t} in the face!", target=target)
+        character.act("{s} hit{ss} {t} in the face!", target=other_character)
         assert (character.session._output.pop() ==
                 "You hit Target in the face!\n")
-        assert (target.session._output.pop() ==
+        assert (other_character.session._output.pop() ==
                 "Testing hits you in the face!\n")
         character.act("{s} speak{ss} gibberish for a moment.",
                       to=Character.all())
         assert (character.session._output.pop() ==
                 "You speak gibberish for a moment.\n")
-        assert (target.session._output.pop() ==
+        assert (other_character.session._output.pop() ==
                 "Testing speaks gibberish for a moment.\n")
-        character.act("{s} does something to {t}.", target=target,
+        character.act("{s} does something to {t}.", target=other_character,
                       to=Character.all(), and_self=False)
         assert not character.session._output
-        assert (target.session._output.pop() ==
+        assert (other_character.session._output.pop() ==
                 "Testing does something to you.\n")
+
+    def test_character_show_room(self, character, room, other_room):
+        """Test that we can generate a room display for a character."""
+        _session = character.session
+        character.session = None
+        character.show_room(room)
+        assert not _session._output
+        character.session = _session
+        assert not character.room
+        character.show_room()
+        assert not character.session._output
+        character.room = room
+        character.show_room()
+        assert "An Unnamed Room" in character.session._output.popleft()
+        assert "Exits:" in character.session._output.popleft()
+        assert character.room is not other_room
+        character.show_room(other_room)
+        assert "Another Room" in character.session._output.popleft()
+        assert "Exits:" in character.session._output.popleft()
+        character.room = Unset
+
+    def test_character_show_exits(self, character, room, other_room):
+        """Test that we can generate an exit display for a character."""
+        _session = character.session
+        character.session = None
+        character.show_exits(room)
+        assert not _session._output
+        character.session = _session
+        assert not character.room
+        character.show_exits()
+        assert not character.session._output
+        character.room = room
+        character.show_exits()
+        exits = character.session._output.popleft()
+        assert "Exits:" in exits
+        assert "east" in exits
+        assert "[Exits:" not in exits
+        assert character.room is not other_room
+        character.show_exits(other_room, short=True)
+        assert "[Exits: west" in character.session._output.popleft()
+        character.room = Unset
+
+    def test_character_move_to_room(self, character, other_character,
+                                    room, other_room):
+        """Test that we can move a character to a room."""
+        with pytest.raises(TypeError):
+            character.move_to_room(None)
+        msgs = ["{s} leave{ss}.", "{s} arrive{ss}."]
+        assert not character.room
+        character.move_to_room(room, *msgs)
+        # They had no room to leave from, so no departure message.
+        assert "An Unnamed Room" in character.session._output.popleft()
+        assert "Exits:" in character.session._output.popleft()
+        other_character.room = room
+        character.move_to_room(other_room, *msgs)
+        assert "You leave." in character.session._output.popleft()
+        assert "Another Room" in character.session._output.popleft()
+        assert "Exits" in character.session._output.popleft()
+        assert "Testing leaves." in other_character.session._output.popleft()
+        character.move_to_room(room, *msgs)
+        assert "You leave." in character.session._output.popleft()
+        assert "An Unnamed Room" in character.session._output.popleft()
+        assert "Exits" in character.session._output.popleft()
+        assert "Testing arrives." in other_character.session._output.popleft()
+
+    def test_character_move_direction(self, character, room, other_room):
+        """Test that we can move a character in a direction."""
+        character.room = Unset
+        character.move_direction(1, 0, 0)
+        assert not character.room
+        character.room = room
+        character.move_direction()
+        assert character.room is room
+        character.move_direction(0, 1, 0)
+        assert character.room is room
+        assert "can't go that way" in character.session._output.popleft()
+        character.move_direction(1, 0, 0)
+        assert character.room is other_room
 
     def test_character_serialization(self, character, room):
         """Test that character serialization functions properly."""
