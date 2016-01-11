@@ -29,3 +29,4 @@ def get_codename():
 __version__ = "{} ({})".format(get_version(), get_codename())
 
 ROOT_DIR = dirname(dirname(abspath(__file__)))
+BASE_PACKAGE = __name__
