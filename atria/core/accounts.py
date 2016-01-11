@@ -210,7 +210,7 @@ class AccountTrust(Attribute):
 
     """An account's trust level."""
 
-    _default = TRUST_PLAYER
+    default = TRUST_PLAYER
 
     @classmethod
     def _validate(cls, new_value):

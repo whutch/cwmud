@@ -351,7 +351,7 @@ class CharacterTitle(Attribute):
 
     """A character title."""
 
-    _default = "the newbie"
+    default = "the newbie"
 
 
 # noinspection PyUnresolvedReferences

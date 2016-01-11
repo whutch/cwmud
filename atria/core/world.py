@@ -83,7 +83,7 @@ class RoomName(Attribute):
     _min_len = 1
     _max_len = 60
     _valid_chars = re.compile(r"^[a-zA-Z ]+$")
-    _default = "An Unnamed Room"
+    default = "An Unnamed Room"
 
     @classmethod
     def _validate(cls, new_value):
@@ -104,7 +104,7 @@ class RoomDescription(Attribute):
 
     """The description of a room."""
 
-    _default = "A nondescript room."
+    default = "A nondescript room."
 
     @classmethod
     def _validate(cls, new_value):

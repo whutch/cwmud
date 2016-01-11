@@ -84,7 +84,7 @@ class _DataBlobMeta(HasWeaksMeta):
             cls._attrs[name] = attr_class
             getter = lambda s: s._get_attr_val(name)
             setter = (lambda s, v: s._set_attr_val(name, v)
-                      if not attr_class._read_only else None)
+                      if not attr_class.read_only else None)
             setattr(cls, name, property(getter, setter))
             return attr_class
 
@@ -106,7 +106,7 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
         self._attr_values = {}
         for key, attr in self._attrs.items():
             # noinspection PyProtectedMember
-            self._attr_values[key] = attr._default
+            self._attr_values[key] = attr.default
         self._blobs = self._blobs.copy()
         for key, blob in self._blobs.items():
             self._blobs[key] = blob(entity)
@@ -219,14 +219,14 @@ class Attribute:
     These are templates for the behavior of an attribute, they will not be
     instantiated and as such have no instance-based variables.
 
-    The value of `_default` should not be set to a mutable type, as it will
+    The value of `default` should not be set to a mutable type, as it will
     be passed by reference to all instantiated blobs and risks being changed
     elsewhere in the code.
 
     """
 
-    _default = Unset  # Do NOT use mutable types for this.
-    _read_only = False
+    default = Unset  # Do NOT use mutable types for this.
+    read_only = False
 
     @classmethod
     def _validate(cls, new_value):
@@ -408,7 +408,7 @@ class _EntityMeta(HasFlagsMeta, HasWeaksMeta):
             cls._base_blob._attrs[name] = attr_class
             getter = lambda s: s._base_blob._get_attr_val(name)
             setter = (lambda s, v: s._base_blob._set_attr_val(name, v)
-                      if not attr_class._read_only else None)
+                      if not attr_class.read_only else None)
             setattr(cls, name, property(getter, setter))
             return attr_class
 
@@ -741,7 +741,7 @@ class EntityVersion(Attribute):
 
     """An entity's version."""
 
-    _default = 1
+    default = 1
 
     @classmethod
     def _validate(cls, value):
