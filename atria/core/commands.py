@@ -8,7 +8,7 @@ from importlib import import_module
 from os import walk
 from os.path import join
 
-from .. import ROOT_DIR
+from .. import BASE_PACKAGE, ROOT_DIR
 from .events import EVENTS
 from .logs import get_logger
 from .utils.exceptions import AlreadyExists
@@ -120,8 +120,10 @@ COMMANDS = CommandManager()
 @EVENTS.hook("server_boot")
 def _hook_server_boot():
     # Import commands modules.
-    import_module(".cmds", "atria.core")
-    for root, dirs, files in walk(join(ROOT_DIR, "atria", "core", "cmds")):
+    core_module = ".".join((BASE_PACKAGE, "core"))
+    import_module(".cmds", core_module)
+    for root, dirs, files in walk(join(ROOT_DIR, BASE_PACKAGE,
+                                       "core", "cmds")):
         for file in files:
             if file.endswith(".py"):
-                import_module(".cmds.{}".format(file[:-3]), "atria.core")
+                import_module(".cmds.{}".format(file[:-3]), core_module)
