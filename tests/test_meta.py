@@ -11,7 +11,7 @@ import pytest
 import redis
 
 from atria import settings
-import atria.__main__ as main
+import atria.nanny as nanny
 
 
 class TestMain:
@@ -47,6 +47,6 @@ class TestMain:
 
         channels.subscribe(**{"server-boot-complete": _server_booted})
         worker = channels.run_in_thread()
-        main.main()
+        nanny.start_nanny()
         worker.stop()
-        reload(main)
+        reload(nanny)

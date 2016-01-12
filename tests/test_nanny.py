@@ -9,7 +9,7 @@ from importlib import reload
 import pytest
 import redis
 
-import atria.__main__ as main
+import atria.nanny as nanny
 
 
 class TestMain:
@@ -31,9 +31,9 @@ class TestMain:
 
         channels.subscribe(**{"server-boot-complete": _server_booted})
         worker = channels.run_in_thread()
-        main.main()
+        nanny.start_nanny()
         worker.stop()
-        reload(main)
+        reload(nanny)
 
     @pytest.mark.timeout(2)
     def test_main_reload(self):
@@ -54,6 +54,6 @@ class TestMain:
 
         channels.subscribe(**{"server-boot-complete": _server_booted})
         worker = channels.run_in_thread()
-        main.main()
+        nanny.start_nanny()
         worker.stop()
-        reload(main)
+        reload(nanny)
