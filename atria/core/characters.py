@@ -137,15 +137,17 @@ class Character(Entity):
             if not self.room:
                 return
             room = self.room
-        is_builder = self.session.account.trust >= TRUST_BUILDER
+        is_builder = (self.session.account.trust >= TRUST_BUILDER
+                      if self.session.account else False)
         char_list = "\n".join(["^G{} ^g{}^g is here.^~".format(
                                char.name, char.title)
                                for char in room.chars if char is not self])
         extra = " ({})".format(room.get_coord_str()) if is_builder else ""
-        self.session.send("^Y", room.name or "An Unnamed Room", extra, "^~\n",
-                          "^m  ", room.description, "^~\n",
-                          char_list, "\n" if char_list else "", "^~",
-                          sep="", end="")
+        self.session.send("^Y", room.name or "A Room", extra, "^~", sep="")
+        if room.description:
+            self.session.send("^m  ", room.description, "^~", sep="")
+        if char_list:
+            self.session.send(char_list, "^~", sep="")
         self.show_exits()
 
     def show_exits(self, room=None, short=False):
@@ -193,6 +195,8 @@ class Character(Entity):
         """
         if not isinstance(room, Room):
             raise TypeError("cannot move character to non-room")
+        if room is self.room:
+            return
         if self.room and depart_msg:
             self.act(depart_msg, depart_context, to=self.room.chars)
         had_chars = bool(room.chars)

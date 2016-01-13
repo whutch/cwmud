@@ -221,10 +221,12 @@ class TestCharacters:
         character.room = room
         character.show_room()
         assert "An Unnamed Room" in character.session._output.popleft()
+        assert character.session._output.popleft()  # The description
         assert "Exits:" in character.session._output.popleft()
         assert character.room is not other_room
         character.show_room(other_room)
         assert "Another Room" in character.session._output.popleft()
+        assert character.session._output.popleft()  # The description
         assert "Exits:" in character.session._output.popleft()
         character.room = Unset
 
@@ -259,16 +261,20 @@ class TestCharacters:
         character.move_to_room(room, *msgs)
         # They had no room to leave from, so no departure message.
         assert "An Unnamed Room" in character.session._output.popleft()
+        assert character.session._output.popleft()  # The description
         assert "Exits:" in character.session._output.popleft()
         other_character.room = room
         character.move_to_room(other_room, *msgs)
         assert "You leave." in character.session._output.popleft()
         assert "Another Room" in character.session._output.popleft()
+        assert character.session._output.popleft()  # The description
         assert "Exits" in character.session._output.popleft()
         assert "Testing leaves." in other_character.session._output.popleft()
         character.move_to_room(room, *msgs)
         assert "You leave." in character.session._output.popleft()
         assert "An Unnamed Room" in character.session._output.popleft()
+        assert character.session._output.popleft()  # The description
+        assert character.session._output.popleft()  # Character list
         assert "Exits" in character.session._output.popleft()
         assert "Testing arrives." in other_character.session._output.popleft()
 
