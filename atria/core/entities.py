@@ -475,7 +475,26 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
     @property
     def key(self):
         """Return the value of this entity's storage key."""
+        if len(self._store_key) == 3:
+            getter = self._store_key[1]
+            if callable(getter):
+                return getter(self)
         return getattr(self, self._store_key)
+
+    @key.setter
+    def key(self, new_key):
+        """Set this entity's storage key.
+
+        :param any new_key: The new key
+        :returns None:
+
+        """
+        if len(self._store_key) == 3:
+            setter = self._store_key[2]
+            if callable(setter):
+                setter(self, new_key)
+                return
+        setattr(self, self._store_key, new_key)
 
     @property
     def is_dirty(self):
@@ -486,6 +505,15 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
     def is_savable(self):
         """Return whether this entity can be saved."""
         return self._store and self._savable
+
+    @classmethod
+    def get_key_name(cls):
+        """Return the name of this entity's storage key."""
+        if len(cls._store_key) == 3:
+            getter, setter = cls._store_key[1:]
+            if callable(getter) and callable(setter):
+                return cls._store_key[0]
+        return cls._store_key
 
     def _flags_changed(self):
         self.dirty()
@@ -560,14 +588,14 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         if cls._store and cls._store.has(key):
             return True
         # Then check unsaved instances.
-        if cls._store_key == "uid":
+        if cls.get_key_name() == "uid":
             if key in cls._instances:
                 return True
         else:
             # This entity isn't saved by UID, so we have to check
             # each one for a matching store key.
             for entity in cls._instances.values():
-                if getattr(entity, cls._store_key) == key:
+                if entity.key == key:
                     return True
         return False
 
@@ -657,12 +685,12 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
 
         """
         if from_cache:
-            if cls._store_key == "uid":
+            if cls.get_key_name() == "uid":
                 if key in cls._instances:
                     return cls._instances[key]
             else:
                 for entity in cls._instances.values():
-                    if getattr(entity, cls._store_key) == key:
+                    if entity.key == key:
                         return entity
         if cls._store:
             data = cls._store.get(key)
@@ -687,16 +715,14 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
                 self._store.delete(old_key)
             del self.tags["_old_key"]
         data = self.serialize()
-        key = data[self._store_key]
-        self._store.put(key, data)
+        self._store.put(self.key, data)
         self._dirty = False
 
     def revert(self):
         """Revert this entity to a previously saved state."""
         if not self._store:
             raise TypeError("cannot revert entity with no store")
-        key = getattr(self, self._store_key)
-        data = self._store.get(key)
+        data = self._store.get(self.key)
         if self.uid != data["uid"]:
             raise ValueError(joins("uid mismatch trying to revert", self))
         self.deserialize(data)
@@ -721,7 +747,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         data = self.serialize()
         del data["uid"]
         new_entity = entity_class(data)
-        setattr(new_entity, self._store_key, new_key)
+        new_entity.key = new_key
         return new_entity
 
     def delete(self):
