@@ -26,7 +26,7 @@ class TestRooms:
     def test_room_coords(self):
         """Test that room coordinates function properly."""
         assert self.room.coords == (Unset, Unset, Unset)
-        assert self.room.get_coord_str() == "invalid coordinates"
+        assert self.room.get_coord_str() == Unset
         self.room.x, self.room.y, self.room.z = (5, 5, 5)
         assert self.room.coords == (5, 5, 5)
         assert self.room.get_coord_str() == "5,5,5"

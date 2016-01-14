@@ -23,7 +23,7 @@ class Room(Entity):
     """A MUD room.  Where the magic happens."""
 
     _store = STORES.register("rooms", PickleStore("rooms"))
-    _store_key = "uid"
+    # _store_key moved below due to referenced functions.
     _uid_code = "R"
 
     def __init__(self, data=None, savable=True):
@@ -56,8 +56,20 @@ class Room(Entity):
 
         """
         if self.x is Unset or self.y is Unset or self.z is Unset:
-            return "invalid coordinates"
+            return Unset
         return "{},{},{}".format(self.x, self.y, self.z)
+
+    def set_coord_from_str(self, coord_str):
+        """Set this room's coordinates given a string.
+
+        :param str coord_str: A string of coordinates in the form "x,y,z"
+        :returns None:
+
+        """
+        # noinspection PyAttributeOutsideInit
+        self.x, self.y, self.z = map(int, coord_str.split(","))
+
+    _store_key = ("coords", get_coord_str, set_coord_from_str)
 
     def get_exits(self):
         """Return the rooms this room connects to.

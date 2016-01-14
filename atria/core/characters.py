@@ -280,8 +280,7 @@ class CharacterRoom(Attribute):
 
     @classmethod
     def _serialize(cls, value):
-        # Save character rooms by UID.
-        return value.uid
+        return value.key
 
     @classmethod
     def _deserialize(cls, value):

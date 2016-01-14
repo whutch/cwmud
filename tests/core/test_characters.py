@@ -292,16 +292,15 @@ class TestCharacters:
         character.move_direction(1, 0, 0)
         assert character.room is other_room
 
-    def test_character_serialization(self, character, room):
+    def test_character_serialization(self, character, room, other_room):
         """Test that character serialization functions properly."""
         character.room = room
         data = character.serialize()
         assert data
         assert data["room"] == room.key
-        new_room = Room(savable=False)
-        data["room"] = new_room.key
+        data["room"] = other_room.key
         character.deserialize(data)
-        assert character.room is new_room
+        assert character.room is other_room
 
     def test_character_creation(self, session, account):
 
