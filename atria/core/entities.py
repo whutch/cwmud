@@ -132,10 +132,12 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
             if not raw:
                 value = attr._finalize(value)
         entity = self._entity
-        if entity._base_blob == self and entity._store_key == name:
-            # We're updating our store key, we need to check for an old one.
-            entity.tags["_old_key"] = old_value
+        old_key = entity.key
         self._attr_values[name] = value
+        if entity.key != old_key:
+            # The entity's key has changed because of this, we need to note
+            # the old one so it can get updated in the store.
+            entity.tags["_old_key"] = old_key
         entity.dirty()
         attr._changed(self, old_value, value)
 
@@ -709,8 +711,8 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         if not self.is_savable:
             log.warn("Tried to save non-savable entity %s!", self)
             return
-        old_key = self.tags.get("_old_key")
-        if old_key:
+        if "_old_key" in self.tags:
+            old_key = self.tags["_old_key"]
             if self._store.has(old_key):
                 self._store.delete(old_key)
             del self.tags["_old_key"]
