@@ -432,7 +432,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
 
     __uid_timecode = 0  # Used internally for UID creation.
 
-    def __init__(self, data=None, savable=True):
+    def __init__(self, data=None, active=False, savable=True):
         super().__init__()
 
         def _build_base_blob(cls, blob=self._base_blob(self), checked=set()):
@@ -458,7 +458,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
 
         # An active entity is considered "in play", inactive entities are
         # hidden from the game world.
-        self.active = False
+        self.active = active
 
         if data is not None:
             self.deserialize(data)
