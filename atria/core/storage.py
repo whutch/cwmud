@@ -164,7 +164,10 @@ class DataStore:
         """
         if key in self._transaction:
             return self._transaction[key] is not None
-        return self._has(key)
+        try:
+            return self._has(key)
+        except (KeyError, TypeError):
+            return False
 
     def get(self, key, default=KeyError):
         """Fetch data from the store.
