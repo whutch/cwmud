@@ -166,23 +166,32 @@ class DataStore:
             return self._transaction[key] is not None
         return self._has(key)
 
-    def get(self, key):
+    def get(self, key, default=KeyError):
         """Fetch data from the store.
 
         :param hashable key: The key of the data to fetch
-        :returns dict: The fetched data
-        :raises KeyError: If the given key does not exist in the store
+        :param default: A default value to return if no entity is found; if
+                        default is an exception, it will be raised instead
+        :returns dict: The fetched data or default
 
         """
         if key in self._transaction:
             pending_data = self._transaction[key]
-            if pending_data is None:
-                raise KeyError(key)
-            return pending_data
+            if pending_data is not None:
+                # A None in the pending data means the key
+                # was pending deletion.
+                return pending_data
         else:
-            if not self.has(key):
-                raise KeyError(key)
-            return self._get(key)
+            try:
+                if self._has(key):
+                    return self._get(key)
+            except (KeyError, TypeError):
+                pass
+        # Nothing was found.
+        if isinstance(default, type) and issubclass(default, Exception):
+            raise default(key)
+        else:
+            return default
 
     def put(self, key, data):
         """Put data into the store.

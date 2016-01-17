@@ -671,7 +671,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
                 if instance.active]
 
     @classmethod
-    def load(cls, key, from_cache=True):
+    def load(cls, key, from_cache=True, default=KeyError):
         """Load an entity from storage.
 
         If `from_cache` is True and an instance is found in the _instances
@@ -682,8 +682,9 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         :param key: The key the entity's data is stored under
         :param bool from_cache: Whether to check the _instances cache for a
                                 match before reading from storage
-        :returns Entity: The loaded entity
-        :raises KeyError: If the given key is not found in the store
+        :param default: A default value to return if no entity is found; if
+                        default is an exception, it will be raised instead
+        :returns Entity: The loaded entity or default
 
         """
         if from_cache:
@@ -695,7 +696,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
                     if entity.key == key:
                         return entity
         if cls._store:
-            data = cls._store.get(key)
+            data = cls._store.get(key, default=None)
             if data:
                 if "uid" not in data:
                     log.warn("No uid for %s loaded with key: %s!",
@@ -703,8 +704,11 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
                 entity = cls(data)
                 entity._dirty = False
                 return entity
-        raise KeyError(joins("couldn't load", class_name(cls),
-                       "with key:", key))
+        # Nothing was found.
+        if isinstance(default, type) and issubclass(default, Exception):
+            raise default(key)
+        else:
+            return default
 
     def save(self):
         """Store this entity."""
