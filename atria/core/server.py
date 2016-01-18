@@ -111,11 +111,16 @@ class Server:
             # Subscribe to Redis channels.
             self._channels.psubscribe("server-*")
 
+        log.info("Server boot complete.")
+
         CLIENTS.listen(settings.BIND_ADDRESS,
                        settings.BIND_PORT,
                        self._client_connected,
                        self._client_disconnected,
                        server_socket=0)
+
+        log.info("Server listening at {}:{}.".format(
+            settings.BIND_ADDRESS, settings.BIND_PORT))
 
         if reload_from:
             self._reloading = True
