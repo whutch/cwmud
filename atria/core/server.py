@@ -4,12 +4,13 @@
 # :copyright: (c) 2008 - 2016 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
+from importlib import import_module
 from gc import collect
 from time import sleep
 
 import redis
 
-from .. import settings
+from .. import BASE_PACKAGE, settings
 from ..libs.miniboa import TelnetClient
 from .accounts import AccountMenu, authenticate_account, create_account
 from .entities import ENTITIES, Unset
@@ -100,6 +101,10 @@ class Server:
 
         with EVENTS.fire("server_init", no_pre=True):
             log.debug("Initializing server process %s.", self._pid)
+
+        log.debug("Loading optional modules.")
+        for module in settings.INCLUDE_MODULES:
+            import_module(module, BASE_PACKAGE)
 
         with EVENTS.fire("server_boot"):
             log.info("Booting server.")

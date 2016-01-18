@@ -32,5 +32,11 @@ LOG_UTC_TIMES = False
 # Storage
 DATA_DIR = join(ROOT_DIR, "data")
 
+# Optional modules
+INCLUDE_MODULES = [
+    # These should be import paths relative to the base package.
+    # ".contrib.my_module",
+]
+
 # Advanced
 FORCE_GC_COLLECT = False
