@@ -255,7 +255,6 @@ def _hook_client_connected(client):
     session = SESSIONS.create(client)
     with EVENTS.fire("session_started", session):
         session.send(SESSIONS.connect_greeting)
-        session.menu = ConnectMenu
 
 
 @EVENTS.hook("client_disconnected")
@@ -263,6 +262,11 @@ def _hook_client_disconnected(client):
     session = SESSIONS.find_by_client(client)
     if session:
         session._socket = None
+
+
+@EVENTS.hook("session_started")
+def _hook_session_started(session):
+    session.menu = ConnectMenu
 
 
 @MENUS.register
