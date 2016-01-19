@@ -500,6 +500,15 @@ class Session(HasFlags):
             # Force a prompt this poll.
             self.send("", end="")
 
+    def do(self, input_string):
+        """Force a session to parse some input.
+
+        :param str input_string: Input to pass to the character's shell
+        :returns None:
+
+        """
+        self._parse_input(input_string)
+
 
 # We create a global SessionManager here for convenience, and while the server
 # will generally only need one to work with, they are NOT singletons and you
