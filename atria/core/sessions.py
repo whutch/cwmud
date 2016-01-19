@@ -314,8 +314,8 @@ class Session(HasFlags):
     def _check_idle(self):
         """Check if this session is idle."""
         idle = self._client.idle()
-        if idle >= settings.IDLE_TIME:
-            if (idle >= settings.IDLE_TIME_MAX or
+        if settings.IDLE_TIME and idle >= settings.IDLE_TIME:
+            if ((settings.IDLE_TIME_MAX and idle >= settings.IDLE_TIME_MAX) or
                     not self._shell or self._shell.state < STATE_PLAYING):
                 # They've been idle long enough, dump them.  If they haven't
                 # even logged in yet, don't wait for the max idle time.
