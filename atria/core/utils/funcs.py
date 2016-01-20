@@ -44,7 +44,7 @@ def class_name(obj):
     :returns str: The class name
 
     """
-    if type_name(obj) == "type":
+    if isinstance(obj, type):
         # It's a class.
         return obj.__name__
     else:
