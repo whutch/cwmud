@@ -5,6 +5,7 @@
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
 from collections import OrderedDict
+from copy import deepcopy
 from itertools import chain
 
 from .logs import get_logger
@@ -183,7 +184,7 @@ class DataStore:
             if pending_data is not None:
                 # A None in the pending data means the key
                 # was pending deletion.
-                return pending_data
+                return deepcopy(pending_data)
         else:
             try:
                 if self._has(key):

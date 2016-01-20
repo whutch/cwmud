@@ -186,7 +186,7 @@ class TestDataStores:
     def test_store_get_from_transaction(self):
         """Test that we can get pending data from a transaction."""
         assert "test" not in self.store._stored
-        assert self.store.get("test") is self.data
+        assert self.store.get("test") == self.data
 
     def test_store_delete_from_transaction(self):
         """Test that we can delete a key from a pending transaction."""
