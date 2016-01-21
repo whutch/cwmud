@@ -10,6 +10,7 @@ from ..entities import ENTITIES
 from ..server import SERVER
 from ..storage import STORES
 from ..timing import duration_to_pulses, PULSE_PER_SECOND, TIMERS
+from ..world import Room
 
 
 @COMMANDS.register
@@ -21,6 +22,29 @@ class CommitCommand(Command):
         ENTITIES.save()
         STORES.commit()
         self.session.send("Ok.")
+
+
+@COMMANDS.register
+class GotoCommand(Command):
+
+    """A command to teleport to somewhere else."""
+
+    def _action(self):
+        try:
+            coords = self.args[0].split(",")
+            if len(coords) == 2:
+                coords.append("0")
+            elif len(coords) != 3:
+                raise IndexError
+            room = Room.load(",".join(coords), default=None)
+            if not room:
+                self.session.send("That doesn't seem to be a place.")
+                return
+            poof_out = "{s} disappear{ss} in a puff of smoke."
+            poof_in = "{s} arrive{ss} in a puff of smoke."
+            self.session.char.move_to_room(room, poof_out, poof_in)
+        except IndexError:
+            self.session.send("Syntax: goto (x),(y)[,z]")
 
 
 @COMMANDS.register
@@ -72,5 +96,6 @@ class ShutdownCommand(Command):
 
 
 CharacterShell.add_verbs(CommitCommand, "commit", truncate=False)
+CharacterShell.add_verbs(GotoCommand, "go", "goto", truncate=False)
 CharacterShell.add_verbs(ReloadCommand, "reload", truncate=False)
 CharacterShell.add_verbs(ShutdownCommand, "shutdown", truncate=False)
