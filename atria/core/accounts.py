@@ -445,7 +445,8 @@ def _account_menu_select_char(session, char=None):
     session.shell = SHELLS["CharacterShell"]
     session.menu = None
     session.send("Welcome", char.name, "!\n")
-    char.resume()
+    with EVENTS.fire("char_login", char):
+        char.resume()
 
 
 @AccountMenu.add_entry("Q", "Quit")

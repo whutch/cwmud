@@ -176,6 +176,7 @@ class Server:
             self._channels.subscribe("server-reload-complete")
             self._reloading = True
             # Do one last session and client poll to clear the output queues.
+            EVENTS.fire("server_reload", no_post=True).now()
             SESSIONS.poll(output_only=True)
             CLIENTS.poll()
             SESSIONS.prune()

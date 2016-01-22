@@ -7,6 +7,7 @@
 from ..accounts import AccountMenu
 from ..characters import CharacterShell
 from ..commands import Command, COMMANDS
+from ..events import EVENTS
 from ..utils.funcs import joins
 
 
@@ -18,6 +19,7 @@ class LogoutCommand(Command):
     def _action(self):
         if self.session.char:
             self.session.char.suspend()
+        EVENTS.fire("char_logout", self.char).now()
         self.session.shell = None
         self.session.menu = AccountMenu
 
@@ -28,8 +30,6 @@ class QuitCommand(Command):
     """A command for quitting the game."""
 
     def _action(self):
-        if self.session.char:
-            self.session.char.suspend()
         self.session.close("Okay, goodbye!",
                            log_msg=joins(self.session, "has quit."))
 
