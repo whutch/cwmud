@@ -152,7 +152,7 @@ def get_terrain_symbol(elevation):
     return '^R?'
 
 
-@lru_cache(maxsize=256)
+@lru_cache(maxsize=256)  # Remove this cache when maps are not terrain only.
 def create_map(center=(0, 0), width=5, height=5, auto_fill=False):
     """Create an ASCII map to be sent to a client.
 
@@ -193,7 +193,6 @@ def generate_room(x, y, z):
     room.choose_elevation()
     room.name = "A Room at {},{}".format(x, y)
     room.description = Unset
-    room.save()
     return room
 
 

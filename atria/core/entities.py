@@ -7,6 +7,8 @@
 from copy import deepcopy
 from weakref import WeakValueDictionary
 
+from pylru import lrucache
+
 from .logs import get_logger
 from .timing import TIMERS
 from .utils.exceptions import AlreadyExists
@@ -138,6 +140,13 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
             # The entity's key has changed because of this, we need to note
             # the old one so it can get updated in the store.
             entity.tags["_old_key"] = old_key
+            # We also need to invalidate the old key in the cache, and insert
+            # this entity back in under the new key.
+            cache = entity._caches.get(entity.get_key_name())
+            if cache is not None:
+                if old_key in cache:
+                    del cache[old_key]
+                cache[entity.key] = entity
         entity.dirty()
         attr._changed(self, old_value, value)
 
@@ -361,6 +370,9 @@ class _EntityMeta(HasFlagsMeta, HasWeaksMeta):
         super().__init__(name, bases, namespace)
         cls._base_blob = type(name + "BaseBlob", (DataBlob,), {})
         cls._instances = WeakValueDictionary()
+        cls._caches = {}
+        # noinspection PyUnresolvedReferences
+        cls.register_cache(cls.get_key_name())
 
     def register_blob(cls, name):
         """Decorate a data blob to register it on this entity.
@@ -416,6 +428,19 @@ class _EntityMeta(HasFlagsMeta, HasWeaksMeta):
 
         return _inner
 
+    def register_cache(cls, key, size=512):
+        """Create a new cache for this entity, keyed by attribute.
+
+        :param str key: The attribute name to use as a key
+        :param int size: The size of the cache to create
+        :returns None:
+        :raises KeyError: If a cache already exists for `key`
+
+        """
+        if key in cls._caches:
+            raise KeyError(joins("entity already has cache:", key))
+        cls._caches[key] = lrucache(size)
+
 
 class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
 
@@ -425,6 +450,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
     # to avoid a lot of unresolved reference errors in IDE introspection.
     _base_blob = None
     _instances = None
+    _caches = None
 
     _store = None
     _store_key = "uid"
@@ -465,6 +491,9 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         if self._uid is None:
             self._uid = self.make_uid()
         self._instances[self._uid] = self
+        cache = self._caches.get(self.get_key_name())
+        if cache is not None and self.key not in cache:
+            cache[self.key] = self
 
     def __repr__(self):
         return joins("Entity<", self.uid, ">", sep="")
@@ -687,23 +716,35 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         :returns Entity: The loaded entity or default
 
         """
-        if from_cache:
-            if cls.get_key_name() == "uid":
-                if key in cls._instances:
+        cache = cls._caches.get(cls.get_key_name())
+
+        def _find():
+            if from_cache:
+                key_name = cls.get_key_name()
+                if key_name == "uid" and key in cls._instances:
                     return cls._instances[key]
-            else:
-                for entity in cls._instances.values():
-                    if entity.key == key:
-                        return entity
-        if cls._store:
-            data = cls._store.get(key, default=None)
-            if data:
-                if "uid" not in data:
-                    log.warn("No uid for %s loaded with key: %s!",
-                             class_name(cls), key)
-                entity = cls(data)
-                entity._dirty = False
-                return entity
+                if cache is not None and key in cache:
+                    return cache[key]
+                if key_name != "uid":
+                    # This is probably slow and may not be worth it.
+                    for entity in cls._instances.values():
+                        if entity.key == key:
+                            return entity
+            if cls._store:
+                data = cls._store.get(key, default=None)
+                if data:
+                    if "uid" not in data:
+                        log.warn("No uid for %s loaded with key: %s!",
+                                 class_name(cls), key)
+                    entity = cls(data)
+                    entity._dirty = False
+                    return entity
+
+        found = _find()
+        if found:
+            if cache is not None and key not in cache:
+                cache[key] = found
+            return found
         # Nothing was found.
         if isinstance(default, type) and issubclass(default, Exception):
             raise default(key)
@@ -716,6 +757,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
             log.warn("Tried to save non-savable entity %s!", self)
             return
         if "_old_key" in self.tags:
+            # The entity's key has changed, so we need to handle that.
             old_key = self.tags["_old_key"]
             if self._store.has(old_key):
                 self._store.delete(old_key)

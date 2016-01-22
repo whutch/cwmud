@@ -43,6 +43,7 @@ class TestRooms:
         another_room = Room()
         another_room.x, another_room.y, another_room.z = (5, 5, 6)
         assert self.room.get_exits() == {"up": another_room}
+        del Room._caches[another_room.get_key_name()][another_room.key]
         del another_room
         gc.collect()
         assert not self.room.get_exits()
@@ -54,6 +55,7 @@ class TestRooms:
         char.resume(quiet=True)
         char.room = self.room
         assert set(self.room.chars) == {char}
+        del Character._caches[char.get_key_name()][char.key]
         del char
         gc.collect()
         assert not self.room.chars
