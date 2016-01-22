@@ -8,6 +8,7 @@ from datetime import datetime as dt
 
 from ..characters import CharacterShell
 from ..commands import Command, COMMANDS
+from ..sessions import SESSIONS
 from ..timing import TIMERS
 
 
@@ -58,6 +59,20 @@ class TimeCommand(Command):
                           " (", TIMERS.get_time_code(), ")", sep="")
 
 
+@COMMANDS.register
+class WhoCommand(Command):
+
+    """A command to display the active players."""
+
+    def _action(self):
+        chars = [session.char for session in SESSIONS.all()
+                 if session.char.active]
+        self.session.send("Players online:", len(chars))
+        for char in chars:
+            self.session.send("  ^W", char.name, "^~  ", char.title, sep="")
+
+
 CharacterShell.add_verbs(ExitsCommand, "exits", "ex")
 CharacterShell.add_verbs(LookCommand, "look", "l")
 CharacterShell.add_verbs(TimeCommand, "time")
+CharacterShell.add_verbs(WhoCommand, "who")
