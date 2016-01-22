@@ -13,6 +13,7 @@ import redis
 from .. import BASE_PACKAGE, settings
 from ..libs.miniboa import TelnetClient
 from .accounts import AccountMenu, authenticate_account, create_account
+from .channels import Channel
 from .entities import ENTITIES, Unset
 from .events import EVENTS
 from .logs import get_logger
@@ -339,3 +340,21 @@ if settings.FORCE_GC_COLLECT:
 def _save_and_commit():
     ENTITIES.save()
     STORES.commit()
+
+
+ANNOUNCE = Channel("^Y[ANNOUNCE]", "^W", members=SESSIONS.all)
+
+
+@EVENTS.hook("char_login")
+def _hook_char_login(char):
+    ANNOUNCE.send(char.name, "has logged in.")
+
+
+@EVENTS.hook("char_logout")
+def _hook_char_logout(char):
+    ANNOUNCE.send(char.name, "has logged out.")
+
+
+@EVENTS.hook("server_reload", pre=True)
+def _hook_server_reload():
+    ANNOUNCE.send("Server is reloading, please remain calm!")
