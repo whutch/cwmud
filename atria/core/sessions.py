@@ -378,7 +378,7 @@ class Session(HasFlags):
         The resulting output will not be sent immediately, but will be put
         in a queue to be sent during its next poll.
 
-        `message` and all members of `more` will be converted to strings
+        `data` and all members of `more` will be converted to strings
         and joined together by `sep` via the joins function.
 
         :param any data: An initial chunk of data
