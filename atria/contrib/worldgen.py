@@ -116,7 +116,6 @@ def show_room(self, room=None):
         self.session.send("^m  ", room.description, "^~", sep="")
     if char_list:
         self.session.send(char_list, "^~", sep="")
-    self.show_exits()
 
 
 @lru_cache(maxsize=None)
