@@ -178,6 +178,10 @@ _movement_strings = {
     (0, -1, 0): ("south", "the north"),
     (0, 0, 1): ("up", "below"),
     (0, 0, -1): ("down", "above"),
+    (1, 1, 0): ("northeast", "the southwest"),
+    (-1, 1, 0): ("northwest", "the southeast"),
+    (1, -1, 0): ("southeast", "the northwest"),
+    (-1, -1, 0): ("southwest", "the northeast"),
 }
 
 
