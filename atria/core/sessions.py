@@ -93,6 +93,10 @@ class SessionManager:
         for port in close:
             del self._sessions[port]
 
+    def all(self):
+        """Return an iterator for all sessions."""
+        return self._sessions.values()
+
 
 class Session(HasFlags):
 
