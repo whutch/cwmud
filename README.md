@@ -4,6 +4,20 @@ Atria MUD Server
 Atria is a pure-Python MUD server designed with modularity and ease of development in mind. It was originally created as an exercise, as I had always wanted to write a MUD from scratch, and as such does not make use of many third-party libraries (just [miniboa][miniboa-py3] for Telnet protocol handling, [redis-py] for inter-process messaging, and [passlib]/[py-bcrypt] for password hashing; none of which are wheels that I wanted to reinvent).
 
 
+Current State
+-------------
+
+This isn't a viable MUD server yet. There's account creation, basic character creation, rooms, talking, and walking around, but that's about it. There are also several currently unhandled, buggy situations such as logging into a character that is already logged in. If you don't add ".contrib.worldgen" to the INCLUDE_MODULES setting, there is also no default room or way to make one. There are also no permission controls on admin commands yet, so anyone can do whatever they want (which is good because there is no concept of an admin yet).
+
+So anyway, very under-construction at the moment.
+
+
+License
+-------
+
+It's MIT licensed. Go crazy. See the [license file][license] for more details.
+
+
 Installation
 ------------
 
@@ -95,11 +109,13 @@ Contact & Support
 * Documentation: *(not hosted yet, but you can build it in `docs`)*
 * Wiki: <https://github.com/whutch/atria/wiki>
 
-You can also email me questions and comments at <will@whutch.com>.
+You can email me questions and comments at <will@whutch.com>. You can also find me as Kazan on the [Mud Coders Slack group][slack] (the signup is on the right side of [this page][mudcoders]).
 
 
+[license]: https://github.com/whutch/atria/blob/master/LICENSE.txt
 [miniboa]: https://code.google.com/p/miniboa
 [miniboa-py3]: https://github.com/pR0Ps/miniboa-py3
+[mudcoders]: http://mudcoders.com
 [passlib]: https://pypi.python.org/pypi/passlib
 [py-bcrypt]: https://code.google.com/p/py-bcrypt
 [pytest]: https://pytest.org/latest
@@ -107,5 +123,6 @@ You can also email me questions and comments at <will@whutch.com>.
 [redis]: http://redis.io
 [redis-py]: https://pypi.python.org/pypi/redis
 [redis-quick-start]: http://redis.io/topics/quickstart
+[slack]: https://mudcoders.slack.com
 [style]: https://github.com/whutch/atria/blob/master/STYLE.md
 [virtualenv]: https://virtualenv.pypa.io
