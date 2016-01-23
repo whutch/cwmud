@@ -71,6 +71,24 @@ class Room(Entity):
 
     _store_key = ("coords", get_coord_str, set_coord_from_str)
 
+    @classmethod
+    def generate(cls, coord_str, name, description=None):
+        """Generate a room.
+
+        :param str coord_str: The string with the room's coordinates
+        :param str name: A name for the room
+        :param description: Optional, a description for the room
+        :returns Room: The generated room
+
+        """
+        room = Room()
+        room.set_coord_from_str(coord_str)
+        room.name = name
+        if description is not None:
+            room.description = description
+        room.save()
+        return room
+
     def get_exits(self):
         """Return the rooms this room connects to.
 
