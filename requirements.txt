@@ -1,3 +1,4 @@
+noise==1.2.2
 passlib==1.6.2
 py-bcrypt==0.4
 pylru==1.0.9
