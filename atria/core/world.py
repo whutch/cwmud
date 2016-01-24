@@ -8,6 +8,7 @@ import re
 from weakref import WeakSet
 
 from .entities import Attribute, ENTITIES, Entity, Unset
+from .events import EVENTS
 from .logs import get_logger
 from .pickle import PickleStore
 from .storage import STORES
@@ -231,3 +232,11 @@ def get_movement_strings(change):
 
     """
     return _movement_strings.get(change, ("nowhere", "nowhere"))
+
+
+@EVENTS.hook("server_boot", "setup_world")
+def _hook_server_boot():
+    room = Room.load("0,0,0", default=None)
+    if not room:
+        Room.generate("0,0,0", "Starting Room", "There's not much to look at.")
+        log.warn("Had to generate initial room at 0,0,0.")
