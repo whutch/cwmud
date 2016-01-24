@@ -239,7 +239,7 @@ class CharacterAccount(Attribute):
     """The account tied to a character."""
 
     @classmethod
-    def _validate(cls, new_value):
+    def _validate(cls, new_value, entity=None):
         from .accounts import Account
         if not isinstance(new_value, Account):
             raise ValueError("Character account must be an Account instance.")
@@ -262,7 +262,7 @@ class CharacterRoom(Attribute):
     """The room a character is in."""
 
     @classmethod
-    def _validate(cls, new_value):
+    def _validate(cls, new_value, entity=None):
         if not isinstance(new_value, Room):
             raise ValueError("Character room must be a Room instance.")
         return new_value
@@ -301,7 +301,7 @@ class CharacterName(Attribute):
     RESERVED = []
 
     @classmethod
-    def _validate(cls, new_value):
+    def _validate(cls, new_value, entity=None):
         if (not isinstance(new_value, str) or
                 not cls._valid_chars.match(new_value)):
             raise ValueError("Character names can only contain letters.")

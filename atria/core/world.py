@@ -116,7 +116,7 @@ class RoomName(Attribute):
     default = "An Unnamed Room"
 
     @classmethod
-    def _validate(cls, new_value):
+    def _validate(cls, new_value, entity=None):
         if (not isinstance(new_value, str) or
                 not cls._valid_chars.match(new_value)):
             raise ValueError("Room names can only contain letters and spaces.")
@@ -137,7 +137,7 @@ class RoomDescription(Attribute):
     default = "A nondescript room."
 
     @classmethod
-    def _validate(cls, new_value):
+    def _validate(cls, new_value, entity=None):
         if not isinstance(new_value, str):
             raise ValueError("Room descriptions must be strings.")
         return new_value
@@ -152,7 +152,7 @@ class RoomX(Attribute):
     _max_val = 1000
 
     @classmethod
-    def _validate(cls, new_value):
+    def _validate(cls, new_value, entity=None):
         if not isinstance(new_value, int):
             raise ValueError("Room coordinates must be integers.")
         return new_value
@@ -167,7 +167,7 @@ class RoomY(Attribute):
     _max_val = 1000
 
     @classmethod
-    def _validate(cls, new_value):
+    def _validate(cls, new_value, entity=None):
         if not isinstance(new_value, int):
             raise ValueError("Room coordinates must be integers.")
         return new_value
@@ -182,7 +182,7 @@ class RoomZ(Attribute):
     _max_val = 1000
 
     @classmethod
-    def _validate(cls, new_value):
+    def _validate(cls, new_value, entity=None):
         if not isinstance(new_value, int):
             raise ValueError("Room coordinates must be integers.")
         return new_value

@@ -128,12 +128,12 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
     def _set_attr_val(self, name, value, validate=True, raw=False):
         attr = self._attrs[name]
         old_value = self._attr_values.get(name)
+        entity = self._entity
         if value is not Unset:
             if validate:
-                value = attr._validate(value)
+                value = attr._validate(value, entity=entity)
             if not raw:
-                value = attr._finalize(value)
-        entity = self._entity
+                value = attr._finalize(value, entity=entity)
         old_key = entity.key
         self._attr_values[name] = value
         if entity.key != old_key:
@@ -240,7 +240,7 @@ class Attribute:
     read_only = False
 
     @classmethod
-    def _validate(cls, new_value):
+    def _validate(cls, new_value, entity=None):
         """Validate a value for this attribute.
 
         This will be called by the blob when setting the value for this
@@ -249,13 +249,14 @@ class Attribute:
         exception as to why the value is invalid.
 
         :param new_value: The potential value to validate
+        :param entity: The entity this attribute is on
         :returns: The validated (and optionally sanitized) value
 
         """
         return new_value
 
     @classmethod
-    def _finalize(cls, new_value):
+    def _finalize(cls, new_value, entity=None):
         """Finalize the value for this attribute.
 
         This will be called by the blob when setting the value for this
@@ -263,6 +264,7 @@ class Attribute:
         or transformation. The value should be considered valid.
 
         :param new_value: The new, validated value
+        :param entity: The entity this attribute is on
         :returns: The finalized value
         """
         return new_value
@@ -818,7 +820,7 @@ class EntityVersion(Attribute):
     default = 1
 
     @classmethod
-    def _validate(cls, value):
-        if not isinstance(value, int):
+    def _validate(cls, new_value, entity=None):
+        if not isinstance(new_value, int):
             raise TypeError("entity version must be a number")
-        return value
+        return new_value
