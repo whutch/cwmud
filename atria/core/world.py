@@ -143,48 +143,68 @@ class RoomDescription(Attribute):
         return new_value
 
 
-@Room.register_attr("x")
-class RoomX(Attribute):
+class CoordAttribute(Attribute):
 
-    """The X coordinate of a room."""
+    """An attribute for room coordinates."""
 
-    _min_val = -1000
-    _max_val = 1000
+    min = None
+    max = None
 
     @classmethod
     def _validate(cls, new_value, entity=None):
         if not isinstance(new_value, int):
-            raise ValueError("Room coordinates must be integers.")
+            raise ValueError("Coordinates must be integers.")
+        if cls.min is not None and new_value < cls.min:
+            raise ValueError("Coordinate must be at least {}."
+                             .format(cls.min))
+        if cls.max is not None and new_value > cls.max:
+            raise ValueError("Coordinate cannot be more than {}."
+                             .format(cls.max))
+        return new_value
+
+
+@Room.register_attr("x")
+class RoomX(CoordAttribute):
+    """The X coordinate of a room."""
+
+    @classmethod
+    def _validate(cls, new_value, entity=None):
+        super()._validate(new_value, entity)
+        if entity and entity.y is not Unset and entity.z is not Unset:
+            new_coords = "{},{},{}".format(new_value, entity.y, entity.z)
+            if Room.load(new_coords, default=None):
+                raise ValueError("Room already exists at {}."
+                                 .format(new_coords))
         return new_value
 
 
 @Room.register_attr("y")
-class RoomY(Attribute):
-
+class RoomY(CoordAttribute):
     """The Y coordinate of a room."""
-
-    _min_val = -1000
-    _max_val = 1000
 
     @classmethod
     def _validate(cls, new_value, entity=None):
-        if not isinstance(new_value, int):
-            raise ValueError("Room coordinates must be integers.")
+        super()._validate(new_value, entity)
+        if entity and entity.x is not Unset and entity.z is not Unset:
+            new_coords = "{},{},{}".format(entity.x, new_value, entity.z)
+            if Room.load(new_coords, default=None):
+                raise ValueError("Room already exists at {}."
+                                 .format(new_coords))
         return new_value
 
 
 @Room.register_attr("z")
-class RoomZ(Attribute):
-
+class RoomZ(CoordAttribute):
     """The Z coordinate of a room."""
-
-    _min_val = -1000
-    _max_val = 1000
 
     @classmethod
     def _validate(cls, new_value, entity=None):
-        if not isinstance(new_value, int):
-            raise ValueError("Room coordinates must be integers.")
+        super()._validate(new_value, entity)
+        if entity and entity.x is not Unset and entity.y is not Unset:
+            new_coords = "{},{},{}".format(entity.x, entity.y, new_value)
+            if Room.load(new_coords, default=None):
+                raise ValueError("Room already exists at {}."
+                                 .format(new_coords))
         return new_value
 
 
