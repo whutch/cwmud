@@ -284,7 +284,10 @@ class CharacterRoom(Attribute):
 
     @classmethod
     def _deserialize(cls, value):
-        return Room.load(value)
+        room = Room.load(value, default=None)
+        if not room:
+            room = Room.load("0,0,0")
+        return room
 
 
 @Character.register_attr("name")
