@@ -4,19 +4,35 @@
 # :copyright: (c) 2008 - 2016 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
-from functools import lru_cache
-import random
 import re
 
-from ..core.characters import Character
-from ..core.entities import Attribute, Unset
+from ..core.characters import Character, get_movement_strings
+from ..core.entities import Unset
+from ..core.events import EVENTS
 from ..core.logs import get_logger
+from ..core.random import generate_noise
 from ..core.utils.decorators import patch
-from ..core.utils.funcs import joins
 from ..core.world import Room, RoomName
+from ..libs.miniboa import colorize
 
 
 log = get_logger("worldgen")
+
+
+_temp_terrains = {  # Temporary
+    "high mountain": (0.85, 0, "^W^^"),
+    "mountain": (0.75, 0, "^K^^"),
+    "hill": (0.65, 0, "^yn"),
+    "dense forest": (0.55, 0, "^gt"),
+    "forest": (0.40, 0, "^Gt"),
+    "dense grassland": (0.30, 0, "^g\""),
+    "grassland": (0.00, 0, "^G\""),
+    "beach": (-0.10, 0, "^Y."),
+    "shallow water": (-0.25, 0, "^C,"),
+    "deep water": (-0.45, 0, "^c,"),
+    "sea": (-0.65, 0, "^B~"),
+    "ocean": (-1.00, 0, "^b~"),
+}
 
 
 # Settings
@@ -25,6 +41,14 @@ log = get_logger("worldgen")
 MAP_SMALL_WIDTH = 21  # The width of the map viewed in "look"
 MAP_SMALL_HEIGHT = 13  # The height of the map viewed in "look"
 
+# How much to increment each step in the terrain table. A smaller value gives
+# you more room and accuracy when choosing values for terrains, but also
+# creates a larger table in memory.
+TABLE_INCREMENT = 0.01
+
+# How many digits to round the noise values to. This should match the number
+# of digits after the decimal in TABLE_INCREMENT.
+ROUND_TO_DIGITS = 2
 
 # Coordinate deltas for each direction, starting east and
 # going counter-clockwise (northeast, north, and so on).
@@ -38,56 +62,17 @@ _ROOM_FLAVOR = {
 
 }
 
-
-@Room.register_attr("elevation")
-class RoomElevation(Attribute):
-
-    """The elevation of a room."""
-
-    default = 4
-    min = -12
-    max = 12
-
-    @classmethod
-    def _validate(cls, new_value):
-        if not isinstance(new_value, int):
-            raise ValueError("Room elevations must be integers.")
-        if new_value < cls.min or new_value > cls.max:
-            raise ValueError(joins("Room elevations must be between ",
-                                   cls.min, " and ", cls.max, ".", sep=""))
-        return new_value
+# Noise generation arguments for map layers
+_BASE_ELEVATION_ARGS = {"scale": 100, "seed": 15051}
+_ELEVATION_NOISE_ARGS = {"scale": 20, "seed": 15051, "octaves": 3}
 
 
-@patch(Room)
-def choose_elevation(self, base_elevation=RoomElevation.default,
-                     change_threshold=1, neighbor_weight=3):
-    """Set this room's elevation randomly based on its neighbors.
+# Globals
+_TERRAIN_TABLE = {}  # Internal. Managed by update_terrain_table().
 
-    :param int base_elevation: The elevation to start with when there are
-                               no neighbors to get data from
-    :param int change_threshold: How much an elevation can change at once
-    :param int neighbor_weight: How much to weigh neighbor elevations over
-                                choosing new ones
-    :returns None:
 
-    """
-    choices = []
-    for direction in range(8):
-        x_delta, y_delta = _DIRECTION_DELTAS[direction]
-        neighbor = Room.load("{},{},{}".format(self.x + x_delta,
-                                               self.y + y_delta, 0),
-                             default=None)
-        if neighbor:
-            elevation_min = max(neighbor.elevation - change_threshold,
-                                RoomElevation.min)
-            elevation_max = min(neighbor.elevation + change_threshold,
-                                RoomElevation.max)
-            choices.extend(range(elevation_min, elevation_max + 1))
-            choices.extend([neighbor.elevation] * (neighbor_weight - 1))
-    if choices:
-        self.elevation = random.choice(choices)
-    else:
-        self.elevation = base_elevation
+# Adjust the validation pattern for room names.
+RoomName._valid_chars = re.compile(".+")
 
 
 @patch(Character)
@@ -109,8 +94,7 @@ def show_room(self, room=None):
                            char.name, char.title)
                            for char in room.chars if char is not self])
     self.session.send("^Y", room.name or "A Room", "^~", sep="")
-    _map = create_map((room.x, room.y), MAP_SMALL_WIDTH, MAP_SMALL_HEIGHT,
-                      auto_fill=True)
+    _map = render_map(MAP_SMALL_WIDTH, MAP_SMALL_HEIGHT, (room.x, room.y))
     self.session.send(_map, "^~", sep="")
     if room.description:
         self.session.send("^m  ", room.description, "^~", sep="")
@@ -118,65 +102,32 @@ def show_room(self, room=None):
         self.session.send(char_list, "^~", sep="")
 
 
-@lru_cache(maxsize=None)
-def get_terrain_symbol(elevation):
-    """Convert an elevation number into an ASCII terrain symbol.
+@patch(Character)
+def move_direction(self, x=0, y=0, z=0):
+    """Move this character to the room in a given direction.
 
-    :param int elevation: The elevation to convert
-    :returns str: The converted terrain symbol
-
-    """
-    if elevation is None:
-        return "^R!"
-    if elevation >= 12:
-        return '^W^^'
-    if elevation >= 10:
-        return "^K^^"
-    if elevation >= 7:
-        return "^yn"
-    if elevation >= 6:
-        return '^g"'
-    if elevation >= 2:
-        return '^G"'
-    if elevation >= 0:
-        return "^Y."
-    if elevation >= -3:
-        return '^C,'
-    if elevation >= -4:
-        return "^c,"
-    if elevation >= -8:
-        return "^B~"
-    if elevation >= -12:
-        return "^b~"
-    return '^R?'
-
-
-@lru_cache(maxsize=256)  # Remove this cache when maps are not terrain only.
-def create_map(center=(0, 0), width=5, height=5, auto_fill=False):
-    """Create an ASCII map to be sent to a client.
-
-    :param tuple(int, int) center: The map's center in (x, y) form
-    :param int width: The desired map width
-    :param int height: The desired map height
-    :param bool auto_fill: Whether to automatically generate new rooms to
-                           fill any gaps in the map
-    :returns str: The created map
+    :param int x: The change in the X coordinate
+    :param int y: The change in the Y coordinate
+    :param int z: The change in the Z coordinate
+    :returns None:
 
     """
-    max_x = width // 2
-    max_y = height // 2
-    rows = []
-    for y in range(center[1] + max_y, center[1] - max_y - (height % 2), -1):
-        row = []
-        for x in range(center[0] - max_x, center[0] + max_x + (width % 2)):
-            room = Room.load("{},{},{}".format(x, y, 0), default=None)
-            if not room and auto_fill:
-                room = generate_room(x, y, 0)
-            row.append(get_terrain_symbol(room.elevation) if room else " ")
-        if y == center[1]:
-            row[max_x] = "^R#"
-        rows.append("".join(row))
-    return "\n".join(rows)
+    if not x and not y and not z:
+        # They apparently don't want to go anywhere..
+        return
+    if not self.room:
+        # Can't move somewhere from nowhere.
+        return
+    to_x, to_y, to_z = map(sum, zip(self.room.coords, (x, y, z)))
+    to_coords = "{},{},{}".format(to_x, to_y, to_z)
+    room = Room.load(to_coords, default=None)
+    if not room:
+        room = Room.generate(to_coords, "A Room at {},{}".format(to_x, to_y),
+                             description=Unset)
+    to_dir, from_dir = get_movement_strings((x, y, z))
+    self.move_to_room(room, "{s} move{ss} {dir}.",
+                      "{s} arrives from {dir}.",
+                      {"dir": to_dir}, {"dir": from_dir})
 
 
 def generate_room(x, y, z):
@@ -189,29 +140,153 @@ def generate_room(x, y, z):
 
     """
     room = Room({"x": x, "y": y, "z": z})
-    room.choose_elevation()
     room.name = "A Room at {},{}".format(x, y)
     room.description = Unset
     return room
 
 
-def generate_rooms(center=(0, 0), width=3, height=3):
-    """Generate a box of new rooms.
+def _update_terrain_table():
+    _TERRAIN_TABLE.clear()
+    elevations = sorted([(data[0], name) for name, data
+                         in _temp_terrains.items()])
+    for index, (elevation, name) in enumerate(elevations):
+        next_elevation = (elevations[index + 1][0]
+                          if index < len(elevations) - 1
+                          else 1 + TABLE_INCREMENT)
+        step = elevation
+        while step < next_elevation:
+            _TERRAIN_TABLE[step] = name
+            step = round(step + TABLE_INCREMENT, ROUND_TO_DIGITS)
 
-    :param tuple(int, int) center: The center of the box in (x, y) form
-    :param int width: The width of the box
-    :param int height: The height of the box
-    :returns None:
+
+# Setup the initial terrain table
+_update_terrain_table()
+
+
+def generate_map_layer(width, height, center=(0, 0), scale=1, seed=0,
+                       offset_x=0.0, offset_y=0.0, octaves=1,
+                       persistence=0.5, lacunarity=2.0,
+                       repeat_x=None, repeat_y=None):
+    """Generate one layer of map data using simplex noise.
+
+    :param int width: The width of the map
+    :param int height: The height of the map
+    :param tuple(int, int) center: The center of the map in (x, y) form
+    :param scale: The scale of the base plane
+    :param seed: A third dimensional coordinate to use as a seed
+    :param float offset_x: How much to offset `x` by on the base plane
+    :param float offset_y: How much to offset `y` by on the base plane
+    :param int octaves: The number of passes to make calculating noise
+    :param float persistence: The amplitude multiplier per octave
+    :param float lacunarity: The frequency multiplier per octave
+    :param repeat_x: The width of a block of noise to repeat
+    :param repeat_y: The height of a block of noise to repeat
+    :returns: A generated map layer
 
     """
     max_x = width // 2
     max_y = height // 2
-    for x in range(center[0] - max_x, center[0] + max_x + (width % 2)):
-        for y in range(center[1] - max_y, center[1] + max_y + (height % 2)):
-            room = Room.load("{},{},{}".format(x, y, 0), default=None)
-            if not room:
-                generate_room(x, y, 0)
+    rows = []
+    for y in range(center[1] + max_y, center[1] - max_y - (height % 2), -1):
+        row = []
+        for x in range(center[0] - max_x, center[0] + max_x + (width % 2)):
+            row.append(generate_noise(x, y, scale=scale, seed=seed,
+                                      offset_x=offset_x, offset_y=offset_y,
+                                      octaves=octaves,
+                                      persistence=persistence,
+                                      lacunarity=lacunarity,
+                                      repeat_x=repeat_x, repeat_y=repeat_y))
+        rows.append(row)
+    return rows
 
 
-# Adjust the validation pattern for room names.
-RoomName._valid_chars = re.compile(".+")
+def combine_map_layers(map_layer, *more_layers):
+    """Create a new layer of map data by combining multiple layers.
+
+    The result of combining different sizes of map data is undefined.
+
+    :param map_layer: The base layer
+    :param iterable more_layers: Additional layers to fold into the base
+    :returns: A combined map layer
+
+    """
+    new_layer = []
+    row_sets = zip(map_layer, *more_layers)
+    for row_set in row_sets:
+        grouped = zip(*row_set)
+        summed = (sum(group) for group in grouped)
+        averaged = map(lambda n: n / (1 + len(more_layers)), summed)
+        new_layer.append(list(averaged))
+    return new_layer
+
+
+def get_terrain(elevation):
+    """Get the terrain type for the given map data.
+
+    :param float elevation: The elevation value, between -1 and 1
+    :returns Terrain: The terrain type
+
+    """
+    elevation = round(elevation, ROUND_TO_DIGITS)
+    if elevation not in _TERRAIN_TABLE:
+        return "^R?"
+    return _temp_terrains[_TERRAIN_TABLE[elevation]][2]
+
+
+def render_map_from_layers(elevation_layer, convert_color=False):
+    """Render an ASCII terrain map from raw layer data.
+
+    :param elevation_layer: The elevation layer
+    :param convert_color: Whether to convert color codes or not
+    :returns str: A rendered map
+
+    """
+    height = len(elevation_layer)
+    width = len(elevation_layer[0])
+    center = (width // 2, height // 2)
+    rows = []
+    for y, values in enumerate(elevation_layer):
+        row = []
+        for x, value in enumerate(values):
+            if (x, y) == center:
+                row.append("^M#")
+            else:
+                row.append(get_terrain(value))
+        rows.append(row)
+    if convert_color:
+        for row in rows:
+            for index, tile in enumerate(row):
+                row[index] = colorize(tile)
+    return "\n".join("".join(tile for tile in row) for row in rows)
+
+
+def render_map(width, height, center=(0, 0), convert_color=False):
+    """Render an ASCII terrain map.
+
+    :param int width: The width of the map
+    :param int height: The height of the map
+    :param tuple(int, int) center: The center of the map in (x, y) form
+    :param convert_color: Whether to convert color codes or not
+    :returns str: A rendered map
+
+    """
+    # Calculate the map data
+    base_elevation = generate_map_layer(width, height, center=center,
+                                        **_BASE_ELEVATION_ARGS)
+    elevation_noise = generate_map_layer(width, height, center=center,
+                                         **_ELEVATION_NOISE_ARGS)
+    elevation_layer = combine_map_layers(base_elevation, elevation_noise)
+    return render_map_from_layers(elevation_layer, convert_color=convert_color)
+
+
+# Unhook all the default events in the setup_world namespace.
+EVENTS.unhook("*", "setup_world")
+
+
+@EVENTS.hook("server_boot", "setup_world")
+def _hook_server_boot():
+    room = Room.load("0,0,0", default=None)
+    if not room:
+        Room.generate("0,0,0", "A Room at 0,0", Unset)
+        log.warn("Had to generate initial room at 0,0,0.")
+        log.debug(Room._store._transaction)
