@@ -289,4 +289,3 @@ def _hook_server_boot():
     if not room:
         Room.generate("0,0,0", "A Room at 0,0", Unset)
         log.warn("Had to generate initial room at 0,0,0.")
-        log.debug(Room._store._transaction)

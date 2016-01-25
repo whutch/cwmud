@@ -488,7 +488,6 @@ class Session(HasFlags):
         self.send(reason)
         if self.char:
             self.char.suspend()
-            EVENTS.fire("char_logout", self.char).now()
         self.flags.add("close")
 
     def request(self, request_class, callback, **options):

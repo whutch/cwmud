@@ -8,6 +8,7 @@ import re
 
 from .const import *
 from .entities import Attribute, ENTITIES, Entity
+from .events import EVENTS
 from .logs import get_logger
 from .pickle import PickleStore
 from .requests import Request, REQUESTS
@@ -58,11 +59,13 @@ class Character(Entity):
         :returns None:
 
         """
-        if self.room:
-            self.room.chars.add(self)
-        self.active = True
-        if not quiet:
-            self.show_room()
+        with EVENTS.fire("char_login", self):
+            if self.room:
+                self.room.chars.add(self)
+            self.active = True
+            if not quiet:
+                log.info("%s has entered the game.", self)
+                self.show_room()
 
     def suspend(self, quiet=False):
         """Remove this character from play.
@@ -71,9 +74,12 @@ class Character(Entity):
         :returns None:
 
         """
-        self.active = False
-        if self.room and self in self.room.chars:
-            self.room.chars.remove(self)
+        with EVENTS.fire("char_logout", self):
+            if not quiet:
+                log.info("%s has left the game.", self)
+            self.active = False
+            if self.room and self in self.room.chars:
+                self.room.chars.remove(self)
 
     def act(self, message, context=None, target=None, to=(), and_self=True):
         """Generate and send contextualized Character-based messages.
