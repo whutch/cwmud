@@ -6,6 +6,7 @@
 
 import re
 
+from .channels import Channel, CHANNELS
 from .const import *
 from .entities import Attribute, ENTITIES, Entity
 from .events import EVENTS
@@ -65,6 +66,7 @@ class Character(Entity):
             self.active = True
             if not quiet:
                 log.info("%s has entered the game.", self)
+                CHANNELS["announce"].send(self.name, "has logged in.")
                 self.show_room()
 
     def suspend(self, quiet=False):
@@ -77,6 +79,7 @@ class Character(Entity):
         with EVENTS.fire("char_logout", self):
             if not quiet:
                 log.info("%s has left the game.", self)
+                CHANNELS["announce"].send(self.name, "has logged out.")
             self.active = False
             if self.room and self in self.room.chars:
                 self.room.chars.remove(self)

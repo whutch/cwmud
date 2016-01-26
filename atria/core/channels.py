@@ -6,6 +6,7 @@
 
 from weakref import WeakSet
 
+from ..libs.miniboa import strip_caret_codes
 from .logs import get_logger
 from .utils.exceptions import AlreadyExists
 from .utils.funcs import joins
@@ -62,19 +63,19 @@ class Channel:
 
     """A communication channel."""
 
-    def __init__(self, header="", msg_color="^~", members=None):
+    def __init__(self, template="{msg}", members=None, logged=False):
         """Create a new channel.
 
-        :param str header: A block of text to prepend to all messages
-        :param str msg_color: A color code to use for messages
-        :param members: Optional, a list of sessions to prefill members with;
+        :param str template: A formatting string to use as a message template
+        :param members: Optional, a list of sessions to fill members with;
                         if callable, it should return a list of sessions on-
                         demand in place of member tracking
+        :param bool logged: Whether to log messages to the console or not
         :returns None:
 
         """
-        self.header = header
-        self.msg_color = msg_color
+        self.template = template
+        self.logged = logged
         if callable(members):
             self.members = members
         else:
@@ -83,7 +84,7 @@ class Channel:
                 for session in members:
                     self.members.add(session)
 
-    def send(self, data, *more, sep=" ", members=None):
+    def send(self, data, *more, sep=" ", context=None, members=None):
         """Send a message to a channel.
 
         `data` and all members of `more` will be converted to strings
@@ -92,7 +93,8 @@ class Channel:
         :param any data: An initial chunk of data
         :param any more: Optional, any additional data to send
         :param str sep: Optional, a separator to join the resulting output by
-
+        :param dict context: Optional, additional context to be passed to
+                             the template formatter
         :param members: Optional, a list of sessions to use in place of the
                         channels own list; if callable, it should return a list
                         of sessions to use
@@ -103,6 +105,10 @@ class Channel:
             members = self.members
         if callable(members):
             members = members()
-        msg = joins(data, *more, sep=sep)
+        message = joins(data, *more, sep=sep)
+        context = context or {}
+        message = self.template.format(msg=message, **context)
+        if self.logged:
+            log.info(strip_caret_codes(message))
         for session in members:
-            session.send(self.header, " ", self.msg_color, msg, "^~", sep="")
+            session.send(message)

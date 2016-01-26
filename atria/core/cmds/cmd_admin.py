@@ -4,6 +4,7 @@
 # :copyright: (c) 2008 - 2016 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
+from ..channels import CHANNELS
 from ..characters import CharacterShell
 from ..commands import Command, COMMANDS
 from ..entities import ENTITIES
@@ -58,7 +59,7 @@ class ReloadCommand(Command):
     """
 
     def _action(self):
-        self.session.send("Starting server reload, hold on to your butt.")
+        CHANNELS["announce"].send("Server is reloading, please remain calm!")
         SERVER.reload()
 
 
