@@ -15,6 +15,18 @@ from ..world import Room
 
 
 @COMMANDS.register
+class AnnounceCommand(Command):
+
+    """A command to announce something."""
+
+    no_parse = True
+
+    def _action(self):
+        message = self.args[0].strip()
+        CHANNELS["announce"].send(message)
+
+
+@COMMANDS.register
 class CommitCommand(Command):
 
     """A command to force a global store commit."""
@@ -96,6 +108,7 @@ class ShutdownCommand(Command):
                 SERVER.shutdown()
 
 
+CharacterShell.add_verbs(AnnounceCommand, "announce")
 CharacterShell.add_verbs(CommitCommand, "commit", truncate=False)
 CharacterShell.add_verbs(GotoCommand, "go", "goto", truncate=False)
 CharacterShell.add_verbs(ReloadCommand, "reload", truncate=False)
