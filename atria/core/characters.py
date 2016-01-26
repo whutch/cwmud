@@ -6,7 +6,7 @@
 
 import re
 
-from .channels import Channel, CHANNELS
+from .channels import CHANNELS
 from .const import *
 from .entities import Attribute, ENTITIES, Entity
 from .events import EVENTS
