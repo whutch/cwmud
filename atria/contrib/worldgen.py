@@ -12,6 +12,7 @@ from ..core.events import EVENTS
 from ..core.logs import get_logger
 from ..core.random import generate_noise
 from ..core.utils.decorators import patch
+from ..core.utils.exceptions import AlreadyExists
 from ..core.world import Room, RoomName
 from ..libs.miniboa import colorize
 
@@ -19,36 +20,11 @@ from ..libs.miniboa import colorize
 log = get_logger("worldgen")
 
 
-_temp_terrains = {  # Temporary
-    "high mountain": (0.85, 0, "^W^^"),
-    "mountain": (0.75, 0, "^K^^"),
-    "hill": (0.65, 0, "^yn"),
-    "dense forest": (0.55, 0, "^gt"),
-    "forest": (0.40, 0, "^Gt"),
-    "dense grassland": (0.30, 0, "^g\""),
-    "grassland": (0.00, 0, "^G\""),
-    "beach": (-0.10, 0, "^Y."),
-    "shallow water": (-0.25, 0, "^C,"),
-    "deep water": (-0.45, 0, "^c,"),
-    "sea": (-0.65, 0, "^B~"),
-    "ocean": (-1.00, 0, "^b~"),
-}
-
-
 # Settings
 
 # Odd numbers are better for these, as they will have a centered cursor.
 MAP_SMALL_WIDTH = 21  # The width of the map viewed in "look"
 MAP_SMALL_HEIGHT = 13  # The height of the map viewed in "look"
-
-# How much to increment each step in the terrain table. A smaller value gives
-# you more room and accuracy when choosing values for terrains, but also
-# creates a larger table in memory.
-TABLE_INCREMENT = 0.01
-
-# How many digits to round the noise values to. This should match the number
-# of digits after the decimal in TABLE_INCREMENT.
-ROUND_TO_DIGITS = 2
 
 # Coordinate deltas for each direction, starting east and
 # going counter-clockwise (northeast, north, and so on).
@@ -67,12 +43,98 @@ _BASE_ELEVATION_ARGS = {"scale": 100, "seed": 15051}
 _ELEVATION_NOISE_ARGS = {"scale": 20, "seed": 15051, "octaves": 3}
 
 
-# Globals
-_TERRAIN_TABLE = {}  # Internal. Managed by update_terrain_table().
-
-
 # Adjust the validation pattern for room names.
 RoomName._valid_chars = re.compile(".+")
+
+
+class TerrainManager:
+
+    """A manager for terrain types."""
+
+    def __init__(self):
+        """Create a new terrain manager."""
+        self._terrains = {}
+        self._table = {}
+
+    def __contains__(self, terrain):
+        return terrain in self._terrains
+
+    def __getitem__(self, terrain):
+        return self._terrains[terrain]
+
+    def _update_terrain_table(self):
+        self._table.clear()
+        elevations = sorted([(terrain.min_elevation, terrain)
+                             for terrain in self._terrains.values()])
+        for index, (elevation, terrain) in enumerate(elevations):
+            next_elevation = (elevations[index + 1][0]
+                              if index < len(elevations) - 1
+                              else 1.01)
+            step = elevation
+            while step < next_elevation:
+                self._table[step] = terrain
+                step = round(step + 0.01, 2)
+
+    def register(self, terrain, *more):
+        """Register one or more terrain types.
+
+        The internal elevation/moisture table will be updated after
+        registration. You can register multiple terrain types at once to
+        avoid unnecessary table updates.
+
+        :param Terrain terrain: The terrain type to register
+        :param iterable<Terrain> more: Optional, additional terrain types
+        :returns None:
+        :raises AlreadyExists: If any of the terrain types are already
+                               registered
+        :raises TypeError: If `terrain` is not an instance of Terrain
+
+        """
+        terrains = [terrain] + list(more)
+        for terrain in terrains:
+            if not isinstance(terrain, Terrain):
+                raise TypeError("must be an instance Terrain to register")
+            if terrain.name in self._terrains:
+                raise AlreadyExists(terrain.name,
+                                    self._terrains[terrain.name], terrain)
+        for terrain in terrains:
+            self._terrains[terrain.name] = terrain
+        self._update_terrain_table()
+
+    def get_terrain(self, elevation):
+        """Get the terrain type for the given map data.
+
+        :param float elevation: The elevation value, between -1 and 1
+        :returns Terrain: The terrain type
+
+        """
+        elevation = round(elevation, 2)
+        return self._table.get(elevation)
+
+
+class Terrain:
+
+    """A terrain type."""
+
+    def __init__(self, name, symbol, min_elevation):
+        self.name = name
+        self.symbol = symbol
+        self.min_elevation = min_elevation
+
+
+TERRAIN = TerrainManager()
+TERRAIN.register(Terrain("high mountain", "^W^^", 0.85),
+                 Terrain("mountain", "^K^^", 0.75),
+                 Terrain("hill", "^yn", 0.65),
+                 Terrain("dense forest", "^gt", 0.55),
+                 Terrain("forest", "^Gt", 0.40),
+                 Terrain("dense grassland", "^g\"", 0.30),
+                 Terrain("grassland", "^G\"", 0.00),
+                 Terrain("beach", "^Y.", -0.10),
+                 Terrain("shallow water", "^C,", -0.25),
+                 Terrain("deep water", "^c,", -0.45),
+                 Terrain("sea", "^B~", -0.65),
+                 Terrain("ocean", "^b~", -1.00))
 
 
 @patch(Character)
@@ -145,24 +207,6 @@ def generate_room(x, y, z):
     return room
 
 
-def _update_terrain_table():
-    _TERRAIN_TABLE.clear()
-    elevations = sorted([(data[0], name) for name, data
-                         in _temp_terrains.items()])
-    for index, (elevation, name) in enumerate(elevations):
-        next_elevation = (elevations[index + 1][0]
-                          if index < len(elevations) - 1
-                          else 1 + TABLE_INCREMENT)
-        step = elevation
-        while step < next_elevation:
-            _TERRAIN_TABLE[step] = name
-            step = round(step + TABLE_INCREMENT, ROUND_TO_DIGITS)
-
-
-# Setup the initial terrain table
-_update_terrain_table()
-
-
 def generate_map_layer(width, height, center=(0, 0), scale=1, seed=0,
                        offset_x=0.0, offset_y=0.0, octaves=1,
                        persistence=0.5, lacunarity=2.0,
@@ -220,19 +264,6 @@ def combine_map_layers(map_layer, *more_layers):
     return new_layer
 
 
-def get_terrain(elevation):
-    """Get the terrain type for the given map data.
-
-    :param float elevation: The elevation value, between -1 and 1
-    :returns Terrain: The terrain type
-
-    """
-    elevation = round(elevation, ROUND_TO_DIGITS)
-    if elevation not in _TERRAIN_TABLE:
-        return "^R?"
-    return _temp_terrains[_TERRAIN_TABLE[elevation]][2]
-
-
 def render_map_from_layers(elevation_layer, convert_color=False):
     """Render an ASCII terrain map from raw layer data.
 
@@ -251,7 +282,8 @@ def render_map_from_layers(elevation_layer, convert_color=False):
             if (x, y) == center:
                 row.append("^M#")
             else:
-                row.append(get_terrain(value))
+                terrain = TERRAIN.get_terrain(value)
+                row.append(terrain.symbol if terrain else "^R?")
         rows.append(row)
     if convert_color:
         for row in rows:
