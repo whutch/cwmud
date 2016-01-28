@@ -4,8 +4,10 @@
 # :copyright: (c) 2008 - 2016 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
+from os.path import exists, join
 import re
 
+from .. import BASE_PACKAGE
 from ..core.characters import Character, get_movement_strings
 from ..core.entities import Unset
 from ..core.events import EVENTS
@@ -41,6 +43,9 @@ _ROOM_FLAVOR = {
 # Noise generation arguments for map layers
 _BASE_ELEVATION_ARGS = {"scale": 100, "seed": 15051}
 _ELEVATION_NOISE_ARGS = {"scale": 20, "seed": 15051, "octaves": 3}
+_BASE_MOISTURE_ARGS = {"scale": 200, "seed": 23230}
+_MOISTURE_NOISE_ARGS = {"scale": 40, "seed": 23230, "octaves": 3}
+_DIVERSITY_NOISE_ARGS = {"scale": 5, "seed": 19578}
 
 
 # Adjust the validation pattern for room names.
@@ -54,87 +59,76 @@ class TerrainManager:
     def __init__(self):
         """Create a new terrain manager."""
         self._terrains = {}
-        self._table = {}
+        self._point_table = {}
 
-    def __contains__(self, terrain):
-        return terrain in self._terrains
+    def __contains__(self, code):
+        return code in self._terrains
 
-    def __getitem__(self, terrain):
-        return self._terrains[terrain]
+    def __getitem__(self, code):
+        return self._terrains[code]
 
-    def _update_terrain_table(self):
-        self._table.clear()
-        elevations = sorted([(terrain.min_elevation, terrain)
-                             for terrain in self._terrains.values()])
-        for index, (elevation, terrain) in enumerate(elevations):
-            next_elevation = (elevations[index + 1][0]
-                              if index < len(elevations) - 1
-                              else 1.01)
-            step = elevation
-            while step < next_elevation:
-                self._table[step] = terrain
-                step = round(step + 0.01, 2)
+    def register(self, code, terrain):
+        """Register a terrain type by it's three letter code.
 
-    def register(self, terrain, *more):
-        """Register one or more terrain types.
-
-        The internal elevation/moisture table will be updated after
-        registration. You can register multiple terrain types at once to
-        avoid unnecessary table updates.
-
+        :param str code: A three letter code for the terrain type
         :param Terrain terrain: The terrain type to register
-        :param iterable<Terrain> more: Optional, additional terrain types
         :returns None:
-        :raises AlreadyExists: If any of the terrain types are already
-                               registered
+        :raises AlreadyExists: If a terrain with `code` is already registered
         :raises TypeError: If `terrain` is not an instance of Terrain
+        :raises ValueError: If `code` is not a three letter string
 
         """
-        terrains = [terrain] + list(more)
-        for terrain in terrains:
-            if not isinstance(terrain, Terrain):
-                raise TypeError("must be an instance Terrain to register")
-            if terrain.name in self._terrains:
-                raise AlreadyExists(terrain.name,
-                                    self._terrains[terrain.name], terrain)
-        for terrain in terrains:
-            self._terrains[terrain.name] = terrain
-        self._update_terrain_table()
+        if not isinstance(code, str) or len(code) != 3:
+            raise ValueError("terrain code must be 3 letter string")
+        if code in self._terrains:
+            raise AlreadyExists(code, self._terrains[code], terrain)
+        if not isinstance(terrain, Terrain):
+            raise TypeError("must be an instance Terrain to register")
+        self._terrains[code] = terrain
 
-    def get_terrain(self, elevation):
-        """Get the terrain type for the given map data.
+    def set_terrain_for_point(self, point_data, terrain):
+        """Link point data to a specific terrain.
 
-        :param float elevation: The elevation value, between -1 and 1
-        :returns Terrain: The terrain type
+        Each value in the point data tuple should already be rounded
+        to their specific ranges.
+
+        :param point_data: A tuple in the form (elevation, moisture)
+        :param terrain: The terrain to link this point data to
+        :returns None:
+        :raises AlreadyExists: If terrain is already linked to `point_data`
 
         """
-        elevation = round(elevation, 2)
-        return self._table.get(elevation)
+        if point_data in self._point_table:
+            raise AlreadyExists(point_data, self._point_table[point_data],
+                                terrain)
+        self._point_table[point_data] = terrain
+
+    def get_terrain_for_point(self, elevation, moisture):
+        """Get the terrain type for the given point data.
+
+        :param float elevation: The elevation value, from -1 to 1
+        :param float moisture: The moisture value, from -1 to 1
+        :returns Terrain: The terrain type or None if not found
+
+        """
+        elevation = round(elevation, 1)
+        moisture = round(moisture, 1)
+        return self._point_table.get((elevation, moisture))
+
+
+TERRAIN = TerrainManager()
 
 
 class Terrain:
 
     """A terrain type."""
 
-    def __init__(self, name, symbol, min_elevation):
+    def __init__(self, name, symbol, diversity_symbol=None,
+                 diversity_minimum=0.0):
         self.name = name
         self.symbol = symbol
-        self.min_elevation = min_elevation
-
-
-TERRAIN = TerrainManager()
-TERRAIN.register(Terrain("high mountain", "^W^^", 0.85),
-                 Terrain("mountain", "^K^^", 0.75),
-                 Terrain("hill", "^yn", 0.65),
-                 Terrain("dense forest", "^gt", 0.55),
-                 Terrain("forest", "^Gt", 0.40),
-                 Terrain("dense grassland", "^g\"", 0.30),
-                 Terrain("grassland", "^G\"", 0.00),
-                 Terrain("beach", "^Y.", -0.10),
-                 Terrain("shallow water", "^C,", -0.25),
-                 Terrain("deep water", "^c,", -0.45),
-                 Terrain("sea", "^B~", -0.65),
-                 Terrain("ocean", "^b~", -1.00))
+        self.diversity_symbol = diversity_symbol
+        self.diversity_minimum = diversity_minimum
 
 
 @patch(Character)
@@ -264,10 +258,13 @@ def combine_map_layers(map_layer, *more_layers):
     return new_layer
 
 
-def render_map_from_layers(elevation_layer, convert_color=False):
+def render_map_from_layers(elevation_layer, moisture_layer,
+                           diversity_layer=None, convert_color=False):
     """Render an ASCII terrain map from raw layer data.
 
     :param elevation_layer: The elevation layer
+    :param moisture_layer: The moisture layer
+    :param diversity_layer: Optional, a diversity layer
     :param convert_color: Whether to convert color codes or not
     :returns str: A rendered map
 
@@ -276,14 +273,26 @@ def render_map_from_layers(elevation_layer, convert_color=False):
     width = len(elevation_layer[0])
     center = (width // 2, height // 2)
     rows = []
-    for y, values in enumerate(elevation_layer):
+    for y in range(height):
+        values = list(zip(elevation_layer[y], moisture_layer[y]))
         row = []
-        for x, value in enumerate(values):
+        for x in range(width):
             if (x, y) == center:
-                row.append("^M#")
+                row.append("^W@")
             else:
-                terrain = TERRAIN.get_terrain(value)
-                row.append(terrain.symbol if terrain else "^R?")
+                elevation, moisture = values[x]
+                terrain = TERRAIN.get_terrain_for_point(elevation, moisture)
+                symbol = None
+                if not terrain:
+                    symbol = "^R?"
+                else:
+                    if diversity_layer and terrain.diversity_symbol:
+                        diversity = diversity_layer[y][x]
+                        if diversity >= terrain.diversity_minimum:
+                            symbol = terrain.diversity_symbol
+                if symbol is None:
+                    symbol = terrain.symbol
+                row.append(symbol)
         rows.append(row)
     if convert_color:
         for row in rows:
@@ -302,13 +311,53 @@ def render_map(width, height, center=(0, 0), convert_color=False):
     :returns str: A rendered map
 
     """
-    # Calculate the map data
+    # Calculate the elevation layer
     base_elevation = generate_map_layer(width, height, center=center,
                                         **_BASE_ELEVATION_ARGS)
     elevation_noise = generate_map_layer(width, height, center=center,
                                          **_ELEVATION_NOISE_ARGS)
     elevation_layer = combine_map_layers(base_elevation, elevation_noise)
-    return render_map_from_layers(elevation_layer, convert_color=convert_color)
+    # Calculate the moisture layer
+    base_moisture = generate_map_layer(width, height, center=center,
+                                       **_BASE_MOISTURE_ARGS)
+    moisture_noise = generate_map_layer(width, height, center=center,
+                                        **_MOISTURE_NOISE_ARGS)
+    moisture_layer = combine_map_layers(base_moisture, moisture_noise)
+    # Calculate the diversity layer
+    diversity_layer = generate_map_layer(width, height, center=center,
+                                         **_DIVERSITY_NOISE_ARGS)
+    # Render the map using the calculated layers
+    return render_map_from_layers(elevation_layer,
+                                  moisture_layer,
+                                  diversity_layer,
+                                  convert_color=convert_color)
+
+
+_VISUALIZE_TABLE = {
+    -1.0: "^r0", -0.9: "^r9", -0.8: "^y8", -0.7: "^y7", -0.6: "^m6",
+    -0.5: "^m5", -0.4: "^b4", -0.3: "^b3", -0.2: "^g2", -0.1: "^g1",
+    0.0: "^w0", 0.1: "^G1", 0.2: "^G2", 0.3: "^B3", 0.4: "^B4", 0.5: "^M5",
+    0.6: "^M6", 0.7: "^Y7", 0.8: "^Y8", 0.9: "^R9", 1.0: "^R0",
+}
+
+
+def _visualize_map_layer(map_layer, formatter=None):
+    """Print raw, colored map data for visualization.
+
+    :param map_layer: The base layer
+    :param callable formatter: Optional, a filter for map data; should accept
+                               a value from -1 to 1 rounded to a tenth and
+                               return a single printable character
+    :returns None:
+
+    """
+    rows = []
+    for values in map_layer:
+        if not formatter or not callable(formatter):
+            formatter = lambda value: _VISUALIZE_TABLE[value]
+        rows.append("".join([formatter(round(value, 1))
+                            for value in values]))
+    print(colorize("\n".join(rows)))
 
 
 # Unhook all the default events in the setup_world namespace.
@@ -317,7 +366,60 @@ EVENTS.unhook("*", "setup_world")
 
 @EVENTS.hook("server_boot", "setup_world")
 def _hook_server_boot():
+    _parse_terrain_grid()
     room = Room.load("0,0,0", default=None)
     if not room:
         Room.generate("0,0,0", "A Room at 0,0", Unset)
         log.warn("Had to generate initial room at 0,0,0.")
+
+
+def _parse_terrain_grid():
+    log.info("Loading terrain point values.")
+    path = join(BASE_PACKAGE, "contrib", "worldgen", "terrain_grid.txt")
+    if not exists(path):
+        raise IOError("cannot find terrain grid file!")
+    with open(path) as terrain_grid:
+        elevation = 1.0
+        while elevation >= -1.0:
+            line = terrain_grid.readline()
+            fields = line.strip().split()[1:]
+            moisture = 1.0
+            while moisture >= -1.0:
+                code = fields.pop()
+                terrain = TERRAIN[code]
+                point = (round(elevation, 1), round(moisture, 1))
+                TERRAIN.set_terrain_for_point(point, terrain)
+                moisture -= 0.1
+            elevation -= 0.1
+
+
+TERRAIN.register("snm", Terrain("snow-capped mountains", "^W^^"))
+TERRAIN.register("mop", Terrain("mountain peaks", "^w^^"))
+TERRAIN.register("mou", Terrain("mountain", "^K^^"))
+TERRAIN.register("hil", Terrain("hill", "^yn"))
+TERRAIN.register("for", Terrain("forest", "^Gt",
+                                diversity_symbol="^gt",
+                                diversity_minimum=0.3))
+TERRAIN.register("gra", Terrain("grassland", "^G\"",
+                                diversity_symbol="^g\"",
+                                diversity_minimum=0.3))
+TERRAIN.register("bea", Terrain("beach", "^Y."))
+TERRAIN.register("shw", Terrain("shallow water", "^C,"))
+TERRAIN.register("dpw", Terrain("deep water", "^c,"))
+TERRAIN.register("sea", Terrain("sea", "^B~"))
+TERRAIN.register("oce", Terrain("ocean", "^b~"))
+
+TERRAIN.register("arp", Terrain("arid peaks", "^k^^"))
+TERRAIN.register("bmo", Terrain("barren mountains", "^y^^"))
+TERRAIN.register("dun", Terrain("sand dunes", "^Yn"))
+TERRAIN.register("des", Terrain("desert", "^Y~"))
+TERRAIN.register("bhi", Terrain("barren hills", "^wn"))
+TERRAIN.register("bar", Terrain("barrens", "^y."))
+TERRAIN.register("swa", Terrain("swamp", "^G."))
+TERRAIN.register("mar", Terrain("marshes", "^c&"))
+TERRAIN.register("whi", Terrain("wooded hills", "^gn"))
+TERRAIN.register("wmo", Terrain("wooded mountains", "^g^^"))
+TERRAIN.register("mud", Terrain("mud fields", "^y\""))
+TERRAIN.register("jun", Terrain("jungle", "^G%"))
+TERRAIN.register("jhi", Terrain("jungle hills", "^Gn"))
+TERRAIN.register("jmo", Terrain("jungle mountains", "^c^^"))
