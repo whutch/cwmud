@@ -9,7 +9,7 @@ import re
 
 from .. import BASE_PACKAGE
 from ..core.characters import Character, get_movement_strings
-from ..core.entities import Unset
+from ..core.entities import Attribute, Unset
 from ..core.events import EVENTS
 from ..core.logs import get_logger
 from ..core.random import generate_noise
@@ -123,12 +123,37 @@ class Terrain:
 
     """A terrain type."""
 
-    def __init__(self, name, symbol, diversity_symbol=None,
-                 diversity_minimum=0.0):
-        self.name = name
+    def __init__(self, room_name, symbol, room_description=Unset,
+                 diversity_name=None, diversity_symbol=None,
+                 diversity_minimum=None):
+        self.room_name = room_name
         self.symbol = symbol
+        self.room_description = room_description
+        self.diversity_name = diversity_name
         self.diversity_symbol = diversity_symbol
         self.diversity_minimum = diversity_minimum
+
+    def is_diverse(self, diversity_value):
+        """Return whether this terrain is diverse at a particular value.
+
+        :param float diversity_value: The diversity value to check against
+        :return bool: Whether the terrain is diverse or not
+
+        """
+        if self.diversity_minimum is None:
+            return False
+        return diversity_value >= self.diversity_minimum
+
+
+@Room.register_attr("terrain")
+class RoomTerrain(Attribute):
+    """A room's terrain type."""
+
+    @classmethod
+    def _validate(cls, new_value, entity=None):
+        if not isinstance(new_value, Terrain):
+            raise ValueError("Room terrain must be a Terrain instance.")
+        return new_value
 
 
 @patch(Character)
@@ -178,8 +203,7 @@ def move_direction(self, x=0, y=0, z=0):
     to_coords = "{},{},{}".format(to_x, to_y, to_z)
     room = Room.load(to_coords, default=None)
     if not room:
-        room = Room.generate(to_coords, "A Room at {},{}".format(to_x, to_y),
-                             description=Unset)
+        room = generate_room(to_x, to_y, to_z)
     to_dir, from_dir = get_movement_strings((x, y, z))
     self.move_to_room(room, "{s} move{ss} {dir}.",
                       "{s} arrives from {dir}.",
@@ -196,8 +220,13 @@ def generate_room(x, y, z):
 
     """
     room = Room({"x": x, "y": y, "z": z})
-    room.name = "A Room at {},{}".format(x, y)
-    room.description = Unset
+    terrain, diverse = get_terrain_for_coord(x, y)
+    room.terrain = terrain
+    if diverse and terrain.diversity_symbol:
+        room.name = terrain.diversity_name
+    else:
+        room.name = terrain.room_name
+    room.description = terrain.room_description
     return room
 
 
@@ -258,6 +287,33 @@ def combine_map_layers(map_layer, *more_layers):
     return new_layer
 
 
+def _render_map_data(width, height, center=(0, 0)):
+    """Render raw layer data for a rectangle of map.
+
+    :param int width: The width of the map
+    :param int height: The height of the map
+    :param tuple(int, int) center: The center of the map in (x, y) form
+    :returns tuple(layers): A tuple of map layers
+
+    """
+    # Calculate the elevation layer
+    base_elevation = generate_map_layer(width, height, center=center,
+                                        **_BASE_ELEVATION_ARGS)
+    elevation_noise = generate_map_layer(width, height, center=center,
+                                         **_ELEVATION_NOISE_ARGS)
+    elevation_layer = combine_map_layers(base_elevation, elevation_noise)
+    # Calculate the moisture layer
+    base_moisture = generate_map_layer(width, height, center=center,
+                                       **_BASE_MOISTURE_ARGS)
+    moisture_noise = generate_map_layer(width, height, center=center,
+                                        **_MOISTURE_NOISE_ARGS)
+    moisture_layer = combine_map_layers(base_moisture, moisture_noise)
+    # Calculate the diversity layer
+    diversity_layer = generate_map_layer(width, height, center=center,
+                                         **_DIVERSITY_NOISE_ARGS)
+    return elevation_layer, moisture_layer, diversity_layer
+
+
 def render_map_from_layers(elevation_layer, moisture_layer,
                            diversity_layer=None, convert_color=False):
     """Render an ASCII terrain map from raw layer data.
@@ -288,7 +344,7 @@ def render_map_from_layers(elevation_layer, moisture_layer,
                 else:
                     if diversity_layer and terrain.diversity_symbol:
                         diversity = diversity_layer[y][x]
-                        if diversity >= terrain.diversity_minimum:
+                        if terrain.is_diverse(diversity):
                             symbol = terrain.diversity_symbol
                 if symbol is None:
                     symbol = terrain.symbol
@@ -311,26 +367,23 @@ def render_map(width, height, center=(0, 0), convert_color=False):
     :returns str: A rendered map
 
     """
-    # Calculate the elevation layer
-    base_elevation = generate_map_layer(width, height, center=center,
-                                        **_BASE_ELEVATION_ARGS)
-    elevation_noise = generate_map_layer(width, height, center=center,
-                                         **_ELEVATION_NOISE_ARGS)
-    elevation_layer = combine_map_layers(base_elevation, elevation_noise)
-    # Calculate the moisture layer
-    base_moisture = generate_map_layer(width, height, center=center,
-                                       **_BASE_MOISTURE_ARGS)
-    moisture_noise = generate_map_layer(width, height, center=center,
-                                        **_MOISTURE_NOISE_ARGS)
-    moisture_layer = combine_map_layers(base_moisture, moisture_noise)
-    # Calculate the diversity layer
-    diversity_layer = generate_map_layer(width, height, center=center,
-                                         **_DIVERSITY_NOISE_ARGS)
-    # Render the map using the calculated layers
-    return render_map_from_layers(elevation_layer,
-                                  moisture_layer,
-                                  diversity_layer,
+    elevation, moisture, diversity = _render_map_data(width, height,
+                                                      center=center)
+    return render_map_from_layers(elevation, moisture, diversity,
                                   convert_color=convert_color)
+
+
+def get_terrain_for_coord(x, y):
+    """Get the terrain type for a coordinate.
+
+    :param int x: The x coordinate
+    :param int y: The y coordinate
+    :returns tuple(Terrain, bool): The terrain type and whether it is diverse
+
+    """
+    elevation, moisture, diversity = _render_map_data(1, 1, (x, y))
+    terrain = TERRAIN.get_terrain_for_point(elevation[0][0], moisture[0][0])
+    return terrain, terrain.is_diverse(diversity[0][0])
 
 
 _VISUALIZE_TABLE = {
@@ -369,7 +422,7 @@ def _hook_server_boot():
     _parse_terrain_grid()
     room = Room.load("0,0,0", default=None)
     if not room:
-        Room.generate("0,0,0", "A Room at 0,0", Unset)
+        generate_room(0, 0, 0)
         log.warn("Had to generate initial room at 0,0,0.")
 
 
@@ -393,33 +446,35 @@ def _parse_terrain_grid():
             elevation -= 0.1
 
 
-TERRAIN.register("snm", Terrain("snow-capped mountains", "^W^^"))
-TERRAIN.register("mop", Terrain("mountain peaks", "^w^^"))
-TERRAIN.register("mou", Terrain("mountain", "^K^^"))
-TERRAIN.register("hil", Terrain("hill", "^yn"))
-TERRAIN.register("for", Terrain("forest", "^Gt",
+TERRAIN.register("snm", Terrain("Snow-capped Mountains", "^W^^"))
+TERRAIN.register("mop", Terrain("Mountain Peak", "^w^^"))
+TERRAIN.register("mou", Terrain("Mountain Range", "^K^^"))
+TERRAIN.register("hil", Terrain("Rolling Hills", "^yn"))
+TERRAIN.register("for", Terrain("Forest", "^Gt",
+                                diversity_name="Dense Forest",
                                 diversity_symbol="^gt",
                                 diversity_minimum=0.3))
-TERRAIN.register("gra", Terrain("grassland", "^G\"",
+TERRAIN.register("gra", Terrain("Grasslands", "^G\"",
+                                diversity_name="Tall Grass",
                                 diversity_symbol="^g\"",
                                 diversity_minimum=0.3))
-TERRAIN.register("bea", Terrain("beach", "^Y."))
-TERRAIN.register("shw", Terrain("shallow water", "^C,"))
-TERRAIN.register("dpw", Terrain("deep water", "^c,"))
-TERRAIN.register("sea", Terrain("sea", "^B~"))
-TERRAIN.register("oce", Terrain("ocean", "^b~"))
+TERRAIN.register("bea", Terrain("Sandy Beach", "^Y."))
+TERRAIN.register("shw", Terrain("Shallow Water", "^C,"))
+TERRAIN.register("dpw", Terrain("Deep Water", "^c,"))
+TERRAIN.register("sea", Terrain("Open Sea", "^B~"))
+TERRAIN.register("oce", Terrain("Open Ocean", "^b~"))
 
-TERRAIN.register("arp", Terrain("arid peaks", "^k^^"))
-TERRAIN.register("bmo", Terrain("barren mountains", "^y^^"))
-TERRAIN.register("dun", Terrain("sand dunes", "^Yn"))
-TERRAIN.register("des", Terrain("desert", "^Y~"))
-TERRAIN.register("bhi", Terrain("barren hills", "^wn"))
-TERRAIN.register("bar", Terrain("barrens", "^y."))
-TERRAIN.register("swa", Terrain("swamp", "^G."))
-TERRAIN.register("mar", Terrain("marshes", "^c&"))
-TERRAIN.register("whi", Terrain("wooded hills", "^gn"))
-TERRAIN.register("wmo", Terrain("wooded mountains", "^g^^"))
-TERRAIN.register("mud", Terrain("mud fields", "^y\""))
-TERRAIN.register("jun", Terrain("jungle", "^G%"))
-TERRAIN.register("jhi", Terrain("jungle hills", "^Gn"))
-TERRAIN.register("jmo", Terrain("jungle mountains", "^c^^"))
+TERRAIN.register("arp", Terrain("Arid Mountain Peak", "^k^^"))
+TERRAIN.register("bmo", Terrain("Barren Mountains", "^y^^"))
+TERRAIN.register("dun", Terrain("Sand Dunes", "^Yn"))
+TERRAIN.register("des", Terrain("Desert", "^Y~"))
+TERRAIN.register("bhi", Terrain("Barren Hills", "^wn"))
+TERRAIN.register("bar", Terrain("Barren Land", "^y."))
+TERRAIN.register("swa", Terrain("Swamp", "^G."))
+TERRAIN.register("mar", Terrain("Marshland", "^c&"))
+TERRAIN.register("whi", Terrain("Wooded Hills", "^gn"))
+TERRAIN.register("wmo", Terrain("Wooded Mountains", "^g^^"))
+TERRAIN.register("mud", Terrain("Muddy Fields", "^y\""))
+TERRAIN.register("jun", Terrain("Dense Jungle", "^G%"))
+TERRAIN.register("jhi", Terrain("Jungle Hills", "^Gn"))
+TERRAIN.register("jmo", Terrain("Jungle Mountains", "^c^^"))
