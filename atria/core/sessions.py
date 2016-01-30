@@ -482,12 +482,15 @@ class Session(HasFlags):
         :returns None:
 
         """
-        if not log_msg:
+        if log_msg == "":
             log_msg = joins("Closing session ", self, ".", sep="")
-        log.info(log_msg)
+        if log_msg:
+            log.info(log_msg)
         self.send(reason)
         if self.char:
             self.char.suspend()
+        if self.account:
+            self.account.logout(self)
         self.flags.add("close")
 
     def request(self, request_class, callback, **options):

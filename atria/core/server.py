@@ -294,12 +294,12 @@ class ConnectMenu(Menu):
 def _connect_menu_login(session):
 
     def _success(_session, account):
-        with EVENTS.fire("account_login", account):
-            if account.options.reader or account.options.reader is Unset:
-                _session.send(SESSIONS.login_greeting_reader)
-            else:
-                _session.send(SESSIONS.login_greeting_ascii)
-            _session.account = account
+        if account.options.reader or account.options.reader is Unset:
+            _session.send(SESSIONS.login_greeting_reader)
+        else:
+            _session.send(SESSIONS.login_greeting_ascii)
+        _session.account = account
+        account.login(session)
         _session.menu = AccountMenu
 
     def _fail(_session, account):

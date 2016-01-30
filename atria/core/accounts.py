@@ -41,6 +41,31 @@ class Account(Entity):
         else:
             return "Account<(unnamed)>"
 
+    def login(self, session):
+        """Process an account login for a session.
+
+        :param sessions.Session session: The session logging in
+        :returns None:
+
+        """
+        if not self.active:
+            with EVENTS.fire("account_login", session, self):
+                self.active = True
+                log.info("%s has logged in to %s.", session, self)
+                session.send("\nMOTD will go here!")
+
+    def logout(self, session):
+        """Process an account logout for a session.
+
+        :param sessions.Session session: The session logging in
+        :returns None:
+
+        """
+        if self.active:
+            with EVENTS.fire("account_logout", session, self):
+                log.info("%s has logged out of %s.", session, self)
+                self.active = False
+
 
 # noinspection PyProtectedMember
 @Account.register_attr("email")
@@ -437,6 +462,7 @@ def _account_menu_select_char(session, char=None):
 def _account_menu_quit(session):
     session.close("Okay, goodbye!",
                   log_msg=joins(session, "has quit."))
+    session.account.logout(session)
 
 
 @AccountMenu.add_entry("C", "Create character")
