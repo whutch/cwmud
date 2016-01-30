@@ -41,21 +41,6 @@ class Account(Entity):
         else:
             return "Account<(unnamed)>"
 
-    @property
-    def session(self):
-        """Return the current session for this account."""
-        return self._get_weak("session")
-
-    @session.setter
-    def session(self, new_session):
-        """Set the current session for this account.
-
-        :param sessions.Session new_session: The session tied to this account
-        :returns None:
-
-        """
-        self._set_weak("session", new_session)
-
 
 # noinspection PyProtectedMember
 @Account.register_attr("email")
@@ -462,8 +447,3 @@ def _account_menu_create_character(session):
         # Build a new menu with an entry for the character.
         _session.menu = AccountMenu
     create_character(session, _callback)
-
-
-@EVENTS.hook("account_login")
-def _hook_account_login(account):
-    account.session.send("\nMOTD will go here!")
