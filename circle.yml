@@ -10,11 +10,11 @@ dependencies:
   pre:
     - pip install -r requirements.txt
     - pip install -r tests/requirements.txt
-    - pip install coveralls
+    - pip install codecov
 
 test:
   override:
     - make test-strict
     - make coverage
   post:
-    - coveralls
+    - codecov
