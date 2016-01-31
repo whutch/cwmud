@@ -1,6 +1,8 @@
 Atria MUD Server
 ================
 
+[![Circle CI](https://circleci.com/gh/whutch/atria/tree/master.svg?style=shield)][build] [![codecov.io](https://codecov.io/github/whutch/atria/coverage.svg?branch=master)][coverage]
+
 Atria is a pure-Python MUD server designed with modularity and ease of development in mind. It was originally created as an exercise, as I had always wanted to write a MUD from scratch, and as such does not make use of many third-party libraries (just [miniboa][miniboa-py3] for Telnet protocol handling, [redis-py] for inter-process messaging, and [passlib]/[py-bcrypt] for password hashing; none of which are wheels that I wanted to reinvent).
 
 
@@ -112,6 +114,8 @@ Contact & Support
 You can email me questions and comments at <will@whutch.com>. You can also find me as Kazan on the [Mud Coders Slack group][slack] (the signup is on the right side of [this page][mudcoders]).
 
 
+[build]: https://circleci.com/gh/whutch/atria/tree/master
+[coverage]: https://codecov.io/github/whutch/atria?branch=master
 [license]: https://github.com/whutch/atria/blob/master/LICENSE.txt
 [miniboa]: https://code.google.com/p/miniboa
 [miniboa-py3]: https://github.com/pR0Ps/miniboa-py3
