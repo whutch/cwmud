@@ -14,6 +14,7 @@ from .. import BASE_PACKAGE, settings
 from ..libs.miniboa import TelnetClient
 from .accounts import AccountMenu, authenticate_account, create_account
 from .channels import Channel, CHANNELS
+from .const import *
 from .entities import ENTITIES, Unset
 from .events import EVENTS
 from .logs import get_logger
@@ -342,6 +343,12 @@ def _save_and_commit():
     STORES.commit()
 
 
+def _get_announce_sessions():
+    return (session for session in SESSIONS.all()
+            if session.active and session.shell and
+            session.shell.state >= STATE_PLAYING)
+
+
 ANNOUNCE = Channel("^Y[ANNOUNCE]^W {msg}^~",
-                   members=SESSIONS.all)
+                   members=_get_announce_sessions)
 CHANNELS.register("announce", ANNOUNCE)
