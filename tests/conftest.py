@@ -29,6 +29,10 @@ settings.BIND_ADDRESS = "localhost"
 # real server is running on the same system.
 settings.BIND_PORT = 4445
 
+# Make sure the idle times are defaults
+settings.IDLE_TIME = 180
+settings.IDLE_TIME_MAX = 600
+
 
 from atria.core.logs import get_logger
 

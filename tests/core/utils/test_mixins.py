@@ -75,11 +75,13 @@ class TestHasFlags:
 
     def test_drop_multiple_flags(self):
         """Test that we can drop multiple flags at once."""
-        assert (1 in self.instance.flags and 2 in self.instance.flags
-                and 3 not in self.instance.flags)
+        assert (1 in self.instance.flags and
+                2 in self.instance.flags and
+                3 not in self.instance.flags)
         self.instance.flags.drop(1, 2, 3)
-        assert (1 not in self.instance.flags and 2 not in self.instance.flags
-                and 3 not in self.instance.flags)
+        assert (1 not in self.instance.flags and
+                2 not in self.instance.flags and
+                3 not in self.instance.flags)
 
     def test_toggle_flags(self):
         """Test that we can toggle one flag in the flag set."""
