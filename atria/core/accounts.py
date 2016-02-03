@@ -35,6 +35,10 @@ class Account(Entity):
     _store_key = "email"
     _uid_code = "A"
 
+    def __init__(self, data=None, active=False, savable=True):
+        super().__init__(data, active, savable)
+        self._sessions = WeakSet()
+
     def __repr__(self):
         if hasattr(self, "name") and self.name:
             return joins("Account<", self.name, ">", sep="")
@@ -48,9 +52,14 @@ class Account(Entity):
         :returns None:
 
         """
-        if not self.active:
-            with EVENTS.fire("account_login", session, self):
+        if session in self._sessions:
+            log.warn("Tried to login %s to %s but it was already logged in.",
+                     session, self)
+        else:
+            if not self.active:
                 self.active = True
+            self._sessions.add(session)
+            with EVENTS.fire("account_login", session, self):
                 log.info("%s has logged in to %s.", session, self)
                 session.send("\nMOTD will go here!")
 
@@ -61,9 +70,14 @@ class Account(Entity):
         :returns None:
 
         """
-        if self.active:
+        if session not in self._sessions:
+            log.warn("Tried to logout %s from %s but it was already logged"
+                     " out.", session, self)
+        else:
             with EVENTS.fire("account_logout", session, self):
                 log.info("%s has logged out of %s.", session, self)
+            self._sessions.remove(session)
+            if not self._sessions:
                 self.active = False
 
 
@@ -462,7 +476,6 @@ def _account_menu_select_char(session, char=None):
 def _account_menu_quit(session):
     session.close("Okay, goodbye!",
                   log_msg=joins(session, "has quit."))
-    session.account.logout(session)
 
 
 @AccountMenu.add_entry("C", "Create character")
