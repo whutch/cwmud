@@ -94,11 +94,18 @@ def _handle_reload_request(msg):
 def start_nanny():
     """Start the nanny process and listen for sockets."""
     global listener
-    log.info("%s %s.", settings.MUD_NAME_FULL, __version__)
-    listener = TelnetServer(address=settings.BIND_ADDRESS,
-                            port=settings.BIND_PORT,
-                            timeout=0,
-                            create_client=False)
+    log.info("Starting %s %s.", settings.MUD_NAME_FULL, __version__)
+    try:
+        listener = TelnetServer(address=settings.BIND_ADDRESS,
+                                port=settings.BIND_PORT,
+                                timeout=0,
+                                create_client=False)
+    except OSError as exc:
+        if exc.errno == 98 or exc.strerror == "Address already in use":
+            log.error("Could not open listener: port already in use!")
+            return
+        else:
+            raise
     channels.subscribe(**{"server-reload-request": _handle_reload_request})
     server = ServerProcess()
     listener.on_connect = _on_connect

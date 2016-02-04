@@ -6,6 +6,7 @@
 
 from functools import partial
 import re
+from weakref import WeakSet
 
 # noinspection PyUnresolvedReferences
 from passlib.hash import bcrypt_sha256
