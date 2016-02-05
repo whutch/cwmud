@@ -8,8 +8,8 @@ import gc
 
 import pytest
 
-from atria.core.characters import Character
 from atria.core.entities import Unset
+from atria.core.players import Player
 from atria.core.world import get_movement_strings, Room
 
 
@@ -51,11 +51,11 @@ class TestRooms:
     def test_room_chars(self):
         """Test that a room's character list functions properly."""
         assert not self.room.chars
-        char = Character()
+        char = Player()
         char.resume(quiet=True)
         char.room = self.room
         assert set(self.room.chars) == {char}
-        del Character._caches[char.get_key_name()][char.key]
+        del Player._caches[char.get_key_name()][char.key]
         del char
         gc.collect()
         assert not self.room.chars

@@ -7,9 +7,7 @@
 from collections import deque
 import pytest
 
-from atria.core.accounts import Account
-from atria.core.characters import (Character, CharacterName, create_character,
-                                   RequestNewCharacterName)
+from atria.core.characters import Character
 from atria.core.entities import Unset
 from atria.core.utils.funcs import joins
 from atria.core.world import Room
@@ -31,12 +29,6 @@ class _FakeSession:
 
 
 @pytest.fixture(scope="module")
-def account():
-    """Create an Account instance for all tests to share."""
-    return Account(savable=False)
-
-
-@pytest.fixture(scope="module")
 def character():
     """Create a Character instance for all tests to share."""
     return Character(savable=False)
@@ -52,7 +44,6 @@ def other_character():
     """Create another Character instance for all tests to share."""
     _character = Character(savable=False)
     _character.active = True
-    _character.name = "Target"
     _character.session = _other_session
     return _character
 
@@ -90,15 +81,6 @@ class TestCharacters:
         character.session = session
         assert character.session is session
 
-    def test_character_account(self, character, account):
-        """Test that we can set a character's account."""
-        assert character.account is Unset
-        with pytest.raises(ValueError):
-            character.account = "test"
-        character.account = account
-        character.session.account = account
-        assert character.account is account
-
     def test_character_room(self, character, room):
         """Test that we can set a character's room."""
         assert character.room is Unset
@@ -113,62 +95,6 @@ class TestCharacters:
         character.room = room
         assert character.room is room
         assert character in room.chars
-
-    def test_character_name(self, character):
-        """Test that we can set a character's name."""
-        assert character.name is Unset
-        with pytest.raises(ValueError):
-            character.name = "123"  # Invalid
-        with pytest.raises(ValueError):
-            character.name = "a"  # Too short
-        with pytest.raises(ValueError):
-            character.name = "a"*20  # Too long
-        CharacterName.RESERVED.append("Nope")
-        with pytest.raises(ValueError) as exc:
-            character.name = "nope"
-        assert exc.exconly().endswith("reserved.")
-        character.name = "testing"
-        assert character.name == "Testing"
-        with pytest.raises(ValueError) as exc:
-            character.name = "testing"
-        assert exc.exconly().endswith("already in use.")
-
-    def test_character_name_request(self, character):
-        """Test that we can validate a character name request."""
-        request = RequestNewCharacterName(character.session, None)
-        with pytest.raises(request.ValidationFailed):
-            request._validate("123")
-        assert request._validate("moretesting") == "Moretesting"
-
-    def test_character_suspend(self, character, room):
-        """Test that we can suspend a character."""
-        assert character.active
-        assert character in room.chars
-        character.suspend()
-        assert not character.active
-        assert character not in room.chars
-
-    def test_character_resume(self, character, room):
-        """Test that we can resume a character."""
-        assert not character.active
-        assert character not in room.chars
-        character.resume(quiet=True)
-        assert character.active
-        assert character in room.chars
-
-    def test_character_suspend_no_room(self, character):
-        """Test that we can suspend a character with no room."""
-        character.room = Unset
-        assert character.active
-        character.suspend()
-        assert not character.active
-
-    def test_character_resume_no_room(self, character):
-        """Test that we can resume a character with no room."""
-        assert character.room is Unset
-        assert not character.active
-        character.resume()
-        assert character.active
 
     def test_character_act(self, character, other_character):
         """Test that we can generate 'act' messages for a character."""
@@ -189,33 +115,33 @@ class TestCharacters:
         assert not character.session._output
         assert other_character.session._output
         assert (other_character.session._output.pop() ==
-                "Testing explodes, hard.\n")
+                "Unnamed explodes, hard.\n")
         # Generate messages for the source and the target.
         character.act("{s} hit{ss} {t} in the face!", target=other_character)
         assert (character.session._output.pop() ==
-                "You hit Target in the face!\n")
+                "You hit Unnamed in the face!\n")
         assert (other_character.session._output.pop() ==
-                "Testing hits you in the face!\n")
+                "Unnamed hits you in the face!\n")
         character.act("{s} speak{ss} gibberish for a moment.",
                       to=Character.all())
         assert (character.session._output.pop() ==
                 "You speak gibberish for a moment.\n")
         assert (other_character.session._output.pop() ==
-                "Testing speaks gibberish for a moment.\n")
+                "Unnamed speaks gibberish for a moment.\n")
         character.act("{s} does something to {t}.", target=other_character,
                       to=Character.all(), and_self=False)
         assert not character.session._output
         assert (other_character.session._output.pop() ==
-                "Testing does something to you.\n")
+                "Unnamed does something to you.\n")
 
     def test_character_show_room(self, character, room, other_room):
         """Test that we can generate a room display for a character."""
         _session = character.session
         character.session = None
+        character.room = Unset
         character.show_room(room)
         assert not _session._output
         character.session = _session
-        assert not character.room
         character.show_room()
         assert not character.session._output
         character.room = room
@@ -228,6 +154,7 @@ class TestCharacters:
         assert "Another Room" in character.session._output.popleft()
         assert character.session._output.popleft()  # The description
         assert "Exits:" in character.session._output.popleft()
+        assert not character.session._output
         character.room = Unset
 
     def test_character_show_exits(self, character, room, other_room):
@@ -249,6 +176,7 @@ class TestCharacters:
         assert character.room is not other_room
         character.show_exits(other_room, short=True)
         assert "[Exits: west" in character.session._output.popleft()
+        assert not character.session._output
         character.room = Unset
 
     def test_character_move_to_room(self, character, other_character,
@@ -269,14 +197,14 @@ class TestCharacters:
         assert "Another Room" in character.session._output.popleft()
         assert character.session._output.popleft()  # The description
         assert "Exits" in character.session._output.popleft()
-        assert "Testing leaves." in other_character.session._output.popleft()
+        assert "Unnamed leaves." in other_character.session._output.popleft()
         character.move_to_room(room, *msgs)
         assert "You leave." in character.session._output.popleft()
         assert "An Unnamed Room" in character.session._output.popleft()
         assert character.session._output.popleft()  # The description
         assert character.session._output.popleft()  # Character list
         assert "Exits" in character.session._output.popleft()
-        assert "Testing arrives." in other_character.session._output.popleft()
+        assert "Unnamed arrives." in other_character.session._output.popleft()
 
     def test_character_move_direction(self, character, room, other_room):
         """Test that we can move a character in a direction."""
@@ -301,25 +229,3 @@ class TestCharacters:
         data["room"] = other_room.key
         character.deserialize(data)
         assert character.room is other_room
-
-    def test_character_creation(self, session, account):
-
-        """Test that character creation functions properly."""
-
-        session.account = account
-
-        def _callback(session, character):
-            assert not session._request_queue
-            assert character
-            assert character.name == "Moretesting"
-            assert character.account is account
-            assert character._savable
-            character._savable = False
-
-        assert not session._request_queue
-        create_character(session, _callback)
-        assert session._request_queue
-        request = session._request_queue.pop()
-        assert isinstance(request, RequestNewCharacterName)
-        assert not request.resolve("moretesting")  # Must confirm name.
-        assert request.resolve("yes")

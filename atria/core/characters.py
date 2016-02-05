@@ -4,15 +4,10 @@
 # :copyright: (c) 2008 - 2016 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
-import re
-
-from .channels import CHANNELS
 from .const import *
 from .entities import Attribute, ENTITIES, Entity
-from .events import EVENTS
 from .logs import get_logger
 from .pickle import PickleStore
-from .requests import Request, REQUESTS
 from .shells import Shell, SHELLS
 from .storage import STORES
 from .utils.funcs import joins
@@ -28,14 +23,10 @@ class Character(Entity):
     """A MUD character.  So full of potential."""
 
     _store = STORES.register("characters", PickleStore("characters"))
-    _store_key = "name"
     _uid_code = "C"
 
     def __repr__(self):
-        if hasattr(self, "name") and self.name:
-            return joins("Character<", self.name, ">", sep="")
-        else:
-            return "Character<(unnamed)>"
+        return joins("Character<", self.uid, ">", sep="")
 
     @property
     def session(self):
@@ -53,36 +44,29 @@ class Character(Entity):
         """
         self._set_weak("session", new_session)
 
-    def resume(self, quiet=False):
-        """Bring this character into play.
+    def get_name(self):
+        """Get this character's name.
 
-        :param bool quiet: Whether to suppress output from resuming or not
-        :returns None:
-
-        """
-        with EVENTS.fire("char_login", self):
-            if self.room:
-                self.room.chars.add(self)
-            self.active = True
-            if not quiet:
-                log.info("%s has entered the game.", self)
-                CHANNELS["announce"].send(self.name, "has logged in.")
-                self.show_room()
-
-    def suspend(self, quiet=False):
-        """Remove this character from play.
-
-        :param bool quiet: Whether to suppress output from resuming or not
-        :returns None:
+        This should be overridden in Character subclasses.
 
         """
-        with EVENTS.fire("char_logout", self):
-            if not quiet:
-                log.info("%s has left the game.", self)
-                CHANNELS["announce"].send(self.name, "has logged out.")
-            self.active = False
-            if self.room and self in self.room.chars:
-                self.room.chars.remove(self)
+        return "Unnamed"
+
+    def get_short_description(self):
+        """Get this character's short description.
+
+        This should be overridden in Character subclasses.
+
+        """
+        return "An unnamed character is here."
+
+    def get_long_description(self):
+        """Get this character's long description.
+
+        This should be overridden in Character subclasses.
+
+        """
+        return "There is nothing particularly interesting about them."
 
     def act(self, message, context=None, target=None, to=(), and_self=True):
         """Generate and send contextualized Character-based messages.
@@ -112,20 +96,20 @@ class Character(Entity):
             context["s"] = "you"
             context["ss"] = ""
             if target:
-                context["t"] = target.name
+                context["t"] = target.get_name()
                 context["ts"] = "s"
             self.session.send(_build_msg(message, context))
         if target:
-            context["s"] = self.name
+            context["s"] = self.get_name()
             context["ss"] = "s"
             context["t"] = "you"
             context["ts"] = ""
             target.session.send(_build_msg(message, context))
         if to:
-            context["s"] = self.name
+            context["s"] = self.get_name()
             context["ss"] = "s"
             if target:
-                context["t"] = target.name
+                context["t"] = target.get_name()
                 context["ts"] = "s"
             msg = _build_msg(message, context)
             for char in to:
@@ -147,9 +131,8 @@ class Character(Entity):
                 return
             room = self.room
         is_builder = (self.session.account.trust >= TRUST_BUILDER
-                      if self.session.account else False)
-        char_list = "\n".join(["^G{} ^g{}^g is here.^~".format(
-                               char.name, char.title)
+                      if self.session and self.session.account else False)
+        char_list = "\n".join([char.get_short_description()
                                for char in room.chars if char is not self])
         extra = " ({})".format(room.get_coord_str()) if is_builder else ""
         self.session.send("^Y", room.name or "A Room", extra, "^~", sep="")
@@ -174,7 +157,8 @@ class Character(Entity):
             if not self.room:
                 return
             room = self.room
-        is_builder = self.session.account.trust >= TRUST_BUILDER
+        is_builder = (self.session.account.trust >= TRUST_BUILDER
+                      if self.session and self.session.account else False)
         exits = room.get_exits()
         if short:
             exits_string = "^b[Exits: {}]^~".format(
@@ -242,29 +226,6 @@ class Character(Entity):
                           {"dir": to_dir}, {"dir": from_dir})
 
 
-@Character.register_attr("account")
-class CharacterAccount(Attribute):
-
-    """The account tied to a character."""
-
-    @classmethod
-    def _validate(cls, new_value, entity=None):
-        from .accounts import Account
-        if not isinstance(new_value, Account):
-            raise ValueError("Character account must be an Account instance.")
-        return new_value
-
-    @classmethod
-    def _serialize(cls, value):
-        # Save character accounts by UID.
-        return value.uid
-
-    @classmethod
-    def _deserialize(cls, value):
-        from .accounts import Account
-        return Account.find("uid", value, n=1)
-
-
 @Character.register_attr("room")
 class CharacterRoom(Attribute):
 
@@ -297,100 +258,6 @@ class CharacterRoom(Attribute):
         if not room:
             room = Room.load("0,0,0")
         return room
-
-
-@Character.register_attr("name")
-class CharacterName(Attribute):
-
-    """A character name."""
-
-    _min_len = 2
-    _max_len = 16
-    _valid_chars = re.compile(r"^[a-zA-Z]+$")
-
-    # Other modules can add any reservations they need to this list.
-    # Reserved character names should be in Titlecase.
-    RESERVED = []
-
-    @classmethod
-    def _validate(cls, new_value, entity=None):
-        if (not isinstance(new_value, str) or
-                not cls._valid_chars.match(new_value)):
-            raise ValueError("Character names can only contain letters.")
-        name_len = len(new_value)
-        if name_len < cls._min_len or name_len > cls._max_len:
-            raise ValueError(joins("Character names must be between",
-                                   cls._min_len, "and", cls._max_len,
-                                   "characters in length."))
-        new_value = new_value.title()
-        if CharacterName.check_reserved(new_value):
-            raise ValueError("That character name is reserved.")
-        if Character.find("name", new_value):
-            raise ValueError("That character name is already in use.")
-        return new_value
-
-    @classmethod
-    def check_reserved(cls, name):
-        """Check if a character name is reserved.
-
-        :param str name: The character name to check
-        :returns bool: True if the name is reserved, else False
-
-        """
-        return name in cls.RESERVED
-
-
-# noinspection PyProtectedMember
-@REQUESTS.register
-class RequestNewCharacterName(Request):
-
-    """A request for a new character name."""
-
-    initial_prompt = joins("Enter a new character name (character names must"
-                           " be between", CharacterName._min_len, "and",
-                           CharacterName._max_len, "letters in length): ")
-    repeat_prompt = "New character name: "
-    confirm = Request.CONFIRM_YES
-    confirm_prompt_yn = "'{data}', is that correct? (Y/N) "
-
-    def _validate(self, data):
-        try:
-            new_name = CharacterName._validate(data)
-        except ValueError as exc:
-            raise Request.ValidationFailed(*exc.args)
-        return new_name
-
-
-@Character.register_attr("title")
-class CharacterTitle(Attribute):
-
-    """A character title."""
-
-    default = "the newbie"
-
-
-# noinspection PyUnresolvedReferences
-def create_character(session, callback, character=None):
-    """Perform a series of requests to create a new character.
-
-    :param sessions.Session session: The session creating a character
-    :param callable callback: A callback for when the character is created
-    :param Character character: The character in the process of being created
-    :returns None:
-
-    """
-    if not character:
-        character = Character()
-        character._savable = False
-    if not character.name:
-        def _set_name(_session, new_name):
-            character.name = new_name
-            create_character(_session, callback, character)
-        session.request(RequestNewCharacterName, _set_name)
-    else:
-        character.account = session.account
-        character._savable = True
-        callback(session, character)
 
 
 @SHELLS.register

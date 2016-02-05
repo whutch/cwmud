@@ -11,13 +11,13 @@ from weakref import WeakSet
 # noinspection PyUnresolvedReferences
 from passlib.hash import bcrypt_sha256
 
-from .characters import Character, create_character
 from .const import *
 from .entities import Attribute, DataBlob, ENTITIES, Entity, Unset
 from .events import EVENTS
 from .logs import get_logger
 from .menus import Menu, MENUS
 from .pickle import PickleStore
+from .players import Player, create_player
 from .requests import Request, REQUESTS, RequestString
 from .shells import SHELLS
 from .storage import STORES
@@ -451,9 +451,9 @@ class AccountMenu(Menu):
             log.warn("AccountMenu assigned to session with no account!")
             return
         # Add entries for the account's characters.
-        for n, char in enumerate(Character.find("account", account,
-                                                "account", account.uid,
-                                                match=any), 1):
+        for n, char in enumerate(Player.find("account", account,
+                                             "account", account.uid,
+                                             match=any), 1):
             self.add_entry(str(n), char.name,
                            partial(_account_menu_select_char, char=char))
 
@@ -481,9 +481,9 @@ def _account_menu_quit(session):
 
 @AccountMenu.add_entry("C", "Create character")
 def _account_menu_create_character(session):
-    def _callback(_session, character):
-        # Save the character before it gets garbage collected.
-        character.save()
+    def _callback(_session, player):
+        # Save the player before it gets garbage collected.
+        player.save()
         # Build a new menu with an entry for the character.
         _session.menu = AccountMenu
-    create_character(session, _callback)
+    create_player(session, _callback)

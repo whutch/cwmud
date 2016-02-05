@@ -15,6 +15,8 @@ from .const import *
 from .events import EVENTS
 from .logs import get_logger
 from .menus import Menu
+from .npcs import NPC
+from .players import Player
 from .shells import Shell, SHELLS
 from .utils.exceptions import AlreadyExists
 from .utils.funcs import class_name, joins
@@ -577,7 +579,11 @@ def _hook_server_load_state(state):
         if email:
             session.account = Account.load(email)
         if char:
-            session.char = Character.load(char)
-            session.char.resume(quiet=True)
+            code, *rest = char.split("-")
+            if code == "P":
+                session.char = Player.load(char)
+                session.char.resume(quiet=True)
+            elif code == "N":
+                session.char = NPC.load(char)
         session.width = width
         session.color = color
