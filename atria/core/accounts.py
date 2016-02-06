@@ -463,7 +463,7 @@ def _account_menu_select_char(session, char=None):
         return
     if not char.room:
         from .world import Room
-        start_room = Room.find("x", 0, "y", 0, "z", 0, n=1)
+        start_room = Room.load("0,0,0", default=None)
         if start_room:
             char.room = start_room
     session.char = char
