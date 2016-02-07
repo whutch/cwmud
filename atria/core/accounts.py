@@ -466,11 +466,21 @@ def _account_menu_select_char(session, char=None):
         start_room = Room.load("0,0,0", default=None)
         if start_room:
             char.room = start_room
-    session.char = char
     session.shell = SHELLS["CharacterShell"]
+    if char.session and char.session is not session:
+        session.send("^RConnecting to active character. Previous connection"
+                     " from {}.^~".format(char.session.address))
+        char.session.char = None
+        char.session.close("^RThis character has been logged in from another"
+                           " session. Good bye.^~",
+                           log_msg=("{} logged in from {}, closing {}."
+                                    .format(char, session, char.session)))
+        char.session.poll(output_only=True)
+    else:
+        session.send("Welcome", char.name, "!\n")
+        char.resume()
+    session.char = char
     session.menu = None
-    session.send("Welcome", char.name, "!\n")
-    char.resume()
 
 
 @AccountMenu.add_entry("Q", "Quit")
