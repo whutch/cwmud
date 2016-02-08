@@ -430,6 +430,20 @@ class _EntityMeta(HasFlagsMeta, HasWeaksMeta):
 
         return _inner
 
+    @staticmethod
+    def _cache_eject_callback(entity):
+        """A callback for when entities are ejected from a cache.
+
+        When an entity is dumped from all of it's caches, there's a chance
+        it could fall out of scope before every being saved, so we save it
+        on ejection to be sure.
+
+        :param Entity entity: The ejected entity
+        :return None:
+
+        """
+        entity.save()
+
     def register_cache(cls, key, size=512):
         """Create a new cache for this entity, keyed by attribute.
 
@@ -441,7 +455,7 @@ class _EntityMeta(HasFlagsMeta, HasWeaksMeta):
         """
         if key in cls._caches:
             raise KeyError(joins("entity already has cache:", key))
-        cls._caches[key] = lrucache(size)
+        cls._caches[key] = lrucache(size, cls._cache_eject_callback)
 
 
 class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
