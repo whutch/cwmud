@@ -427,7 +427,7 @@ class Session(HasFlags):
         """
         # Do an initial state check.
         if (("close" in self.flags or not self.active) and
-                "closed" not in self.flags):
+                "closed" not in self.flags and not output_only):
             with EVENTS.fire("session_ended", self):
                 # Hooks to this event cannot send any output to the client,
                 # they've already had their last poll.
