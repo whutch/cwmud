@@ -100,7 +100,7 @@ class Room(Entity):
         found = {}
         for change, (dir_name, rev_name) in _movement_strings.items():
             x, y, z = map(sum, zip(self.coords, change))
-            room = Room.find("x", x, "y", y, "z", z, n=1)
+            room = Room.load("{},{},{}".format(x, y, z), default=None)
             if room:
                 found[dir_name] = room
         return found
