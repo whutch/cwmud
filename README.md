@@ -3,13 +3,13 @@ Atria MUD Server
 
 [![Circle CI](https://circleci.com/gh/whutch/atria/tree/master.svg?style=shield)][build] [![codecov.io](https://codecov.io/github/whutch/atria/coverage.svg?branch=master)][coverage]
 
-Atria is a pure-Python MUD server designed with modularity and ease of development in mind. It was originally created as an exercise, as I had always wanted to write a MUD from scratch, and as such does not make use of many third-party libraries (just [miniboa][miniboa-py3] for Telnet protocol handling, [redis-py] for inter-process messaging, and [passlib]/[py-bcrypt] for password hashing; none of which are wheels that I wanted to reinvent).
+Atria is a pure-Python MUD server designed with modularity and ease of development in mind. It was originally created as an exercise, as I had always wanted to write a MUD from scratch, so I used as few third-party libraries as I was able (exceptions were made for Telnet handling, inter-process messaging, password hashing, and other such wheels that I didn't want to re-invent).
 
 
 Current State
 -------------
 
-This isn't a viable MUD server yet. There's account creation, basic character creation, rooms, talking, and walking around, but that's about it. There are also several currently unhandled, buggy situations such as logging into a character that is already logged in. If you don't add ".contrib.worldgen" to the INCLUDE_MODULES setting, there is also no default room or way to make one. There are also no permission controls on admin commands yet, so anyone can do whatever they want (which is good because there is no concept of an admin yet).
+This isn't a viable MUD server yet. There's account creation, basic character creation, rooms, talking, and walking around, but that's about it. There are also no permission controls on admin commands yet, so anyone can do whatever they want (which is good because there is no concept of an admin yet).
 
 So anyway, very under-construction at the moment.
 
@@ -41,7 +41,12 @@ Dependencies
 
 Atria runs on [Python 3.4][python] and is as yet untested on any later versions. There are currently no plans to support earlier versions.
 
-Atria requires a running [Redis][redis] server and the [Redis Python bindings][redis-py] for messages, and [passlib]/[py-bcrypt] for password hashing. It also makes use of [miniboa-py3], a Python 3 port of [miniboa], which is a tiny, asynchronous Telnet server. Our modified copy of miniboa is included in `atria/libs`.
+Atria requires a running [Redis][redis] server and the [Redis Python bindings][redis-py] for messages, and [bcrypt] for password hashing (and bcrypt in turn requires libffi). It also makes use of [miniboa-py3], a Python 3 port of [miniboa], which is a tiny, asynchronous Telnet server. Our modified copy of miniboa is included in `atria/libs`.
+
+To install the libffi library on Debian/Ubuntu, run:
+```
+sudo apt-get install libffi-dev
+```
 
 To install the Python package dependencies, run:
 ```
@@ -114,14 +119,13 @@ Contact & Support
 You can email me questions and comments at <will@whutch.com>. You can also find me as Kazan on the [Mud Coders Slack group][slack] (the signup is on the right side of [this page][mudcoders]).
 
 
+[bcrypt]: https://github.com/pyca/bcrypt
 [build]: https://circleci.com/gh/whutch/atria/tree/master
 [coverage]: https://codecov.io/github/whutch/atria?branch=master
 [license]: https://github.com/whutch/atria/blob/master/LICENSE.txt
 [miniboa]: https://code.google.com/p/miniboa
 [miniboa-py3]: https://github.com/pR0Ps/miniboa-py3
 [mudcoders]: http://mudcoders.com
-[passlib]: https://pypi.python.org/pypi/passlib
-[py-bcrypt]: https://code.google.com/p/py-bcrypt
 [pytest]: https://pytest.org/latest
 [python]: https://www.python.org
 [redis]: http://redis.io

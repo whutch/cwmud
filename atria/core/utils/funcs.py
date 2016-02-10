@@ -4,6 +4,8 @@
 # :copyright: (c) 2008 - 2016 Will Hutcheson
 # :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
 
+import bcrypt
+
 
 def joins(*parts, sep=" "):
     """Join a sequence as a string with given separator.
@@ -153,3 +155,28 @@ def base_n_to_int(string, charset):
     for index, char in enumerate(reversed(string)):
         integer += charset.index(char) * (base ** index)
     return integer
+
+
+def generate_hash(string):
+    """Generate a cryptographic hash from a string.
+
+    :param str string: A string to generate the hash from
+    :return str: The generated hash
+
+    """
+    byte_string = string.encode()
+    hashed_string = bcrypt.hashpw(byte_string, bcrypt.gensalt())
+    return hashed_string.decode()
+
+
+def check_hash(string, hashed_string):
+    """Check that an input string matches a given hash.
+
+    :param str string: The input string
+    :param str hashed_string: The hash to compare to
+    :return bool: Whether the input string matches the given hash
+
+    """
+    byte_string = string.encode()
+    byte_hash = hashed_string.encode()
+    return bcrypt.hashpw(byte_string, byte_hash) == byte_hash

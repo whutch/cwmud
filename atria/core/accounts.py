@@ -8,9 +8,6 @@ from functools import partial
 import re
 from weakref import WeakSet
 
-# noinspection PyUnresolvedReferences
-from passlib.hash import bcrypt_sha256
-
 from .const import *
 from .entities import Attribute, DataBlob, ENTITIES, Entity, Unset
 from .events import EVENTS
@@ -21,7 +18,7 @@ from .players import Player, create_player
 from .requests import Request, REQUESTS, RequestString
 from .shells import SHELLS
 from .storage import STORES
-from .utils.funcs import joins
+from .utils.funcs import check_hash, generate_hash, joins
 
 
 log = get_logger("accounts")
@@ -208,7 +205,7 @@ class AccountPassword(Attribute):
 
     @classmethod
     def _finalize(cls, new_value, entity=None):
-        return bcrypt_sha256.encrypt(new_value)
+        return generate_hash(new_value)
 
 
 # noinspection PyProtectedMember
@@ -426,8 +423,7 @@ def authenticate_account(session, success=None, fail=None, account=None):
                     fail(_session, account)
             else:
                 # Check the given password against the account.
-                if password and bcrypt_sha256.verify(password,
-                                                     account.password):
+                if password and check_hash(password, account.password):
                     success(_session, account)
                 else:
                     fail(_session, account)
