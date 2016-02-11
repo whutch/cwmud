@@ -48,16 +48,6 @@ class ServerProcess:
         """Return whether this process is alive."""
         return self._process.is_alive()
 
-    @staticmethod
-    def _start(pid, _socket_queue, reload_from=None):
-        from .core.server import SERVER
-        # Wait for our pid.
-        while not pid.value:  # pragma: no cover
-            continue
-        SERVER._pid = pid.value
-        SERVER.boot(_socket_queue, reload_from)
-        SERVER.loop()
-
     def start(self, reload_from=None):
         """Start this server process.
 
@@ -68,11 +58,21 @@ class ServerProcess:
         """
         assert not self._process, "server instance already started"
         pid = Value("i")
-        self._process = Process(target=self._start,
+        self._process = Process(target=_start_server,
                                 args=(pid, socket_queue),
                                 kwargs={"reload_from": reload_from})
         self._process.start()
         pid.value = self._process.pid
+
+
+def _start_server(pid, _socket_queue, reload_from=None):
+        from .core.server import SERVER
+        # Wait for our pid.
+        while not pid.value:  # pragma: no cover
+            continue
+        SERVER._pid = pid.value
+        SERVER.boot(_socket_queue, reload_from)
+        SERVER.loop()
 
 
 def _on_connect(new_socket, addr_port):  # pragma: no cover

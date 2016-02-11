@@ -869,6 +869,11 @@ class TelnetServer(object):
             if client.send_pending:
                 send_list.append(client.fileno)
 
+        # Don't poll with three empty lists, Windows won't like it.
+        # (And it's a waste of time?)
+        if not recv_list and not send_list:
+            return
+
         # Get active socket file descriptors from select.select().
         try:
             rlist, slist, elist = select.select(recv_list, send_list, [],
