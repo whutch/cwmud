@@ -208,7 +208,11 @@ class DataStore:
         :returns None:
 
         """
-        self._transaction[key] = data
+        try:
+            self._transaction[key] = data
+        except ReferenceError:
+            # Suppress occasional ignored exception in OrderedDict internals.
+            pass
 
     def delete(self, key):
         """Delete date from the store.
