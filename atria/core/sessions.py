@@ -546,7 +546,7 @@ def _hook_server_save_state(state):
             class_name(session.shell) if session.shell else None,
             class_name(session.menu) if session.menu else None,
             session.account.email if session.account else None,
-            session.char.name if session.char else None,
+            session.char.key if session.char else None,
             session.width,
             session.color)
     state["sessions"] = sessions
@@ -579,11 +579,12 @@ def _hook_server_load_state(state):
         if email:
             session.account = Account.load(email)
         if char:
-            code, *rest = char.split("-")
-            if code == "P":
+            if char.startswith("N-"):
+                # It's an NPC UID.
+                session.char = NPC.load(char)
+            else:
+                # It's a player name.
                 session.char = Player.load(char)
                 session.char.resume(quiet=True)
-            elif code == "N":
-                session.char = NPC.load(char)
         session.width = width
         session.color = color
