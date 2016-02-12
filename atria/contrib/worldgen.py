@@ -8,7 +8,7 @@ from os.path import exists, join
 import re
 
 from .. import BASE_PACKAGE
-from ..core.characters import Character, get_movement_strings
+from ..core.characters import Character
 from ..core.entities import Attribute, Unset
 from ..core.events import EVENTS
 from ..core.logs import get_logger
@@ -204,7 +204,7 @@ def move_direction(self, x=0, y=0, z=0):
     room = Room.load(to_coords, default=None)
     if not room:
         room = generate_room(to_x, to_y, to_z)
-    to_dir, from_dir = get_movement_strings((x, y, z))
+    to_dir, from_dir = Room.get_movement_strings((x, y, z))
     self.move_to_room(room, "{s} move{ss} {dir}.",
                       "{s} arrives from {dir}.",
                       {"dir": to_dir}, {"dir": from_dir})

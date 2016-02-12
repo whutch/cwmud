@@ -11,7 +11,7 @@ from .pickle import PickleStore
 from .shells import Shell, SHELLS
 from .storage import STORES
 from .utils.funcs import joins
-from .world import get_movement_strings, Room
+from .world import Room
 
 
 log = get_logger("characters")
@@ -220,7 +220,7 @@ class Character(Entity):
         if not room:
             self.session.send("You can't go that way.")
             return
-        to_dir, from_dir = get_movement_strings((x, y, z))
+        to_dir, from_dir = Room.get_movement_strings((x, y, z))
         self.move_to_room(room, "{s} move{ss} {dir}.",
                           "{s} arrives from {dir}.",
                           {"dir": to_dir}, {"dir": from_dir})

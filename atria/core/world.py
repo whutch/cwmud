@@ -27,6 +27,20 @@ class Room(Entity):
     # _store_key moved below due to referenced functions.
     _uid_code = "R"
 
+    # These are used to generate Character.act messages.
+    _movement_strings = {
+        (1, 0, 0): ("east", "the west"),
+        (-1, 0, 0): ("west", "the east"),
+        (0, 1, 0): ("north", "the south"),
+        (0, -1, 0): ("south", "the north"),
+        (0, 0, 1): ("up", "below"),
+        (0, 0, -1): ("down", "above"),
+        (1, 1, 0): ("northeast", "the southwest"),
+        (-1, 1, 0): ("northwest", "the southeast"),
+        (1, -1, 0): ("southeast", "the northwest"),
+        (-1, -1, 0): ("southwest", "the northeast"),
+    }
+
     def __init__(self, data=None, active=False, savable=True):
         super().__init__(data, active, savable)
         self._chars = WeakSet()  # The Characters currently in this room.
@@ -98,12 +112,22 @@ class Room(Entity):
         """
         # This is an inefficient placeholder until an Exit type is in.
         found = {}
-        for change, (dir_name, rev_name) in _movement_strings.items():
+        for change, (dir_name, rev_name) in self._movement_strings.items():
             x, y, z = map(sum, zip(self.coords, change))
             room = Room.load("{},{},{}".format(x, y, z), default=None)
             if room:
                 found[dir_name] = room
         return found
+
+    @classmethod
+    def get_movement_strings(cls, change):
+        """Return a pair of strings to describe character movement.
+
+        :param tuple<int,int,int> change: A tuple of the (x,y,z) change
+        :returns tuple<str,str>: The relevant to and from strings
+
+        """
+        return cls._movement_strings.get(change, ("nowhere", "nowhere"))
 
 
 @Room.register_attr("name")
@@ -207,31 +231,6 @@ class RoomZ(CoordAttribute):
                 raise ValueError("Room already exists at {}."
                                  .format(new_coords))
         return new_value
-
-
-# These are used to generate Character.act messages.
-_movement_strings = {
-    (1, 0, 0): ("east", "the west"),
-    (-1, 0, 0): ("west", "the east"),
-    (0, 1, 0): ("north", "the south"),
-    (0, -1, 0): ("south", "the north"),
-    (0, 0, 1): ("up", "below"),
-    (0, 0, -1): ("down", "above"),
-    (1, 1, 0): ("northeast", "the southwest"),
-    (-1, 1, 0): ("northwest", "the southeast"),
-    (1, -1, 0): ("southeast", "the northwest"),
-    (-1, -1, 0): ("southwest", "the northeast"),
-}
-
-
-def get_movement_strings(change):
-    """Return a pair of strings to describe bi-directional character movement.
-
-    :param tuple<int,int,int> change: A tuple of the (x,y,z) change
-    :returns tuple<str,str>: The relevant to and from strings
-
-    """
-    return _movement_strings.get(change, ("nowhere", "nowhere"))
 
 
 @EVENTS.hook("server_boot", "setup_world")

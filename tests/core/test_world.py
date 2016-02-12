@@ -10,7 +10,7 @@ import pytest
 
 from atria.core.entities import Unset
 from atria.core.players import Player
-from atria.core.world import get_movement_strings, Room
+from atria.core.world import Room
 
 
 class TestRooms:
@@ -78,9 +78,8 @@ class TestRooms:
         self.room.description = "A boring test room."
         assert self.room.description == "A boring test room."
 
-
-def test_movement_strings():
-    """Test that we can generate movement strings."""
-    to_dir, from_dir = get_movement_strings((1, 0, 0))
-    assert to_dir == "east"
-    assert from_dir == "the west"
+    def test_movement_strings(self):
+        """Test that we can generate movement strings."""
+        to_dir, from_dir = self.room.get_movement_strings((1, 0, 0))
+        assert to_dir == "east"
+        assert from_dir == "the west"
