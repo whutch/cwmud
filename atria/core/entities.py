@@ -431,13 +431,14 @@ class _EntityMeta(HasFlagsMeta, HasWeaksMeta):
         return _inner
 
     @staticmethod
-    def _cache_eject_callback(entity):
+    def _cache_eject_callback(key, entity):
         """A callback for when entities are ejected from a cache.
 
         When an entity is dumped from all of it's caches, there's a chance
         it could fall out of scope before every being saved, so we save it
         on ejection to be sure.
 
+        :param key: The ejected entity's cache key
         :param Entity entity: The ejected entity
         :return None:
 
