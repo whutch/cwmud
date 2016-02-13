@@ -156,6 +156,27 @@ class RoomTerrain(Attribute):
         return new_value
 
 
+@patch(Room)
+def get_exits(self):
+    """Return the rooms this room connects to.
+
+    If the neighboring rooms don't exist, they will be created.
+
+    :returns dict: The connecting rooms, keyed by direction name
+
+    """
+    # This is an inefficient placeholder until an Exit type is in.
+    found = {}
+    for change, (dir_name, rev_name) in self._movement_strings.items():
+        x, y, z = map(sum, zip(self.coords, change))
+        room = Room.load("{},{},{}".format(x, y, z), default=None)
+        if not room and change[2] == 0:  # Don't auto-create "up" and "down"
+            room = generate_room(x, y, z)
+        if room:
+            found[dir_name] = room
+    return found
+
+
 @patch(Character)
 def show_room(self, room=None):
     """Show a room's contents to the session controlling this character.
