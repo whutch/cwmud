@@ -232,8 +232,7 @@ def generate_room(x, y, z):
 
 def generate_map_layer(width, height, center=(0, 0), scale=1, seed=0,
                        offset_x=0.0, offset_y=0.0, octaves=1,
-                       persistence=0.5, lacunarity=2.0,
-                       repeat_x=None, repeat_y=None):
+                       persistence=0.5, lacunarity=2.0):
     """Generate one layer of map data using simplex noise.
 
     :param int width: The width of the map
@@ -246,8 +245,6 @@ def generate_map_layer(width, height, center=(0, 0), scale=1, seed=0,
     :param int octaves: The number of passes to make calculating noise
     :param float persistence: The amplitude multiplier per octave
     :param float lacunarity: The frequency multiplier per octave
-    :param repeat_x: The width of a block of noise to repeat
-    :param repeat_y: The height of a block of noise to repeat
     :returns: A generated map layer
 
     """
@@ -257,12 +254,11 @@ def generate_map_layer(width, height, center=(0, 0), scale=1, seed=0,
     for y in range(center[1] + max_y, center[1] - max_y - (height % 2), -1):
         row = []
         for x in range(center[0] - max_x, center[0] + max_x + (width % 2)):
-            row.append(generate_noise(x, y, scale=scale, seed=seed,
+            row.append(generate_noise(x, y, seed, scale=scale,
                                       offset_x=offset_x, offset_y=offset_y,
                                       octaves=octaves,
                                       persistence=persistence,
-                                      lacunarity=lacunarity,
-                                      repeat_x=repeat_x, repeat_y=repeat_y))
+                                      lacunarity=lacunarity))
         rows.append(row)
     return rows
 
