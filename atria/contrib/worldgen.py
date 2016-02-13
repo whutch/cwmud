@@ -332,13 +332,15 @@ def _render_map_data(width, height, center=(0, 0)):
 
 
 def render_map_from_layers(elevation_layer, moisture_layer,
-                           diversity_layer=None, convert_color=False):
+                           diversity_layer=None, convert_color=False,
+                           join_tiles=True):
     """Render an ASCII terrain map from raw layer data.
 
     :param elevation_layer: The elevation layer
     :param moisture_layer: The moisture layer
     :param diversity_layer: Optional, a diversity layer
     :param convert_color: Whether to convert color codes or not
+    :param join_tiles: Whether to join the tiles into a string
     :returns str: A rendered map
 
     """
@@ -371,7 +373,10 @@ def render_map_from_layers(elevation_layer, moisture_layer,
         for row in rows:
             for index, tile in enumerate(row):
                 row[index] = colorize(tile)
-    return "\n".join("".join(tile for tile in row) for row in rows)
+    if join_tiles:
+        return "\n".join("".join(tile for tile in row) for row in rows)
+    else:
+        return rows
 
 
 def render_map(width, height, center=(0, 0), convert_color=False):
