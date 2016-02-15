@@ -817,6 +817,9 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
 
     def delete(self):
         """Delete this entity from its store."""
+        cache = self._caches.get(self.get_key_name())
+        if cache and self.key in cache:
+            del cache[self.key]
         if self._store:
             self._store.delete(self.key)
 
