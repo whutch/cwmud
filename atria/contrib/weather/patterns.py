@@ -92,7 +92,8 @@ class WeatherPattern:
         return (x_speed + y_speed) / 2
 
     def generate_layer(self, width, height, center=(0, 0),
-                       octaves=1, persistence=0.5, lacunarity=2.0):
+                       octaves=1, persistence=0.5, lacunarity=2.0,
+                       fine_noise=None):
         """Generate one layer of weather data using simplex noise.
 
         :param int width: The width of the weather map
@@ -101,6 +102,7 @@ class WeatherPattern:
         :param int octaves: The number of passes to make calculating noise
         :param float persistence: The amplitude multiplier per octave
         :param float lacunarity: The frequency multiplier per octave
+        :param fine_noise: A multiplier for an extra fine noise layer
         :returns: A generated map layer
 
         """
@@ -116,12 +118,18 @@ class WeatherPattern:
             row = []
             for x in range(center[0] - max_x,
                            center[0] + max_x + (width % 2)):
-                row.append(generate_noise(x, y, formation_shift, self.seed,
-                                          scale=self.storm_scale,
-                                          offset_x=offset_x,
-                                          offset_y=offset_y,
-                                          octaves=octaves,
-                                          persistence=persistence,
-                                          lacunarity=lacunarity))
+                storm_noise = generate_noise(x, y, formation_shift, self.seed,
+                                             scale=self.storm_scale,
+                                             offset_x=offset_x,
+                                             offset_y=offset_y,
+                                             octaves=octaves,
+                                             persistence=persistence,
+                                             lacunarity=lacunarity)
+                if fine_noise is not None:
+                    fine_value = generate_noise(x, y, 0, -self.seed, scale=1)
+                    fine_value *= fine_noise
+                    row.append(max(-1, min(storm_noise + fine_value, 1)))
+                else:
+                    row.append(storm_noise)
             rows.append(row)
         return rows
