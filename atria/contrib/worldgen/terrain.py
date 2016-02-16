@@ -32,10 +32,9 @@ class TerrainManager:
     def __getitem__(self, code):
         return self._terrains[code]
 
-    def register(self, code, terrain):
+    def register(self, terrain):
         """Register a terrain type by it's three letter code.
 
-        :param str code: A three letter code for the terrain type
         :param Terrain terrain: The terrain type to register
         :returns None:
         :raises AlreadyExists: If a terrain with `code` is already registered
@@ -43,6 +42,7 @@ class TerrainManager:
         :raises ValueError: If `code` is not a three letter string
 
         """
+        code = terrain.code
         if not isinstance(code, str) or len(code) != 3:
             raise ValueError("terrain code must be 3 letter string")
         if code in self._terrains:
@@ -88,9 +88,10 @@ class Terrain:
 
     """A terrain type."""
 
-    def __init__(self, room_name, symbol, room_description=Unset,
+    def __init__(self, code, room_name, symbol, room_description=Unset,
                  diversity_name=None, diversity_symbol=None,
                  diversity_minimum=None):
+        self.code = code
         self.room_name = room_name
         self.symbol = symbol
         self.room_description = room_description
@@ -120,6 +121,14 @@ class RoomTerrain(Attribute):
             raise ValueError("Room terrain must be a Terrain instance.")
         return new_value
 
+    @classmethod
+    def _serialize(cls, value):
+        return value.code
+
+    @classmethod
+    def _deserialize(cls, value):
+        return TERRAIN[value]
+
 
 def _parse_terrain_grid():
     log.info("Loading terrain point values.")
@@ -141,38 +150,38 @@ def _parse_terrain_grid():
             elevation -= 0.1
 
 
-TERRAIN.register("snm", Terrain("Snow-capped Mountains", "^W^^"))
-TERRAIN.register("mop", Terrain("Mountain Peak", "^w^^"))
-TERRAIN.register("mou", Terrain("Mountain Range", "^K^^"))
-TERRAIN.register("hil", Terrain("Rolling Hills", "^yn"))
-TERRAIN.register("for", Terrain("Forest", "^Gt",
+TERRAIN.register(Terrain("snm", "Snow-capped Mountains", "^W^^"))
+TERRAIN.register(Terrain("mop", "Mountain Peak", "^w^^"))
+TERRAIN.register(Terrain("mou", "Mountain Range", "^K^^"))
+TERRAIN.register(Terrain("hil", "Rolling Hills", "^yn"))
+TERRAIN.register(Terrain("for", "Forest", "^Gt",
                                 diversity_name="Dense Forest",
                                 diversity_symbol="^gt",
                                 diversity_minimum=0.3))
-TERRAIN.register("gra", Terrain("Grasslands", "^G\"",
+TERRAIN.register(Terrain("gra", "Grasslands", "^G\"",
                                 diversity_name="Tall Grass",
                                 diversity_symbol="^g\"",
                                 diversity_minimum=0.3))
-TERRAIN.register("bea", Terrain("Sandy Beach", "^Y."))
-TERRAIN.register("shw", Terrain("Shallow Water", "^C,"))
-TERRAIN.register("dpw", Terrain("Deep Water", "^c,"))
-TERRAIN.register("sea", Terrain("Open Sea", "^B~"))
-TERRAIN.register("oce", Terrain("Open Ocean", "^b~"))
+TERRAIN.register(Terrain("bea", "Sandy Beach", "^Y."))
+TERRAIN.register(Terrain("shw", "Shallow Water", "^C,"))
+TERRAIN.register(Terrain("dpw", "Deep Water", "^c,"))
+TERRAIN.register(Terrain("sea", "Open Sea", "^B~"))
+TERRAIN.register(Terrain("oce", "Open Ocean", "^b~"))
 
-TERRAIN.register("arp", Terrain("Arid Mountain Peak", "^k^^"))
-TERRAIN.register("bmo", Terrain("Barren Mountains", "^y^^"))
-TERRAIN.register("dun", Terrain("Sand Dunes", "^Yn"))
-TERRAIN.register("des", Terrain("Desert", "^Y~"))
-TERRAIN.register("bhi", Terrain("Barren Hills", "^wn"))
-TERRAIN.register("bar", Terrain("Barren Land", "^y."))
-TERRAIN.register("swa", Terrain("Swamp", "^G."))
-TERRAIN.register("mar", Terrain("Marshland", "^c&"))
-TERRAIN.register("whi", Terrain("Wooded Hills", "^gn"))
-TERRAIN.register("wmo", Terrain("Wooded Mountains", "^g^^"))
-TERRAIN.register("mud", Terrain("Muddy Fields", "^y\""))
-TERRAIN.register("jun", Terrain("Dense Jungle", "^G%"))
-TERRAIN.register("jhi", Terrain("Jungle Hills", "^Gn"))
-TERRAIN.register("jmo", Terrain("Jungle Mountains", "^c^^"))
+TERRAIN.register(Terrain("arp", "Arid Mountain Peak", "^k^^"))
+TERRAIN.register(Terrain("bmo", "Barren Mountains", "^y^^"))
+TERRAIN.register(Terrain("dun", "Sand Dunes", "^Yn"))
+TERRAIN.register(Terrain("des", "Desert", "^Y~"))
+TERRAIN.register(Terrain("bhi", "Barren Hills", "^wn"))
+TERRAIN.register(Terrain("bar", "Barren Land", "^y."))
+TERRAIN.register(Terrain("swa", "Swamp", "^G."))
+TERRAIN.register(Terrain("mar", "Marshland", "^c&"))
+TERRAIN.register(Terrain("whi", "Wooded Hills", "^gn"))
+TERRAIN.register(Terrain("wmo", "Wooded Mountains", "^g^^"))
+TERRAIN.register(Terrain("mud", "Muddy Fields", "^y\""))
+TERRAIN.register(Terrain("jun", "Dense Jungle", "^G%"))
+TERRAIN.register(Terrain("jhi", "Jungle Hills", "^Gn"))
+TERRAIN.register(Terrain("jmo", "Jungle Mountains", "^c^^"))
 
 
 @EVENTS.hook("server_boot", "parse_terrain_grid")
