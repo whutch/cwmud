@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """Tests for server initialization and loop logic."""
-# Part of Atria MUD Server (https://github.com/whutch/atria)
+# Part of Clockwork MUD Server (https://github.com/whutch/cwmud)
 # :copyright: (c) 2008 - 2016 Will Hutcheson
-# :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
+# :license: MIT (https://github.com/whutch/cwmud/blob/master/LICENSE.txt)
 
 from multiprocessing import Queue
 
 import pytest
 
-from atria.core.server import CLIENTS, EVENTS, SERVER
+from cwmud.core.server import CLIENTS, EVENTS, SERVER
 
 
 def test_boot():

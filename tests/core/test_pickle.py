@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 """Tests for pickle serialization and storage."""
-# Part of Atria MUD Server (https://github.com/whutch/atria)
+# Part of Clockwork MUD Server (https://github.com/whutch/cwmud)
 # :copyright: (c) 2008 - 2016 Will Hutcheson
-# :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
+# :license: MIT (https://github.com/whutch/cwmud/blob/master/LICENSE.txt)
 
 from os.path import exists, join
 from shutil import rmtree
 
 import pytest
 
-from atria import settings
-from atria.core.pickle import PickleStore
+from cwmud import settings
+from cwmud.core.pickle import PickleStore
 
 
 class TestPickleStores:

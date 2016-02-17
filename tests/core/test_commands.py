@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """Test for command management and processing."""
-# Part of Atria MUD Server (https://github.com/whutch/atria)
+# Part of Clockwork MUD Server (https://github.com/whutch/cwmud)
 # :copyright: (c) 2008 - 2016 Will Hutcheson
-# :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
+# :license: MIT (https://github.com/whutch/cwmud/blob/master/LICENSE.txt)
 
 import pytest
 
-from atria.core.commands import AlreadyExists, Command, CommandManager
+from cwmud.core.commands import AlreadyExists, Command, CommandManager
 
 
 class TestCommands:

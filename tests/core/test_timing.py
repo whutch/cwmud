@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """Tests for scheduling and timer management."""
-# Part of Atria MUD Server (https://github.com/whutch/atria)
+# Part of Clockwork MUD Server (https://github.com/whutch/cwmud)
 # :copyright: (c) 2008 - 2016 Will Hutcheson
-# :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
+# :license: MIT (https://github.com/whutch/cwmud/blob/master/LICENSE.txt)
 
 import pytest
 
 # noinspection PyProtectedMember
-from atria.core.timing import (AlreadyExists, duration_to_pulses,
+from cwmud.core.timing import (AlreadyExists, duration_to_pulses,
                                PULSE_PER_SECOND, _PULSE_TIME, TimerManager)
 
 

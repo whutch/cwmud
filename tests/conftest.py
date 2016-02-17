@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """Configuration for testing through py.test."""
-# Part of Atria MUD Server (https://github.com/whutch/atria)
+# Part of Clockwork MUD Server (https://github.com/whutch/cwmud)
 # :copyright: (c) 2008 - 2016 Will Hutcheson
-# :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
+# :license: MIT (https://github.com/whutch/cwmud/blob/master/LICENSE.txt)
 
 from os.path import abspath, dirname, join
 import sys
@@ -10,12 +10,12 @@ import time
 
 import redis
 
-# Until Atria is an installable package, we need to add it to our Python path
-# so that we can do "from atria" imports in the tests.
+# Until Clockwork is an installable package, we need to add it to our Python
+# path so that we can do "from cwmud" imports in the tests.
 TEST_ROOT = dirname(abspath(__file__))
 sys.path.insert(0, dirname(TEST_ROOT))
 
-from atria import ROOT_DIR, settings
+from cwmud import ROOT_DIR, settings
 
 
 # Change the log path during testing.
@@ -34,7 +34,7 @@ settings.IDLE_TIME = 180
 settings.IDLE_TIME_MAX = 600
 
 
-from atria.core.logs import get_logger
+from cwmud.core.logs import get_logger
 
 log = get_logger("tests")
 

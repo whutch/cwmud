@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 """Tests for logging."""
-# Part of Atria MUD Server (https://github.com/whutch/atria)
+# Part of Clockwork MUD Server (https://github.com/whutch/cwmud)
 # :copyright: (c) 2008 - 2016 Will Hutcheson
-# :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
+# :license: MIT (https://github.com/whutch/cwmud/blob/master/LICENSE.txt)
 
 from datetime import datetime
 import logging
 import uuid
 
-from atria import settings
-from atria.core.logs import _Formatter, get_logger
+from cwmud import settings
+from cwmud.core.logs import _Formatter, get_logger
 
 
 class TestLogs:

@@ -1,5 +1,5 @@
-Atria Coding Style
-==================
+Clockwork Coding Style
+======================
 
 A uniform coding style is critical to a happy and productive collaboration among coders. Having a clear standard can greatly increase readability and maintainability, and reduces headaches when it comes time to merge. Please do your best to adhere to these specifications when contributing.
 
@@ -18,8 +18,8 @@ Including (but not limited to):
 
 With a few exceptions:
  * Python modules should include an encoding declaration, even when using the Python 3 default UTF-8.
- * Modules within the `atria.core` package should use relative imports when importing other modules from `atria.core`.
- * Wild-card importing is only allowed for the `atria.core.const` module (`from .const import *`).
+ * Modules within the `cwmud.core` package should use relative imports when importing other modules from `cwmud.core`.
+ * Wild-card importing is only allowed for the `cwmud.core.const` module (`from .const import *`).
 
 And additions:
  * Use double quotes for all strings, or single quotes for strings that contain double quotes.
@@ -58,9 +58,9 @@ Example
 ```python
 # -*- coding: utf-8 -*-
 """Example module full of examples."""
-# Part of Atria MUD Server (https://github.com/whutch/atria)
+# Part of Clockwork MUD Server (https://github.com/whutch/cwmud)
 # :copyright: (c) {year} {your name}
-# :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
+# :license: MIT (https://github.com/whutch/cwmud/blob/master/LICENSE.txt)
 
 import os
 from os.path import exists

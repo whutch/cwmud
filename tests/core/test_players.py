@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 """Tests for player entities."""
-# Part of Atria MUD Server (https://github.com/whutch/atria)
+# Part of Clockwork MUD Server (https://github.com/whutch/cwmud)
 # :copyright: (c) 2008 - 2016 Will Hutcheson
-# :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
+# :license: MIT (https://github.com/whutch/cwmud/blob/master/LICENSE.txt)
 
 from collections import deque
 import pytest
 
-from atria.core.accounts import Account
-from atria.core.entities import Unset
-from atria.core.players import (create_player, Player, PlayerName,
+from cwmud.core.accounts import Account
+from cwmud.core.entities import Unset
+from cwmud.core.players import (create_player, Player, PlayerName,
                                 RequestNewPlayerName)
-from atria.core.utils.funcs import joins
-from atria.core.world import Room
+from cwmud.core.utils.funcs import joins
+from cwmud.core.world import Room
 
 
 class _FakeSession:

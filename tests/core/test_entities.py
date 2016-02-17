@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """Tests for entities."""
-# Part of Atria MUD Server (https://github.com/whutch/atria)
+# Part of Clockwork MUD Server (https://github.com/whutch/cwmud)
 # :copyright: (c) 2008 - 2016 Will Hutcheson
-# :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
+# :license: MIT (https://github.com/whutch/cwmud/blob/master/LICENSE.txt)
 
 import pytest
 
-from atria.core.entities import Entity
-from atria.core.pickle import PickleStore
+from cwmud.core.entities import Entity
+from cwmud.core.pickle import PickleStore
 
 
 class SomeEntity(Entity):

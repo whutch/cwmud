@@ -1,9 +1,9 @@
-Atria MUD Server
-================
+Clockwork MUD Server
+====================
 
-[![Circle CI](https://circleci.com/gh/whutch/atria/tree/master.svg?style=shield)][build] [![codecov.io](https://codecov.io/github/whutch/atria/coverage.svg?branch=master)][coverage]
+[![Circle CI](https://circleci.com/gh/whutch/cwmud/tree/master.svg?style=shield)][build] [![codecov.io](https://codecov.io/github/whutch/cwmud/coverage.svg?branch=master)][coverage]
 
-Atria is a pure-Python MUD server designed with modularity and ease of development in mind. It was originally created as an exercise, as I had always wanted to write a MUD from scratch, so I used as few third-party libraries as I was able (exceptions were made for Telnet handling, inter-process messaging, password hashing, and other such wheels that I didn't want to re-invent).
+Clockwork is a pure-Python MUD server designed with modularity and ease of development in mind. It was originally created as an exercise, as I had always wanted to write a MUD from scratch, so I used as few third-party libraries as I was able (exceptions were made for Telnet handling, inter-process messaging, password hashing, and other such wheels that I didn't want to re-invent).
 
 
 Current State
@@ -23,12 +23,12 @@ It's MIT licensed. Go crazy. See the [license file][license] for more details.
 Installation
 ------------
 
-There isn't a proper package set up yet, so for now Atria is best installed by cloning the git repo:
+There isn't a proper package set up yet, so for now Clockork is best installed by cloning the git repo:
 ```
-git clone https://github.com/whutch/atria.git mymud
+git clone https://github.com/whutch/cwmud.git mymud
 ```
 
-It's also *highly* recommended that you set up a [virtualenv] to run Atria in:
+It's also *highly* recommended that you set up a [virtualenv] to run Clockwork in:
 ```
 cd mymud
 virtualenv -p python3 --no-site-packages .venv
@@ -39,9 +39,9 @@ source .venv/bin/activate
 Dependencies
 ------------
 
-Atria runs on [Python 3.4][python] and is as yet untested on any later versions. There are currently no plans to support earlier versions.
+Clockwork runs on [Python 3.4][python] and is as yet untested on any later versions. There are currently no plans to support earlier versions.
 
-Atria requires a running [Redis][redis] server and the [Redis Python bindings][redis-py] for messages, and [bcrypt] for password hashing (and bcrypt in turn requires libffi). It also makes use of [miniboa-py3], a Python 3 port of [miniboa], which is a tiny, asynchronous Telnet server. Our modified copy of miniboa is included in `atria/libs`.
+Clockwork requires a running [Redis][redis] server and the [Redis Python bindings][redis-py] for messages, and [bcrypt] for password hashing (and bcrypt in turn requires libffi). It also makes use of [miniboa-py3], a Python 3 port of [miniboa], which is a tiny, asynchronous Telnet server. Our modified copy of miniboa is included in `cwmud/libs`.
 
 To install the libffi library on Debian/Ubuntu, run:
 ```
@@ -60,7 +60,7 @@ See the [Redis Quick Start guide][redis-quick-start] for details on installing a
 Configuration
 -------------
 
-All the post-installation configuration settings are stored in `atria/settings.py`.
+All the post-installation configuration settings are stored in `cwmud/settings.py`.
 
 Some key settings you'll probably want to change:
  * `BIND_ADDRESS`: The IP to bind the listener to, default is 127.0.0.1, change to 0.0.0.0 to allow external connections.
@@ -72,18 +72,18 @@ Some key settings you'll probably want to change:
 Usage
 -----
 
-To start the Atria server, simply run:
+To start the Clockwork server, simply run:
 ```
-python -m atria
+python -m cwmud
 ```
 
-After booting, the server will be ready to accept Telnet connections on whatever address and port you specified in `atria/settings.py` (default is localhost and port 4000).
+After booting, the server will be ready to accept Telnet connections on whatever address and port you specified in `cwmud/settings.py` (default is localhost and port 4000).
 
 
 Testing
 -------
 
-Atria includes a suite of unit tests in [pytest] format. To run the test suite you will first need to install pytest and the plugins we use (coverage, flake8, timeout). To install all the test suite dependencies, run:
+Clockwork includes a suite of unit tests in [pytest] format. To run the test suite you will first need to install pytest and the plugins we use (coverage, flake8, timeout). To install all the test suite dependencies, run:
 ```
 pip install -r tests/requirements.txt
 ```
@@ -96,15 +96,15 @@ make tests
 
 If you don't have `make` available (a make.bat file will be in the works for Windows users), you can call pytest directly like so:
 ```
-py.test --flake8 atria tests
+py.test --flake8 cwmud tests
 ```
 
 
 Development
 -----------
 
-* Git repository: <https://github.com/whutch/atria>
-* Issue tracker: <https://github.com/whutch/atria/issues>
+* Git repository: <https://github.com/whutch/cwmud>
+* Issue tracker: <https://github.com/whutch/cwmud/issues>
 
 Please read the [style guide][style] for coding conventions and style guidelines before submitting any pull requests or committing changes.
 
@@ -114,15 +114,15 @@ Contact & Support
 
 * Homepage: *(not yet)*
 * Documentation: *(not hosted yet, but you can build it in `docs`)*
-* Wiki: <https://github.com/whutch/atria/wiki>
+* Wiki: <https://github.com/whutch/cwmud/wiki>
 
 You can email me questions and comments at <will@whutch.com>. You can also find me as Kazan on the [Mud Coders Slack group][slack] (the signup is on the right side of [this page][mudcoders]).
 
 
 [bcrypt]: https://github.com/pyca/bcrypt
-[build]: https://circleci.com/gh/whutch/atria/tree/master
-[coverage]: https://codecov.io/github/whutch/atria?branch=master
-[license]: https://github.com/whutch/atria/blob/master/LICENSE.txt
+[build]: https://circleci.com/gh/whutch/cwmud/tree/master
+[coverage]: https://codecov.io/github/whutch/cwmud?branch=master
+[license]: https://github.com/whutch/cwmud/blob/master/LICENSE.txt
 [miniboa]: https://code.google.com/p/miniboa
 [miniboa-py3]: https://github.com/pR0Ps/miniboa-py3
 [mudcoders]: http://mudcoders.com
@@ -132,5 +132,5 @@ You can email me questions and comments at <will@whutch.com>. You can also find 
 [redis-py]: https://pypi.python.org/pypi/redis
 [redis-quick-start]: http://redis.io/topics/quickstart
 [slack]: https://mudcoders.slack.com
-[style]: https://github.com/whutch/atria/blob/master/STYLE.md
+[style]: https://github.com/whutch/cwmud/blob/master/STYLE.md
 [virtualenv]: https://virtualenv.pypa.io

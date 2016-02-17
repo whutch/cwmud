@@ -1,7 +1,7 @@
 [run]
 branch = True
 omit =
-    atria/libs/*
+    cwmud/libs/*
 
 [report]
 exclude_lines =

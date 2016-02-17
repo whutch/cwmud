@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """Tests for utility exception classes."""
-# Part of Atria MUD Server (https://github.com/whutch/atria)
+# Part of Clockwork MUD Server (https://github.com/whutch/cwmud)
 # :copyright: (c) 2008 - 2016 Will Hutcheson
-# :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
+# :license: MIT (https://github.com/whutch/cwmud/blob/master/LICENSE.txt)
 
-from atria.core.utils import exceptions
+from cwmud.core.utils import exceptions
 
 
 def test_exception_already_exists():

@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """Tests for text menus."""
-# Part of Atria MUD Server (https://github.com/whutch/atria)
+# Part of Clockwork MUD Server (https://github.com/whutch/cwmud)
 # :copyright: (c) 2008 - 2016 Will Hutcheson
-# :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
+# :license: MIT (https://github.com/whutch/cwmud/blob/master/LICENSE.txt)
 
 import pytest
 
-from atria.core.menus import AlreadyExists, Menu, MenuManager
-from atria.core.utils.funcs import joins
+from cwmud.core.menus import AlreadyExists, Menu, MenuManager
+from cwmud.core.utils.funcs import joins
 
 
 class TestMenus:

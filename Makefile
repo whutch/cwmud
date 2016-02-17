@@ -17,17 +17,17 @@ clean-test:
 	-rm -r .cache
 
 coverage: clean-coverage clean-test
-	py.test --cov-report html --cov atria tests
+	py.test --cov-report html --cov cwmud tests
 
 nothing:
 
 print-coverage: clean-coverage clean-test
-	py.test --cov atria tests
+	py.test --cov cwmud tests
 
 test: clean-test
-	py.test --flake8 atria tests
+	py.test --flake8 cwmud tests
 
 test-strict: clean-test
-	py.test --flake8 -x --strict atria tests
+	py.test --flake8 -x --strict cwmud tests
 
 tests: test

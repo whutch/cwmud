@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """Tests for account entities."""
-# Part of Atria MUD Server (https://github.com/whutch/atria)
+# Part of Clockwork MUD Server (https://github.com/whutch/cwmud)
 # :copyright: (c) 2008 - 2016 Will Hutcheson
-# :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
+# :license: MIT (https://github.com/whutch/cwmud/blob/master/LICENSE.txt)
 
-from atria.core.accounts import Account
+from cwmud.core.accounts import Account
 
 
 class TestAccounts:

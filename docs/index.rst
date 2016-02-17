@@ -1,56 +1,53 @@
-.. Atria documentation master file, created by
+.. Clockwork documentation master file, created by
    sphinx-quickstart on Sat Oct 25 22:28:12 2014.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Atria's documentation!
-=================================
+Welcome to Clockwork's documentation!
+=====================================
 
 Contents:
 
 .. toctree::
    :maxdepth: 2
 
-.. automodule:: atria.core.commands
+.. automodule:: cwmud.core.commands
     :members:
 
-.. automodule:: atria.core.events
+.. automodule:: cwmud.core.events
     :members:
 
-.. automodule:: atria.core.logs
+.. automodule:: cwmud.core.logs
     :members:
 
-.. automodule:: atria.core.net
+.. automodule:: cwmud.core.net
     :members:
 
-.. automodule:: atria.core.server
+.. automodule:: cwmud.core.pickle
     :members:
 
-.. automodule:: atria.core.sessions
+.. automodule:: cwmud.core.server
     :members:
 
-.. automodule:: atria.core.shells
+.. automodule:: cwmud.core.sessions
     :members:
 
-.. automodule:: atria.core.storage
+.. automodule:: cwmud.core.shells
     :members:
 
-.. automodule:: atria.core.timing
+.. automodule:: cwmud.core.storage
     :members:
 
-.. automodule:: atria.core.utils.exceptions
+.. automodule:: cwmud.core.timing
     :members:
 
-.. automodule:: atria.core.utils.funcs
+.. automodule:: cwmud.core.utils.exceptions
     :members:
 
-.. automodule:: atria.core.utils.mixins
+.. automodule:: cwmud.core.utils.funcs
     :members:
 
-.. automodule:: atria.core.opt.json
-    :members:
-
-.. automodule:: atria.core.opt.pickle
+.. automodule:: cwmud.core.utils.mixins
     :members:
 
 Indices and tables

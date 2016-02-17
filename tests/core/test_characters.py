@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 """Tests for character entities."""
-# Part of Atria MUD Server (https://github.com/whutch/atria)
+# Part of Clockwork MUD Server (https://github.com/whutch/cwmud)
 # :copyright: (c) 2008 - 2016 Will Hutcheson
-# :license: MIT (https://github.com/whutch/atria/blob/master/LICENSE.txt)
+# :license: MIT (https://github.com/whutch/cwmud/blob/master/LICENSE.txt)
 
 from collections import deque
 import pytest
 
-from atria.core.characters import Character
-from atria.core.entities import Unset
-from atria.core.utils.funcs import joins
-from atria.core.world import Room
+from cwmud.core.characters import Character
+from cwmud.core.entities import Unset
+from cwmud.core.utils.funcs import joins
+from cwmud.core.world import Room
 
 
 class _FakeSession:
