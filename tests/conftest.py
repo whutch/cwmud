@@ -33,6 +33,8 @@ settings.BIND_PORT = 4445
 settings.IDLE_TIME = 180
 settings.IDLE_TIME_MAX = 600
 
+# Clear out the contrib modules
+settings.INCLUDE_MODULES = []
 
 from cwmud.core.logs import get_logger
 

@@ -23,7 +23,7 @@ It's MIT licensed. Go crazy. See the [license file][license] for more details.
 Installation
 ------------
 
-There isn't a proper package set up yet, so for now Clockork is best installed by cloning the git repo:
+There isn't a proper package set up yet, so for now Clockwork is best installed by cloning the git repo:
 ```
 git clone https://github.com/whutch/cwmud.git mymud
 ```
