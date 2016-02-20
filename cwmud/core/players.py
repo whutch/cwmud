@@ -85,19 +85,19 @@ class PlayerAccount(Attribute):
     """The account tied to a player."""
 
     @classmethod
-    def _validate(cls, new_value, entity=None):
+    def _validate(cls, entity, new_value):
         from .accounts import Account
         if not isinstance(new_value, Account):
             raise ValueError("Player account must be an Account instance.")
         return new_value
 
     @classmethod
-    def _serialize(cls, value):
+    def _serialize(cls, entity, value):
         # Save player accounts by UID.
         return value.uid
 
     @classmethod
-    def _deserialize(cls, value):
+    def _deserialize(cls, entity, value):
         from .accounts import Account
         return Account.find("uid", value, n=1)
 
@@ -116,7 +116,7 @@ class PlayerName(Attribute):
     RESERVED = []
 
     @classmethod
-    def _validate(cls, new_value, entity=None):
+    def _validate(cls, entity, new_value):
         if (not isinstance(new_value, str) or
                 not cls._valid_chars.match(new_value)):
             raise ValueError("Character names can only contain letters.")
@@ -158,7 +158,7 @@ class RequestNewPlayerName(Request):
 
     def _validate(self, data):
         try:
-            new_name = PlayerName._validate(data)
+            new_name = PlayerName._validate(None, data)
         except ValueError as exc:
             raise Request.ValidationFailed(*exc.args)
         return new_name

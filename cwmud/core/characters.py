@@ -232,28 +232,26 @@ class CharacterRoom(Attribute):
     """The room a character is in."""
 
     @classmethod
-    def _validate(cls, new_value, entity=None):
+    def _validate(cls, entity, new_value):
         if not isinstance(new_value, Room):
             raise ValueError("Character room must be a Room instance.")
         return new_value
 
-    # noinspection PyProtectedMember
     @classmethod
-    def _changed(cls, blob, old_value, new_value):
-        char = blob._entity
-        if char.active:
+    def _changed(cls, entity, blob, old_value, new_value):
+        if entity.active:
             # Update the rooms' character sets.
-            if old_value and char in old_value.chars:
-                old_value.chars.remove(char)
+            if old_value and entity in old_value.chars:
+                old_value.chars.remove(entity)
             if new_value:
-                new_value.chars.add(char)
+                new_value.chars.add(entity)
 
     @classmethod
-    def _serialize(cls, value):
+    def _serialize(cls, entity, value):
         return value.key
 
     @classmethod
-    def _deserialize(cls, value):
+    def _deserialize(cls, entity, value):
         room = Room.load(value, default=None)
         if not room:
             room = Room.load("0,0,0")

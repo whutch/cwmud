@@ -131,9 +131,9 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
         entity = self._entity
         if value is not Unset:
             if validate:
-                value = attr._validate(value, entity=entity)
+                value = attr._validate(entity, value)
             if not raw:
-                value = attr._finalize(value, entity=entity)
+                value = attr._finalize(entity, value)
         old_key = entity.key
         self._attr_values[name] = value
         if entity.key != old_key:
@@ -148,7 +148,7 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
                     del cache[old_key]
                 cache[entity.key] = entity
         entity.dirty()
-        attr._changed(self, old_value, value)
+        attr._changed(entity, self, old_value, value)
 
     def _update(self, blob):
         """Merge this blob with another, replacing blobs and attrs.
@@ -183,7 +183,7 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
                 value = "unset"
             else:
                 # noinspection PyProtectedMember
-                value = attr._serialize(value)
+                value = attr._serialize(self._entity, value)
             data[key] = value
         return data
 
@@ -203,7 +203,7 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
                     value = Unset
                 else:
                     # noinspection PyProtectedMember
-                    value = self._attrs[key]._deserialize(value)
+                    value = self._attrs[key]._deserialize(self._entity, value)
                 self._set_attr_val(key, value, validate=False, raw=True)
             elif key in self._blobs:
                 self._blobs[key].deserialize(value)
@@ -244,7 +244,7 @@ class Attribute:
     read_only = False
 
     @classmethod
-    def _validate(cls, new_value, entity=None):
+    def _validate(cls, entity, new_value):
         """Validate a value for this attribute.
 
         This will be called by the blob when setting the value for this
@@ -252,34 +252,35 @@ class Attribute:
         should either return a valid value for the attribute or raise an
         exception as to why the value is invalid.
 
-        :param new_value: The potential value to validate
         :param entity: The entity this attribute is on
+        :param new_value: The potential value to validate
         :returns: The validated (and optionally sanitized) value
 
         """
         return new_value
 
     @classmethod
-    def _finalize(cls, new_value, entity=None):
+    def _finalize(cls, entity, new_value):
         """Finalize the value for this attribute.
 
         This will be called by the blob when setting the value for this
         attribute, after validation; override it to perform any sanitation
         or transformation. The value should be considered valid.
 
-        :param new_value: The new, validated value
         :param entity: The entity this attribute is on
+        :param new_value: The new, validated value
         :returns: The finalized value
         """
         return new_value
 
     @classmethod
-    def _changed(cls, blob, old_value, new_value):
+    def _changed(cls, entity, blob, old_value, new_value):
         """Perform any actions necessary after this attribute's value changes.
 
         This will be called by the blob after the value of this attribute
         has changed, override it to do any necessary post-setter actions.
 
+        :param entity: The entity this attribute is on
         :param DataBlob blob: The blob that changed
         :param old_value: The previous value
         :param new_value: The new value
@@ -288,12 +289,13 @@ class Attribute:
         """
 
     @classmethod
-    def _serialize(cls, value):
+    def _serialize(cls, entity, value):
         """Serialize a value for this attribute that is suitable for storage.
 
         This will be called by the blob when serializing itself, override it
         to perform any necessary conversion or sanitation.
 
+        :param entity: The entity this attribute is on
         :param value: The value to serialize
         :returns: The serialized value
 
@@ -301,12 +303,13 @@ class Attribute:
         return value
 
     @classmethod
-    def _deserialize(cls, value):
+    def _deserialize(cls, entity, value):
         """Deserialize a value for this attribute from storage.
 
         This will be called by the blob when deserializing itself, override it
         to perform any necessary conversion or sanitation.
 
+        :param entity: The entity this attribute is on
         :param value: The value to deserialize
         :returns: The deserialized value
 
@@ -842,7 +845,7 @@ class EntityVersion(Attribute):
     default = 1
 
     @classmethod
-    def _validate(cls, new_value, entity=None):
+    def _validate(cls, entity, new_value):
         if not isinstance(new_value, int):
             raise TypeError("entity version must be a number")
         return new_value

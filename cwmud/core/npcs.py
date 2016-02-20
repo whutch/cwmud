@@ -55,7 +55,7 @@ class NPCName(Attribute):
     RESERVED = []
 
     @classmethod
-    def _validate(cls, new_value, entity=None):
+    def _validate(cls, entity, new_value):
         if (not isinstance(new_value, str) or
                 not cls._valid_chars.match(new_value)):
             raise ValueError("NPC names can only contain letters and spaces.")
