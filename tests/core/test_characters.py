@@ -7,8 +7,8 @@
 from collections import deque
 import pytest
 
+from cwmud.core.attributes import Unset
 from cwmud.core.characters import Character
-from cwmud.core.entities import Unset
 from cwmud.core.utils.funcs import joins
 from cwmud.core.world import Room
 

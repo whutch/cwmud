@@ -13,9 +13,10 @@ import redis
 from .. import BASE_PACKAGE, settings
 from ..libs.miniboa import TelnetClient
 from .accounts import AccountMenu, authenticate_account, create_account
+from .attributes import Unset
 from .channels import Channel, CHANNELS
 from .const import *
-from .entities import ENTITIES, Unset
+from .entities import ENTITIES
 from .events import EVENTS
 from .logs import get_logger
 from .menus import Menu, MENUS

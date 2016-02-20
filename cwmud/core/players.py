@@ -6,9 +6,10 @@
 
 import re
 
+from .attributes import Attribute
 from .channels import CHANNELS
 from .characters import Character
-from .entities import Attribute, ENTITIES
+from .entities import ENTITIES
 from .events import EVENTS
 from .logs import get_logger
 from .pickle import PickleStore

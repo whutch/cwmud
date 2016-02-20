@@ -6,8 +6,9 @@
 
 import re
 
+from .attributes import Attribute
 from .characters import Character
-from .entities import Attribute, ENTITIES
+from .entities import ENTITIES
 from .logs import get_logger
 from .pickle import PickleStore
 from .storage import STORES

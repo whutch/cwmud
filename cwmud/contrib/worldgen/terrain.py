@@ -7,7 +7,8 @@
 from os.path import exists, join
 
 from ... import BASE_PACKAGE
-from ...core.entities import Attribute, Unset
+from ...core.attributes import Unset
+from ...core.entities import Attribute
 from ...core.events import EVENTS
 from ...core.logs import get_logger
 from ...core.utils.exceptions import AlreadyExists

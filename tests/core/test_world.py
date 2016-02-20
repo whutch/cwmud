@@ -8,7 +8,7 @@ import gc
 
 import pytest
 
-from cwmud.core.entities import Unset
+from cwmud.core.attributes import Unset
 from cwmud.core.players import Player
 from cwmud.core.world import Room
 

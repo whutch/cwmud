@@ -4,8 +4,9 @@
 # :copyright: (c) 2008 - 2016 Will Hutcheson
 # :license: MIT (https://github.com/whutch/cwmud/blob/master/LICENSE.txt)
 
+from .attributes import Attribute
 from .const import *
-from .entities import Attribute, ENTITIES, Entity
+from .entities import ENTITIES, Entity
 from .logs import get_logger
 from .pickle import PickleStore
 from .shells import Shell, SHELLS

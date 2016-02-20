@@ -8,7 +8,7 @@ from collections import deque
 import pytest
 
 from cwmud.core.accounts import Account
-from cwmud.core.entities import Unset
+from cwmud.core.attributes import Unset
 from cwmud.core.players import (create_player, Player, PlayerName,
                                 RequestNewPlayerName)
 from cwmud.core.utils.funcs import joins

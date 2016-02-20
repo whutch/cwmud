@@ -8,8 +8,9 @@ from functools import partial
 import re
 from weakref import WeakSet
 
+from .attributes import Attribute, DataBlob, Unset
 from .const import *
-from .entities import Attribute, DataBlob, ENTITIES, Entity, Unset
+from .entities import ENTITIES, Entity
 from .events import EVENTS
 from .logs import get_logger
 from .menus import Menu, MENUS
