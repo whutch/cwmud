@@ -92,7 +92,7 @@ class AccountEmail(Attribute):
     _pattern = re.compile(r"^[\w.%+-]+@[\w.%+-]+\.[a-zA-Z]{2,4}$")
 
     @classmethod
-    def _validate(cls, new_value, entity=None):
+    def validate(cls, entity, new_value):
         if (not isinstance(new_value, str) or
                 not cls._pattern.match(new_value)):
             raise ValueError("Invalid email address.")
@@ -137,7 +137,7 @@ class AccountName(Attribute):
     RESERVED = []
 
     @classmethod
-    def _validate(cls, new_value, entity=None):
+    def validate(cls, entity, new_value):
         if (not isinstance(new_value, str) or
                 not cls._valid_chars.match(new_value)):
             raise ValueError("Account names can only contain alphanumeric"
@@ -196,7 +196,7 @@ class AccountPassword(Attribute):
     _min_len = 8
 
     @classmethod
-    def _validate(cls, new_value, entity=None):
+    def validate(cls, entity, new_value):
         if not isinstance(new_value, str):
             raise TypeError("Account password must be a string.")
         if len(new_value) < 8:
@@ -205,7 +205,7 @@ class AccountPassword(Attribute):
         return new_value
 
     @classmethod
-    def _finalize(cls, new_value, entity=None):
+    def finalize(cls, entity, new_value):
         return generate_hash(new_value)
 
 
@@ -233,10 +233,10 @@ class AccountTrust(Attribute):
 
     """An account's trust level."""
 
-    default = TRUST_PLAYER
+    _default = TRUST_PLAYER
 
     @classmethod
-    def _validate(cls, new_value, entity=None):
+    def validate(cls, entity, new_value):
         if not isinstance(new_value, int):
             raise TypeError("Account trust must be an integer.")
         return new_value
@@ -253,7 +253,7 @@ class AccountOptionsReader(Attribute):
     """An account option for using a screen reader."""
 
     @classmethod
-    def _validate(cls, new_value, entity=None):
+    def validate(cls, entity, new_value):
         if not isinstance(new_value, bool):
             raise TypeError("The reader option must be either True or False.")
         return new_value
@@ -282,7 +282,7 @@ class AccountOptionsColor(Attribute):
     """An account option for using color."""
 
     @classmethod
-    def _validate(cls, new_value, entity=None):
+    def validate(cls, entity, new_value):
         if not isinstance(new_value, bool):
             raise TypeError("The color option must be either True or False.")
         return new_value
@@ -311,7 +311,7 @@ class AccountOptionsWidth(Attribute):
     """An account option for screen width."""
 
     @classmethod
-    def _validate(cls, new_value, entity=None):
+    def validate(cls, entity, new_value):
         if not isinstance(new_value, int):
             raise TypeError("The width option must be an integer.")
         return new_value

@@ -68,7 +68,7 @@ class _DataBlobMeta(HasWeaksMeta):
             cls._attrs[name] = attr_class
             getter = lambda s: s._get_attr_val(name)
             setter = (lambda s, v: s._set_attr_val(name, v)
-                      if not attr_class.read_only else None)
+                      if not attr_class._read_only else None)
             setattr(cls, name, property(getter, setter))
             return attr_class
 
@@ -90,7 +90,7 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
         self._attr_values = {}
         for key, attr in self._attrs.items():
             # noinspection PyProtectedMember
-            self._attr_values[key] = attr.default
+            self._attr_values[key] = attr.get_default(entity)
         self._blobs = self._blobs.copy()
         for key, blob in self._blobs.items():
             self._blobs[key] = blob(entity)
@@ -113,9 +113,9 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
         entity = self._entity
         if value is not Unset:
             if validate:
-                value = attr._validate(entity, value)
+                value = attr.validate(entity, value)
             if not raw:
-                value = attr._finalize(entity, value)
+                value = attr.finalize(entity, value)
         old_key = entity.key
         self._attr_values[name] = value
         if entity.key != old_key:
@@ -130,7 +130,7 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
                     del cache[old_key]
                 cache[entity.key] = entity
         entity.dirty()
-        attr._changed(entity, self, old_value, value)
+        attr.changed(entity, self, old_value, value)
 
     def _update(self, blob):
         """Merge this blob with another, replacing blobs and attrs.
@@ -165,7 +165,7 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
                 value = "unset"
             else:
                 # noinspection PyProtectedMember
-                value = attr._serialize(self._entity, value)
+                value = attr.serialize(self._entity, value)
             data[key] = value
         return data
 
@@ -185,7 +185,7 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
                     value = Unset
                 else:
                     # noinspection PyProtectedMember
-                    value = self._attrs[key]._deserialize(self._entity, value)
+                    value = self._attrs[key].deserialize(self._entity, value)
                 self._set_attr_val(key, value, validate=False, raw=True)
             elif key in self._blobs:
                 self._blobs[key].deserialize(value)
@@ -198,7 +198,7 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
 class _UnsetMeta(type):
 
     def __repr__(cls):
-        return "Unset"
+        return "<Unset>"
 
     def __bool__(cls):
         return False
@@ -222,11 +222,21 @@ class Attribute:
 
     """
 
-    default = Unset  # Do NOT use mutable types for this.
-    read_only = False
+    _default = Unset  # Do NOT use mutable types for this.
+    _read_only = False
 
     @classmethod
-    def _validate(cls, entity, new_value):
+    def get_default(cls, entity):
+        """Get the default value for this attribute.
+
+        :param entity: The entity this attribute is on
+        :returns: The default value
+
+        """
+        return cls._default
+
+    @classmethod
+    def validate(cls, entity, new_value):
         """Validate a value for this attribute.
 
         This will be called by the blob when setting the value for this
@@ -242,7 +252,7 @@ class Attribute:
         return new_value
 
     @classmethod
-    def _finalize(cls, entity, new_value):
+    def finalize(cls, entity, new_value):
         """Finalize the value for this attribute.
 
         This will be called by the blob when setting the value for this
@@ -256,7 +266,7 @@ class Attribute:
         return new_value
 
     @classmethod
-    def _changed(cls, entity, blob, old_value, new_value):
+    def changed(cls, entity, blob, old_value, new_value):
         """Perform any actions necessary after this attribute's value changes.
 
         This will be called by the blob after the value of this attribute
@@ -271,7 +281,7 @@ class Attribute:
         """
 
     @classmethod
-    def _serialize(cls, entity, value):
+    def serialize(cls, entity, value):
         """Serialize a value for this attribute that is suitable for storage.
 
         This will be called by the blob when serializing itself, override it
@@ -285,7 +295,7 @@ class Attribute:
         return value
 
     @classmethod
-    def _deserialize(cls, entity, value):
+    def deserialize(cls, entity, value):
         """Deserialize a value for this attribute from storage.
 
         This will be called by the blob when deserializing itself, override it

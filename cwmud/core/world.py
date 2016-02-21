@@ -139,10 +139,10 @@ class RoomName(Attribute):
     _min_len = 1
     _max_len = 60
     _valid_chars = re.compile(r"^[a-zA-Z ]+$")
-    default = "An Unnamed Room"
+    _default = "An Unnamed Room"
 
     @classmethod
-    def _validate(cls, entity, new_value):
+    def validate(cls, entity, new_value):
         if (not isinstance(new_value, str) or
                 not cls._valid_chars.match(new_value)):
             raise ValueError("Room names can only contain letters and spaces.")
@@ -160,10 +160,10 @@ class RoomDescription(Attribute):
 
     """The description of a room."""
 
-    default = "A nondescript room."
+    _default = "A nondescript room."
 
     @classmethod
-    def _validate(cls, entity, new_value):
+    def validate(cls, entity, new_value):
         if not isinstance(new_value, str):
             raise ValueError("Room descriptions must be strings.")
         return new_value
@@ -177,7 +177,7 @@ class CoordAttribute(Attribute):
     max = None
 
     @classmethod
-    def _validate(cls, entity, new_value):
+    def validate(cls, entity, new_value):
         if not isinstance(new_value, int):
             raise ValueError("Coordinates must be integers.")
         if cls.min is not None and new_value < cls.min:
@@ -194,8 +194,8 @@ class RoomX(CoordAttribute):
     """The X coordinate of a room."""
 
     @classmethod
-    def _validate(cls, entity, new_value):
-        super()._validate(entity, new_value)
+    def validate(cls, entity, new_value):
+        super().validate(entity, new_value)
         if entity and entity.y is not Unset and entity.z is not Unset:
             new_coords = "{},{},{}".format(new_value, entity.y, entity.z)
             if Room.load(new_coords, default=None):
@@ -209,8 +209,8 @@ class RoomY(CoordAttribute):
     """The Y coordinate of a room."""
 
     @classmethod
-    def _validate(cls, entity, new_value):
-        super()._validate(entity, new_value)
+    def validate(cls, entity, new_value):
+        super().validate(entity, new_value)
         if entity and entity.x is not Unset and entity.z is not Unset:
             new_coords = "{},{},{}".format(entity.x, new_value, entity.z)
             if Room.load(new_coords, default=None):
@@ -224,8 +224,8 @@ class RoomZ(CoordAttribute):
     """The Z coordinate of a room."""
 
     @classmethod
-    def _validate(cls, entity, new_value):
-        super()._validate(entity, new_value)
+    def validate(cls, entity, new_value):
+        super().validate(entity, new_value)
         if entity and entity.x is not Unset and entity.y is not Unset:
             new_coords = "{},{},{}".format(entity.x, entity.y, new_value)
             if Room.load(new_coords, default=None):

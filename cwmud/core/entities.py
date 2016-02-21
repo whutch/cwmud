@@ -146,7 +146,7 @@ class _EntityMeta(HasFlagsMeta, HasWeaksMeta):
             cls._base_blob._attrs[name] = attr_class
             getter = lambda s: s._base_blob._get_attr_val(name)
             setter = (lambda s, v: s._base_blob._set_attr_val(name, v)
-                      if not attr_class.read_only else None)
+                      if not attr_class._read_only else None)
             setattr(cls, name, property(getter, setter))
             return attr_class
 
@@ -560,7 +560,7 @@ class EntityVersion(Attribute):
     default = 1
 
     @classmethod
-    def _validate(cls, entity, new_value):
+    def validate(cls, entity, new_value):
         if not isinstance(new_value, int):
             raise TypeError("entity version must be a number")
         return new_value
