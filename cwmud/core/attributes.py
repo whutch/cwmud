@@ -307,3 +307,25 @@ class Attribute:
 
         """
         return value
+
+
+class MutableAttribute(Attribute):
+
+    """A mutable attribute of an entity."""
+
+    _read_only = True
+
+    class Proxy:
+
+        def __init__(self, entity):
+            raise NotImplementedError
+
+    @classmethod
+    def get_default(cls, entity):
+        """Return a bound proxy instance for this mutable attribute.
+
+        :param entity: The entity this attribute is on
+        :returns: A bound proxy instance
+
+        """
+        return cls.Proxy(entity)

@@ -117,17 +117,17 @@ class RoomTerrain(Attribute):
     """A room's terrain type."""
 
     @classmethod
-    def _validate(cls, new_value, entity=None):
+    def validate(cls, entity, new_value):
         if not isinstance(new_value, Terrain):
             raise ValueError("Room terrain must be a Terrain instance.")
         return new_value
 
     @classmethod
-    def _serialize(cls, value):
+    def serialize(cls, entity, value):
         return value.code
 
     @classmethod
-    def _deserialize(cls, value):
+    def deserialize(cls, entity, value):
         return TERRAIN[value]
 
 
