@@ -4,6 +4,8 @@
 # :copyright: (c) 2008 - 2016 Will Hutcheson
 # :license: MIT (https://github.com/whutch/cwmud/blob/master/LICENSE.txt)
 
+from collections import abc
+
 from .logs import get_logger
 from .utils.exceptions import AlreadyExists
 from .utils.funcs import class_name, joins
@@ -329,3 +331,32 @@ class MutableAttribute(Attribute):
 
         """
         return cls.Proxy(entity)
+
+
+class ListAttribute(MutableAttribute):
+
+    """An entity attribute that proxies a set."""
+
+    class Proxy(abc.MutableSequence):
+
+        def __init__(self, entity, items=()):
+            self._items = list(items)
+            self._entity = entity
+
+        def __getitem__(self, index):
+            return self._items[index]
+
+        def __setitem__(self, index, value):
+            self._items[index] = value
+            self._entity.dirty()
+
+        def __delitem__(self, index):
+            del self._items[index]
+            self._entity.dirty()
+
+        def __len__(self):
+            return len(self._items)
+
+        def insert(self, index, value):
+            self._items.insert(index, value)
+            self._entity.dirty()
