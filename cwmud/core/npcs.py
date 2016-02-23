@@ -26,6 +26,8 @@ class NPC(Character):
     _store = STORES.register("npcs", PickleStore("npcs"))
     _uid_code = "N"
 
+    type = "npc"
+
     def __repr__(self):
         return joins("NPC<", self.uid, ">", sep="")
 

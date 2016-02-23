@@ -28,6 +28,8 @@ class Room(Entity):
     # _store_key moved below due to referenced functions.
     _uid_code = "R"
 
+    type = "room"
+
     # These are used to generate Character.act messages.
     _movement_strings = {
         (1, 0, 0): ("east", "the west"),

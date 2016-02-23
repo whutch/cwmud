@@ -34,6 +34,8 @@ class Account(Entity):
     _store_key = "email"
     _uid_code = "A"
 
+    type = "account"
+
     def __init__(self, data=None, active=False, savable=True):
         super().__init__(data, active, savable)
         self._sessions = WeakSet()

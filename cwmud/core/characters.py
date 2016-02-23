@@ -26,6 +26,8 @@ class Character(Entity):
     _store = STORES.register("characters", PickleStore("characters"))
     _uid_code = "C"
 
+    type = "character"
+
     def __repr__(self):
         return joins("Character<", self.uid, ">", sep="")
 

@@ -30,6 +30,8 @@ class Player(Character):
     _store_key = "name"
     _uid_code = "P"
 
+    type = "player"
+
     def __repr__(self):
         if hasattr(self, "name") and self.name:
             return joins("Player<", self.name, ">", sep="")

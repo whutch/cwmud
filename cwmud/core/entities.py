@@ -185,15 +185,17 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
 
     """The base of all persistent objects in the game."""
 
+    _store = None
+    _store_key = "uid"
+    _uid_code = "E"
+
+    type = "entity"
+
     # These are overridden in the metaclass, I just put them here
     # to avoid a lot of unresolved reference errors in IDE introspection.
     _base_blob = None
     _instances = None
     _caches = None
-
-    _store = None
-    _store_key = "uid"
-    _uid_code = "E"
 
     __uid_timecode = 0  # Used internally for UID creation.
 

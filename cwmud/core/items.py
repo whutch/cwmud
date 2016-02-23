@@ -23,6 +23,8 @@ class Item(Entity):
     _store = STORES.register("items", PickleStore("items"))
     _uid_code = "I"
 
+    type = "item"
+
     def __repr__(self):
         return joins("Item<", self.uid, ">", sep="")
 
