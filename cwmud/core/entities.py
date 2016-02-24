@@ -40,11 +40,11 @@ class EntityManager:
         """Create a new entity manager."""
         self._entities = {}
 
-    def __contains__(self, entity):
-        return entity in self._entities
+    def __contains__(self, name):
+        return name in self._entities
 
-    def __getitem__(self, entity):
-        return self._entities[entity]
+    def __getitem__(self, name):
+        return self._entities[name]
 
     def register(self, entity):
         """Register an entity type.
@@ -54,8 +54,6 @@ class EntityManager:
         :param Entity entity: The entity to be registered
         :returns Entity: The registered entity
         :raises AlreadyExists: If an entity with that class name already exists
-        :raises KeyError: If an entity with the same _uid_code attribute
-                          already exists
         :raises TypeError: If the supplied or decorated class is not a
                            subclass of Entity
 
@@ -66,11 +64,6 @@ class EntityManager:
         name = entity.__name__
         if name in self._entities:
             raise AlreadyExists(name, self._entities[name], entity)
-        for registered_entity in self._entities.values():
-            # noinspection PyProtectedMember,PyUnresolvedReferences
-            if entity._uid_code == registered_entity._uid_code:
-                raise KeyError("cannot register two Entity classes with the"
-                               " same UID code")
         self._entities[name] = entity
         return entity
 
@@ -102,7 +95,7 @@ class _EntityMeta(HasFlagsMeta, HasWeaksMeta):
         """Decorate a data blob to register it on this entity.
 
         :param str name: The name of the field to store the blob
-        :returns None:
+        :returns DataBlob: The decorated blob
         :raises AlreadyExists: If the given name already exists as an attr
         :raises TypeError: If the supplied or decorated class is not a
                            subclass of DataBlob
@@ -128,7 +121,7 @@ class _EntityMeta(HasFlagsMeta, HasWeaksMeta):
         """Decorate an attribute to register it on this entity.
 
         :param str name: The name of the field to store the attribute
-        :returns None:
+        :returns Attribute: The decorated attribute
         :raises AlreadyExists: If the given name already exists as an attr
         :raises TypeError: If the supplied or decorated class is not a
                            subclass of Attribute
@@ -304,6 +297,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
 
         """
         data = self._base_blob.serialize()
+        data["class"] = class_name(self)
         data["uid"] = self._uid
         data["flags"] = self.flags.as_tuple
         data["tags"] = deepcopy(self.tags.as_dict)
@@ -317,16 +311,36 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
 
         """
         if "uid" in data:
-            self._uid = data["uid"]
-            del data["uid"]
+            self._uid = data.pop("uid")
         if "flags" in data:
-            self.flags.add(*data["flags"])
-            del data["flags"]
+            self.flags.add(*data.pop("flags"))
         if "tags" in data:
             self.tags.clear()
-            self.tags.update(data["tags"])
-            del data["tags"]
+            self.tags.update(data.pop("tags"))
         self._base_blob.deserialize(data)
+
+    @classmethod
+    def reconstruct(cls, data):
+        """Reconstruct an entity from a dict of its data.
+
+        The given `data` must include a "class" key with the name of a
+        registered Entity class as its value.
+
+        This differs from the deserialize method in that this method will
+        return an entity created from a class specified in the data, rather
+        than merging the data into an existing instance of a (potentially
+        different) class.
+
+        :param dict data: The data to reconstruct the entity from
+        :returns Entity: The reconstructed entity instance
+        :raises KeyError: If `data` has no "class" key or the value of the
+                          given key is not a registered Entity class
+
+        """
+        entity_name = data.pop("class", None)
+        if not entity_name or entity_name not in ENTITIES:
+            raise KeyError("failed to reconstruct entity: bad class key")
+        return ENTITIES[entity_name](data)
 
     @classmethod
     def make_uid(cls):
@@ -420,7 +434,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
                     matches = [data.get(_attr) == _value
                                for _attr, _value in pairs]
                     if match(matches):
-                        entity = cls(data)
+                        entity = cls.reconstruct(data)
                         entity._dirty = False
                         found.add(entity)
                         if n and len(found) >= n:
@@ -477,7 +491,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
                     if "uid" not in data:
                         log.warn("No uid for %s loaded with key: %s!",
                                  class_name(cls), key)
-                    entity = cls(data)
+                    entity = cls.reconstruct(data)
                     entity._dirty = False
                     return entity
 
