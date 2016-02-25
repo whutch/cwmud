@@ -558,7 +558,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         cache = self._caches.get(self.get_key_name())
         if cache and self.key in cache:
             del cache[self.key]
-        if self._store:
+        if self._store and self._store.has(self.key):
             self._store.delete(self.key)
 
 
