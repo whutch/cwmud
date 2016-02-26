@@ -97,6 +97,6 @@ class NPCShortDesc(Attribute):
 @NPC.register_attr("long")
 class NPCLongDesc(Attribute):
 
-    """An NPC's short description."""
+    """An NPC's long description."""
 
     default = "There's nothing particularly interesting about them."

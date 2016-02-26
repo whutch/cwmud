@@ -4,7 +4,9 @@
 # :copyright: (c) 2008 - 2016 Will Hutcheson
 # :license: MIT (https://github.com/whutch/cwmud/blob/master/LICENSE.txt)
 
-from .attributes import Attribute
+from collections import Counter
+
+from .attributes import Attribute, ListAttribute, Unset
 from .entities import ENTITIES, Entity
 from .logs import get_logger
 from .pickle import PickleStore
@@ -13,6 +15,43 @@ from .utils.funcs import joins
 
 
 log = get_logger("items")
+
+
+class ItemListAttribute(ListAttribute):
+
+    """An attribute for a list of items."""
+
+    class Proxy(ListAttribute.Proxy):
+
+        def __repr__(self):
+            return repr(self._items)
+
+        def __setitem__(self, index, value):
+            if not isinstance(value, Item):
+                raise TypeError(joins(value, "is not an Item"))
+            value.container = self._entity
+            super().__setitem__(index, value)
+
+        def __delitem__(self, index):
+            self._items[index].container = Unset
+            super().__delitem__(index)
+
+        def insert(self, index, value):
+            if not isinstance(value, Item):
+                raise TypeError(joins(value, "is not an Item"))
+            value.container = self._entity
+            super().insert(index, value)
+
+        def get_counts(self):
+            return Counter([item.name for item in self._items]).items()
+
+    @classmethod
+    def serialize(cls, entity, value):
+        return [item.key for item in value]
+
+    @classmethod
+    def deserialize(cls, entity, value):
+        return cls.Proxy(entity, [Item.load(key) for key in value])
 
 
 @ENTITIES.register
