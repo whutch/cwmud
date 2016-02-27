@@ -7,6 +7,7 @@
 from .attributes import Attribute
 from .const import *
 from .entities import ENTITIES, Entity
+from .items import ItemListAttribute
 from .logs import get_logger
 from .pickle import PickleStore
 from .shells import Shell, SHELLS
@@ -259,6 +260,12 @@ class CharacterRoom(Attribute):
         if not room:
             room = Room.load("0,0,0")
         return room
+
+
+@Character.register_attr("inventory")
+class CharacterInventory(ItemListAttribute):
+
+    """A character's inventory."""
 
 
 @SHELLS.register
