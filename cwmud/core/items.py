@@ -45,6 +45,9 @@ class ItemListAttribute(ListAttribute):
         def get_counts(self):
             return Counter([item.name for item in self._items]).items()
 
+        def get_weight(self):
+            return sum([item.get_weight() for item in self._items])
+
     @classmethod
     def serialize(cls, entity, value):
         return [item.key for item in value]
@@ -66,6 +69,10 @@ class Item(Entity):
 
     def __repr__(self):
         return joins("Item<", self.uid, ">", sep="")
+
+    def get_weight(self):
+        """Get the weight of this item."""
+        return self.weight
 
 
 @Item.register_attr("nouns")
@@ -98,3 +105,11 @@ class ItemLongDesc(Attribute):
     """An item's long description."""
 
     _default = "There's nothing particularly interesting about it."
+
+
+@Item.register_attr("weight")
+class ItemWeight(Attribute):
+
+    """An item's weight."""
+
+    _default = 0
