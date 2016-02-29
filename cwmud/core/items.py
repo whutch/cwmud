@@ -113,3 +113,44 @@ class ItemWeight(Attribute):
     """An item's weight."""
 
     _default = 0
+
+
+@Item.register_attr("container")
+class ItemContainer(Attribute):
+
+    """The container an item is in.
+
+    Changing this does not set a reverse relationship, so setting this
+    will generally be managed by the container.
+
+    """
+
+    @classmethod
+    def serialize(cls, entity, value):
+        return value.key
+
+    @classmethod
+    def deserialize(cls, entity, value):
+        container = Item.load(value, default=None)
+        if not container:
+            log.warn("Could not load container '%s' for %s",
+                     value, entity)
+        return container
+
+
+@ENTITIES.register
+class Container(Item):
+
+    """A container item."""
+
+    type = "container"
+
+    def get_weight(self):
+        """Get the weight of this container and its contents."""
+        return self.weight + self.contents.get_weight()
+
+
+@Container.register_attr("contents")
+class ContainerContents(ItemListAttribute):
+
+    """The contents of a container."""
