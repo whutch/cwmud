@@ -335,7 +335,7 @@ class MutableAttribute(Attribute):
 
 class ListAttribute(MutableAttribute):
 
-    """An entity attribute that proxies a set."""
+    """An entity attribute that proxies a list."""
 
     class Proxy(abc.MutableSequence):
 
@@ -360,3 +360,31 @@ class ListAttribute(MutableAttribute):
         def insert(self, index, value):
             self._items.insert(index, value)
             self._entity.dirty()
+
+
+class DictAttribute(MutableAttribute):
+
+    """An entity attribute that proxies a dictionary."""
+
+    class Proxy(abc.MutableMapping):
+
+        def __init__(self, entity, items=None):
+            self._items = dict(items or {})
+            self._entity = entity
+
+        def __getitem__(self, key):
+            return self._items[key]
+
+        def __setitem__(self, key, value):
+            self._items[key] = value
+            self._entity.dirty()
+
+        def __delitem__(self, key):
+            del self._items[key]
+            self._entity.dirty()
+
+        def __len__(self):
+            return len(self._items)
+
+        def __iter__(self):
+            return iter(self._items)
