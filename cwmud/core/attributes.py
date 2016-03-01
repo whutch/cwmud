@@ -388,3 +388,31 @@ class DictAttribute(MutableAttribute):
 
         def __iter__(self):
             return iter(self._items)
+
+
+class SetAttribute(MutableAttribute):
+
+    """An entity attribute that proxies a set."""
+
+    class Proxy(abc.MutableSet):
+
+        def __init__(self, entity, items=()):
+            self._items = set(items)
+            self._entity = entity
+
+        def __len__(self):
+            return len(self._items)
+
+        def __iter__(self):
+            return iter(self._items)
+
+        def __contains__(self, value):
+            return value in self._items
+
+        def add(self, value):
+            self._items.add(value)
+            self._entity.dirty()
+
+        def discard(self, value):
+            self._items.discard(value)
+            self._entity.dirty()
