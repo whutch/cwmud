@@ -10,7 +10,7 @@ from shutil import rmtree
 import pytest
 
 from cwmud import settings
-from cwmud.contrib.json import JSONStore
+from cwmud.core.json import JSONStore
 
 
 class TestJSONStores:
