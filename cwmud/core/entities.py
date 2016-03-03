@@ -297,7 +297,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
 
         """
         data = self._base_blob.serialize()
-        data["class"] = class_name(self)
+        data["type"] = class_name(self)
         data["uid"] = self._uid
         data["flags"] = self.flags.as_tuple
         data["tags"] = deepcopy(self.tags.as_dict)
@@ -310,6 +310,8 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         :returns None:
 
         """
+        if "type" in data:
+            del data["type"]
         if "uid" in data:
             self._uid = data.pop("uid")
         if "flags" in data:
@@ -323,7 +325,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
     def reconstruct(cls, data):
         """Reconstruct an entity from a dict of its data.
 
-        The given `data` must include a "class" key with the name of a
+        The given `data` must include a "type" key with the name of a
         registered Entity class as its value.
 
         This differs from the deserialize method in that this method will
@@ -333,11 +335,11 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
 
         :param dict data: The data to reconstruct the entity from
         :returns Entity: The reconstructed entity instance
-        :raises KeyError: If `data` has no "class" key or the value of the
+        :raises KeyError: If `data` has no "type" key or the value of the
                           given key is not a registered Entity class
 
         """
-        entity_name = data.pop("class", None)
+        entity_name = data.pop("type", None)
         if not entity_name or entity_name not in ENTITIES:
             raise KeyError("failed to reconstruct entity: bad class key")
         return ENTITIES[entity_name](data)
