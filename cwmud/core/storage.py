@@ -47,6 +47,13 @@ class DataStoreManager:
         self._stores[name] = store
         return store
 
+    def initialize(self):
+        """Initialize all registered data stores."""
+        log.info("Initializing stores.")
+        for store in self._stores.values():
+            store.initialize()
+            store.build_indexes()
+
     def commit(self):
         """Commit the transactions of all registered data stores."""
         item_count = 0
@@ -84,6 +91,10 @@ class DataStore:
     def __init__(self):
         """Create a new data store."""
         self._transaction = OrderedDict()
+        # Indexes is a nested dictionary, keyed first by data key, and
+        # then by value, each containing a set of store keys with that value.
+        self._indexes = {}
+        self._unique_keys = set()
 
     def _is_open(self):  # pragma: no cover
         raise NotImplementedError
@@ -142,6 +153,67 @@ class DataStore:
         if commit:
             self.commit()
         self._close()
+
+    def initialize(self):
+        """Initialize this store.
+
+        Override this on subclasses to perform any setup needed.
+
+        """
+
+    def add_index(self, key, unique=False):
+        """Add an index to this store.
+
+        Adding an index does not automatically rebuild the indexes;
+        if you are adding an index after the server has booted, you will
+        need to call store.build_indexes() yourself.
+
+        :param str key: The data key to index
+        :param bool unique: Whether the given key is unique to each blob
+        :returns None:
+
+        """
+        if key in self._indexes:
+            log.warn("Tried to add existing index '%s' to %s", key, self)
+            return
+        self._indexes[key] = {}
+        if unique:
+            self._unique_keys.add(key)
+
+    def build_indexes(self):
+        """Build the indexes for this store using all stored data."""
+        for key in self._keys():
+            data = self._get(key)
+            self.update_indexes(key, data, prune=False)
+
+    def update_indexes(self, key, data, prune=True):
+        """Update the indexes for this store with data for one key.
+
+        :param str key: The storage key for the data
+        :param dict data: The data to update the indexes with
+        :param bool prune: Whether to load any existing data from the store
+                           so that old values can be removed.
+        :returns None
+
+        """
+        old_data = {}
+        if prune and self._has(key):
+            old_data = self._get(key)
+        for index_key, index in self._indexes.items():
+            if data and index_key in data:
+                value = data[index_key]
+                if value not in index:
+                    index[value] = set()
+                elif index[value] and index_key in self._unique_keys:
+                    raise KeyError("unique key '{}' already has value '{}'"
+                                   .format(index_key, index[value]))
+                index[value].add(key)
+            else:
+                value = None
+            if prune:
+                old_value = old_data.get(index_key)
+                if old_value != value and old_value in index:
+                    index[old_value].discard(key)
 
     # CHEESEBURGER DELIGHT
     # RED SKY AT NIGHT
@@ -245,8 +317,13 @@ class DataStore:
         """Commit the current data transaction."""
         if not self._transaction:
             return
+        # We need to update indexes first, otherwise we won't be able to
+        # prune an old value from an index.  We also want any exceptions
+        # triggered by the indexing to happen before we save everything.
+        for key, data in self._transaction.items():
+            self.update_indexes(key, data)
         while self._transaction:
-            key, data = self._transaction.popitem()
+            key, data = self._transaction.popitem(last=False)
             if data is None:
                 if self._has(key):
                     self._delete(key)
