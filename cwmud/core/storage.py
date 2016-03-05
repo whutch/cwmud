@@ -242,6 +242,51 @@ class DataStore:
         except (KeyError, TypeError):
             return False
 
+    def _find_in_store(self, ignore_keys=(), **key_value_pairs):
+        found = set()
+        for key in self._keys():
+            if key in ignore_keys:
+                continue
+            data = self._get(key)
+            for _key, _value in key_value_pairs.items():
+                if _key not in data or data[_key] != _value:
+                    break
+            else:
+                found.add(key)
+        return found
+
+    def _find_in_index(self, **key_value_pairs):
+        found = set()
+        pairs = list(key_value_pairs.items())
+        if not pairs:
+            return found
+        # Add all the items that match the first key/value pair.
+        key, value = pairs.pop()
+        if key in self._indexes and value in self._indexes[key]:
+            found.update(self._indexes[key][value])
+        # Then remove all the items that don't match all the other pairs.
+        if pairs:
+            for key, value in pairs:
+                if not found:
+                    # There's nothing left to check against.
+                    break
+                if key in self._indexes and value in self._indexes[key]:
+                    found.intersection_update(self._indexes[key][value])
+        # Anything left matched all key/value pairs.
+        return found
+
+    def _find_in_transaction(self, ignore_keys=(), **key_value_pairs):
+        found = set()
+        for key, data in self._transaction.items():
+            if key in ignore_keys:
+                continue
+            for _key, _value in key_value_pairs.items():
+                if data is None or _key not in data or data[_key] != _value:
+                    break
+            else:
+                found.add(key)
+        return found
+
     def get(self, key, default=KeyError):
         """Fetch data from the store.
 
