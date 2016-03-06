@@ -10,6 +10,7 @@ from itertools import chain
 
 from .logs import get_logger
 from .utils.exceptions import AlreadyExists
+from .utils.funcs import joins
 
 
 log = get_logger("storage")
@@ -312,30 +313,36 @@ class DataStore:
                                                    **key_value_pairs))
         return list(found)
 
-    def get(self, key, default=KeyError):
-        """Fetch data from the store.
+    def get(self, key=None, default=None, transaction=True, **key_value_pairs):
+        """Get data from the store by one or more of its attribute values.
 
-        :param hashable key: The key of the data to fetch
+        :param key: The key to get; if given `key_value_pairs` will be ignored
         :param default: A default value to return if no entity is found; if
                         default is an exception, it will be raised instead
-        :returns dict: The fetched data or default
+        :param bool transaction: Whether to check the transaction
+        :param iterable key_value_pairs: Pairs of keys and values to
+                                         match against
+        :returns dict: A matching data blob, or default
+        :raises KeyError: If more than one key matches the given values
 
         """
-        if key in self._transaction:
-            pending_data = self._transaction[key]
-            if pending_data is not None:
-                # A None in the pending data means the key
-                # was pending deletion.
-                return deepcopy(pending_data)
-        else:
-            try:
-                if self._has(key):
-                    return self._get(key)
-            except (KeyError, TypeError):
-                pass
+        if key is None:
+            matches = self.find(transaction=transaction, **key_value_pairs)
+            if len(matches) > 1:
+                raise KeyError(joins("get returned more than one match:",
+                                     matches, "using values", key_value_pairs))
+            if matches:
+                key = matches[0]
+        if key:
+            if transaction and key in self._transaction:
+                data = self._transaction[key]
+                if data is not None:
+                    return deepcopy(data)
+            else:
+                return self._get(key)
         # Nothing was found.
         if isinstance(default, type) and issubclass(default, Exception):
-            raise default(key)
+            raise default
         else:
             return default
 
