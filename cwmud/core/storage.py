@@ -287,6 +287,31 @@ class DataStore:
                 found.add(key)
         return found
 
+    def find(self, transaction=True, ignore_keys=(), **key_value_pairs):
+        """Find data blobs by one or more keyed values.
+
+        :param bool transaction: Whether to check the transaction
+        :param iterable ignore_keys: A sequence of keys to ignore
+        :param iterable key_value_pairs: Pairs of keys and values to
+                                         match against
+        :returns list: A list of keys to matching blobs, if any
+
+        """
+        # Checking the indexes only makes sense if *all* the key/value
+        # pairs are actually indexed.
+        if all(map(self._indexes.get, key_value_pairs)):
+            found = self._find_in_index(**key_value_pairs)
+        else:
+            found = self._find_in_store(ignore_keys=ignore_keys,
+                                        **key_value_pairs)
+        if transaction:
+            # Remove any keys already found that are in the transaction.
+            found.difference_update(self._transaction)
+            # And then add them back only if they match our values.
+            found.update(self._find_in_transaction(ignore_keys=ignore_keys,
+                                                   **key_value_pairs))
+        return list(found)
+
     def get(self, key, default=KeyError):
         """Fetch data from the store.
 
