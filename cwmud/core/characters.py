@@ -9,9 +9,7 @@ from .const import *
 from .entities import ENTITIES, Entity
 from .items import ItemListAttribute
 from .logs import get_logger
-from .pickle import PickleStore
 from .shells import Shell, SHELLS
-from .storage import STORES
 from .utils.funcs import joins
 from .world import Room
 
@@ -24,7 +22,6 @@ class Character(Entity):
 
     """A MUD character.  So full of potential."""
 
-    _store = STORES.register("characters", PickleStore("characters"))
     _uid_code = "C"
 
     type = "character"
@@ -252,7 +249,7 @@ class CharacterRoom(Attribute):
 
     @classmethod
     def serialize(cls, entity, value):
-        return value.key
+        return value.uid
 
     @classmethod
     def deserialize(cls, entity, value):

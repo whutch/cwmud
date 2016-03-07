@@ -546,7 +546,7 @@ def _hook_server_save_state(state):
             class_name(session.shell) if session.shell else None,
             class_name(session.menu) if session.menu else None,
             session.account.email if session.account else None,
-            session.char.key if session.char else None,
+            session.char.uid if session.char else None,
             session.width,
             session.color)
     state["sessions"] = sessions

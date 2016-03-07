@@ -11,8 +11,6 @@ from .attributes import Attribute, Unset
 from .entities import ENTITIES, Entity
 from .events import EVENTS
 from .logs import get_logger
-from .pickle import PickleStore
-from .storage import STORES
 from .utils.funcs import joins
 
 
@@ -24,8 +22,6 @@ class Room(Entity):
 
     """A MUD room.  Where the magic happens."""
 
-    _store = STORES.register("rooms", PickleStore("rooms"))
-    # _store_key moved below due to referenced functions.
     _uid_code = "R"
 
     type = "room"
@@ -86,8 +82,6 @@ class Room(Entity):
         """
         # noinspection PyAttributeOutsideInit
         self.x, self.y, self.z = map(int, coord_str.split(","))
-
-    _store_key = ("coords", get_coord_str, set_coord_from_str)
 
     @classmethod
     def generate(cls, coord_str, name, description=None):

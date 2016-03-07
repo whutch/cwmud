@@ -50,11 +50,11 @@ class ItemListAttribute(ListAttribute):
 
     @classmethod
     def serialize(cls, entity, value):
-        return [item.key for item in value]
+        return [item.uid for item in value]
 
     @classmethod
     def deserialize(cls, entity, value):
-        return cls.Proxy(entity, [Item.load(key) for key in value])
+        return cls.Proxy(entity, [Item.get(uid) for uid in value])
 
 
 @ENTITIES.register
@@ -127,7 +127,7 @@ class ItemContainer(Attribute):
 
     @classmethod
     def serialize(cls, entity, value):
-        return value.key
+        return value.uid
 
     @classmethod
     def deserialize(cls, entity, value):

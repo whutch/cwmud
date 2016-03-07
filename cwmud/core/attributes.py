@@ -118,19 +118,7 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
                 value = attr.validate(entity, value)
             if not raw:
                 value = attr.finalize(entity, value)
-        old_key = entity.key
         self._attr_values[name] = value
-        if entity.key != old_key:
-            # The entity's key has changed because of this, we need to note
-            # the old one so it can get updated in the store.
-            entity.tags["_old_key"] = old_key
-            # We also need to invalidate the old key in the cache, and insert
-            # this entity back in under the new key.
-            cache = entity._caches.get(entity.get_key_name())
-            if cache is not None:
-                if old_key in cache:
-                    del cache[old_key]
-                cache[entity.key] = entity
         entity.dirty()
         attr.changed(entity, self, old_value, value)
 

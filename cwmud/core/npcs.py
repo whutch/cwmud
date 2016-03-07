@@ -10,8 +10,6 @@ from .attributes import Attribute
 from .characters import Character
 from .entities import ENTITIES
 from .logs import get_logger
-from .pickle import PickleStore
-from .storage import STORES
 from .utils.funcs import joins
 
 
@@ -23,7 +21,6 @@ class NPC(Character):
 
     """A non-player character."""
 
-    _store = STORES.register("npcs", PickleStore("npcs"))
     _uid_code = "N"
 
     type = "npc"

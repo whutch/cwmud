@@ -10,7 +10,9 @@ from weakref import WeakValueDictionary
 from pylru import lrucache
 
 from .attributes import Attribute, DataBlob
+from .json import JSONStore
 from .logs import get_logger
+from .storage import STORES
 from .timing import TIMERS
 from .utils.exceptions import AlreadyExists
 from .utils.funcs import class_name, int_to_base_n, joins
@@ -89,7 +91,7 @@ class _EntityMeta(HasFlagsMeta, HasWeaksMeta):
         cls._instances = WeakValueDictionary()
         cls._caches = {}
         # noinspection PyUnresolvedReferences
-        cls.register_cache(cls.get_key_name())
+        cls.register_cache("uid")
 
     def register_blob(cls, name):
         """Decorate a data blob to register it on this entity.
@@ -178,8 +180,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
 
     """The base of all persistent objects in the game."""
 
-    _store = None
-    _store_key = "uid"
+    _store = STORES.register("entities", JSONStore("entities"))
     _uid_code = "E"
 
     type = "entity"
@@ -225,9 +226,9 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         if self._uid is None:
             self._uid = self.make_uid()
         self._instances[self._uid] = self
-        cache = self._caches.get(self.get_key_name())
-        if cache is not None and self.key not in cache:
-            cache[self.key] = self
+        cache = self._caches.get("uid")
+        if cache is not None and self.uid not in cache:
+            cache[self.uid] = self
 
     def __repr__(self):
         return joins("Entity<", self.uid, ">", sep="")
@@ -238,30 +239,6 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         return self._uid
 
     @property
-    def key(self):
-        """Return the value of this entity's storage key."""
-        if len(self._store_key) == 3:
-            getter = self._store_key[1]
-            if callable(getter):
-                return getter(self)
-        return getattr(self, self._store_key)
-
-    @key.setter
-    def key(self, new_key):
-        """Set this entity's storage key.
-
-        :param any new_key: The new key
-        :returns None:
-
-        """
-        if len(self._store_key) == 3:
-            setter = self._store_key[2]
-            if callable(setter):
-                setter(self, new_key)
-                return
-        setattr(self, self._store_key, new_key)
-
-    @property
     def is_dirty(self):
         """Return whether this entity is dirty and needs to be saved."""
         return self._dirty
@@ -270,15 +247,6 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
     def is_savable(self):
         """Return whether this entity can be saved."""
         return self._store and self._savable
-
-    @classmethod
-    def get_key_name(cls):
-        """Return the name of this entity's storage key."""
-        if len(cls._store_key) == 3:
-            getter, setter = cls._store_key[1:]
-            if callable(getter) and callable(setter):
-                return cls._store_key[0]
-        return cls._store_key
 
     def _flags_changed(self):
         self.dirty()
@@ -520,48 +488,44 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
                 self._store.delete(old_key)
             del self.tags["_old_key"]
         data = self.serialize()
-        self._store.put(self.key, data)
+        self._store.put(self.uid, data)
         self._dirty = False
 
     def revert(self):
         """Revert this entity to a previously saved state."""
         if not self._store:
             raise TypeError("cannot revert entity with no store")
-        data = self._store.get(self.key)
+        data = self._store.get(self.uid)
         if self.uid != data["uid"]:
             raise ValueError(joins("uid mismatch trying to revert", self))
         self.deserialize(data)
         self._dirty = False
 
-    def clone(self, new_key):
+    def clone(self, new_uid):
         """Create a new entity with a copy of this entity's data.
 
-        :param new_key: The key the new entity will be stored under;
-                        new_key can be callable, in which case the return
-                        value will be used as the key
+        :param new_uid: The UID the new entity will be stored under
         :returns Entity: The new, cloned entity
 
         """
         if not self._store:
             raise TypeError("cannot clone entity with no store")
         entity_class = type(self)
-        if callable(new_key):
-            new_key = new_key()
-        if self._store.has(new_key):
-            raise KeyError(joins("key exists in entity store:", new_key))
+        if self._store.has(new_uid):
+            raise KeyError(joins("UID exists in entity store:", new_uid))
         data = self.serialize()
         del data["uid"]
         new_entity = entity_class(data)
-        new_entity.key = new_key
+        new_entity._uid = new_uid
         return new_entity
 
     def delete(self):
         """Delete this entity from its store."""
-        cache = self._caches.get(self.get_key_name())
-        if cache and self.key in cache:
-            del cache[self.key]
-        if self._store and self._store.has(self.key):
-            self._store.delete(self.key)
+        cache = self._caches.get("uid")
+        if cache and self.uid in cache:
+            del cache[self.uid]
+        if self._store and self._store.has(self.uid):
+            self._store.delete(self.uid)
 
 
 # We create a global EntityManager here for convenience, and while the

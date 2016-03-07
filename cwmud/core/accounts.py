@@ -14,11 +14,9 @@ from .entities import ENTITIES, Entity
 from .events import EVENTS
 from .logs import get_logger
 from .menus import Menu, MENUS
-from .pickle import PickleStore
 from .players import Player, create_player
 from .requests import Request, REQUESTS, RequestString
 from .shells import SHELLS
-from .storage import STORES
 from .utils.funcs import check_hash, generate_hash, joins
 
 
@@ -30,8 +28,6 @@ class Account(Entity):
 
     """A user account."""
 
-    _store = STORES.register("accounts", PickleStore("accounts"))
-    _store_key = "email"
     _uid_code = "A"
 
     type = "account"

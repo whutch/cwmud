@@ -35,12 +35,12 @@ class TestEntities:
     def test_entity_load_data_integrity(self):
         """Test loading two copies of an entity from a store transaction."""
         another_entity = SomeEntity()
-        uid, key = another_entity.uid, another_entity.key
-        assert uid and key
+        uid = another_entity.uid
+        assert uid
         assert uid in SomeEntity._instances
         assert another_entity in SomeEntity._instances.values()
         another_entity.save()
-        assert key in SomeEntity._store._transaction
+        assert uid in SomeEntity._store._transaction
         del another_entity
         # Entity should have been dereferenced and fallen out of instances,
         # an attempt to load it now should fall back to the store transaction.

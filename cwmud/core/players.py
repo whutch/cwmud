@@ -12,9 +12,7 @@ from .characters import Character
 from .entities import ENTITIES
 from .events import EVENTS
 from .logs import get_logger
-from .pickle import PickleStore
 from .requests import Request, REQUESTS
-from .storage import STORES
 from .utils.funcs import joins
 
 
@@ -26,8 +24,6 @@ class Player(Character):
 
     """A player character."""
 
-    _store = STORES.register("players", PickleStore("players"))
-    _store_key = "name"
     _uid_code = "P"
 
     type = "player"

@@ -225,7 +225,7 @@ class TestCharacters:
         character.room = room
         data = character.serialize()
         assert data
-        assert data["room"] == room.key
-        data["room"] = other_room.key
+        assert data["room"] == room.uid
+        data["room"] = other_room.uid
         character.deserialize(data)
         assert character.room is other_room
