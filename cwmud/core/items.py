@@ -131,7 +131,7 @@ class ItemContainer(Attribute):
 
     @classmethod
     def deserialize(cls, entity, value):
-        container = Item.load(value, default=None)
+        container = Item.get(value)
         if not container:
             log.warn("Could not load container '%s' for %s",
                      value, entity)

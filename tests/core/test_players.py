@@ -47,7 +47,7 @@ def player():
 @pytest.fixture(scope="module")
 def room():
     """Create a Room instance for all tests to share."""
-    return Room({"x": 0, "y": 0, "z": 0}, savable=False)
+    return Room({"x": 6, "y": 4, "z": 4}, savable=False)
 
 
 @pytest.fixture(scope="module")

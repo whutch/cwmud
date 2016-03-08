@@ -111,7 +111,7 @@ class Room(Entity):
         found = {}
         for change, (dir_name, rev_name) in self._movement_strings.items():
             x, y, z = map(sum, zip(self.coords, change))
-            room = Room.load("{},{},{}".format(x, y, z), default=None)
+            room = Room.get(x=x, y=y, z=z)
             if room:
                 found[dir_name] = room
         return found
@@ -193,10 +193,9 @@ class RoomX(CoordAttribute):
     def validate(cls, entity, new_value):
         super().validate(entity, new_value)
         if entity and entity.y is not Unset and entity.z is not Unset:
-            new_coords = "{},{},{}".format(new_value, entity.y, entity.z)
-            if Room.load(new_coords, default=None):
-                raise ValueError("Room already exists at {}."
-                                 .format(new_coords))
+            if Room.get(x=new_value, y=entity.y, z=entity.z):
+                raise ValueError("Room already exists at {},{},{}."
+                                 .format(new_value, entity.y, entity.z))
         return new_value
 
 
@@ -208,10 +207,9 @@ class RoomY(CoordAttribute):
     def validate(cls, entity, new_value):
         super().validate(entity, new_value)
         if entity and entity.x is not Unset and entity.z is not Unset:
-            new_coords = "{},{},{}".format(entity.x, new_value, entity.z)
-            if Room.load(new_coords, default=None):
-                raise ValueError("Room already exists at {}."
-                                 .format(new_coords))
+            if Room.get(x=entity.x, y=new_value, z=entity.z):
+                raise ValueError("Room already exists at {},{},{}."
+                                 .format(entity.x, new_value, entity.z))
         return new_value
 
 
@@ -223,16 +221,15 @@ class RoomZ(CoordAttribute):
     def validate(cls, entity, new_value):
         super().validate(entity, new_value)
         if entity and entity.x is not Unset and entity.y is not Unset:
-            new_coords = "{},{},{}".format(entity.x, entity.y, new_value)
-            if Room.load(new_coords, default=None):
-                raise ValueError("Room already exists at {}."
-                                 .format(new_coords))
+            if Room.get(x=entity.x, y=entity.y, z=new_value):
+                raise ValueError("Room already exists at {},{},{}."
+                                 .format(entity.x, entity.y, new_value))
         return new_value
 
 
 @EVENTS.hook("server_boot", "setup_world")
 def _hook_server_boot():
-    room = Room.load("0,0,0", default=None)
+    room = Room.get(x=0, y=0, z=0)
     if not room:
         Room.generate("0,0,0", "Starting Room", "There's not much to look at.")
         log.warn("Had to generate initial room at 0,0,0.")

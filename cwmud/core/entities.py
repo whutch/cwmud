@@ -333,86 +333,91 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         return uid
 
     @classmethod
-    def exists(cls, key):
-        """Check if an entity with the given key exists.
+    def exists(cls, uid):
+        """Check if an entity with the given uid exists.
 
-        :param key: The key the entity's data is stored under
+        :param uid: The key the entity's data is stored under
         :returns bool: True if it exists, else False
 
         """
         # Check the store first.
-        if cls._store and cls._store.has(key):
+        if cls._store and cls._store.has(uid):
             return True
         # Then check unsaved instances.
-        if cls.get_key_name() == "uid":
-            if key in cls._instances:
-                return True
-        else:
-            # This entity isn't saved by UID, so we have to check
-            # each one for a matching store key.
-            for entity in cls._instances.values():
-                if entity.key == key:
-                    return True
+        if uid in cls._instances:
+            return True
+        # We didn't find one.
         return False
 
     @classmethod
-    def find(cls, *attr_value_pairs, cache=True, store=True, match=all, n=0):
+    def _find_in_cache(cls, **attr_value_pairs):
+        found = set()
+        for entity in cls._instances.values():
+            for attr, value in attr_value_pairs.items():
+                if getattr(entity, attr) != value:
+                    break
+            else:
+                found.add(entity)
+        return found
+
+    @classmethod
+    def find(cls, cache=True, store=True, **attr_value_pairs):
         """Find one or more entities by one of their attribute values.
 
-        :param iterable attr_value_pairs: Pairs of attributes and values to
-                                          match against; unless _or is True,
-                                          they must all match
         :param bool cache: Whether to check the _instances cache
         :param bool store: Whether to check the store
-        :param function match: Function to test if an entity matches, given
-                               a list of booleans returned by attr/value
-                               comparisons; should be any or all
-        :param int n: The maximum number of matches to return
+        :param iterable attr_value_pairs: Pairs of attributes and values to
+                                          match against
         :returns list: A list of found entities, if any
-        :raises ValueError: If both `store_only` and `cache_only` are True
 
         """
-        pairs = []
-        while attr_value_pairs:
-            attr, value, *attr_value_pairs = attr_value_pairs
-            pairs.append((attr, value))
         found = set()
         checked_keys = set()
         if cache:
-            # Check the cache.
-            for entity in cls._instances.values():
-                matches = [getattr(entity, _attr) == _value
-                           for _attr, _value in pairs]
-                if match(matches):
-                    found.add(entity)
-                    if n and len(found) >= n:
-                        break
-                checked_keys.add(entity.key)
-        if store and (not n or (n and len(found) < n)):
-            # Check the store.
-            for key in cls._store.keys():
-                if key in checked_keys:
-                    # We already checked this entity when we were checking the
-                    # cache, so don't bother reading from the store.
-                    continue
-                try:
-                    data = cls._store.get(key)
-                except KeyError:
-                    # This key is pending deletion.
-                    data = None
-                if data:
-                    matches = [data.get(_attr) == _value
-                               for _attr, _value in pairs]
-                    if match(matches):
-                        entity = cls.reconstruct(data)
-                        entity._dirty = False
-                        found.add(entity)
-                        if n and len(found) >= n:
-                            break
-        if n == 1:
-            return found.pop() if found else None
+            found.update(cls._find_in_cache(**attr_value_pairs))
+            checked_keys.update(cls._instances.keys())
+        if store:
+            found_uids = cls._store.find(ignore_keys=checked_keys,
+                                         **attr_value_pairs)
+            found.update([cls.reconstruct(cls._store.get(uid))
+                          for uid in found_uids])
+        return list(found)
+
+    @classmethod
+    def get(cls, key=None, default=None, cache=True, store=True,
+            **attr_value_pairs):
+        """Get an entity by one or more of their attribute values.
+
+        :param key: The key to get; if given `attr_value_pairs` will be ignored
+        :param default: A default value to return if no entity is found; if
+                        default is an exception, it will be raised instead
+        :param bool cache: Whether to check the caches
+        :param bool store: Whether to check the store
+        :param iterable attr_value_pairs: Pairs of attributes and values to
+                                          match against
+        :returns Entity: A matching entity, or default
+        :raises KeyError: If more than one entity matches the given values
+
+        """
+        if key is None:
+            matches = cls.find(cache=cache, store=store, **attr_value_pairs)
+            if len(matches) > 1:
+                raise KeyError(joins("get returned more than one match:",
+                                     matches, "using attrs", attr_value_pairs))
+            if matches:
+                return matches[0]
         else:
-            return list(found)
+            if cache:
+                if key in cls._instances:
+                    return cls._instances[key]
+            if store:
+                if cls._store.has(key):
+                    return cls._store.get(key)
+        # Nothing was found.
+        if isinstance(default, type) and issubclass(default, Exception):
+            raise default
+        else:
+            return default
 
     @classmethod
     def all(cls):
@@ -423,58 +428,6 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         """
         return [instance for instance in cls._instances.values()
                 if instance.active]
-
-    @classmethod
-    def load(cls, key, from_cache=True, default=KeyError):
-        """Load an entity from storage.
-
-        If `from_cache` is True and an instance is found in the _instances
-        cache then the found instance will be returned as-is and NOT
-        reloaded from the store.  If you want to reset an entity's data to a
-        stored state, use the revert method instead.
-
-        :param key: The key the entity's data is stored under
-        :param bool from_cache: Whether to check the _instances cache for a
-                                match before reading from storage
-        :param default: A default value to return if no entity is found; if
-                        default is an exception, it will be raised instead
-        :returns Entity: The loaded entity or default
-
-        """
-        cache = cls._caches.get(cls.get_key_name())
-
-        def _find():
-            if from_cache:
-                key_name = cls.get_key_name()
-                if key_name == "uid" and key in cls._instances:
-                    return cls._instances[key]
-                if cache is not None and key in cache:
-                    return cache[key]
-                if key_name != "uid":
-                    # This is probably slow and may not be worth it.
-                    for entity in cls._instances.values():
-                        if entity.key == key:
-                            return entity
-            if cls._store:
-                data = cls._store.get(key, default=None)
-                if data:
-                    if "uid" not in data:
-                        log.warn("No uid for %s loaded with key: %s!",
-                                 class_name(cls), key)
-                    entity = cls.reconstruct(data)
-                    entity._dirty = False
-                    return entity
-
-        found = _find()
-        if found:
-            if cache is not None and key not in cache:
-                cache[key] = found
-            return found
-        # Nothing was found.
-        if isinstance(default, type) and issubclass(default, Exception):
-            raise default(key)
-        else:
-            return default
 
     def save(self):
         """Store this entity."""

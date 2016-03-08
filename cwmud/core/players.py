@@ -98,7 +98,7 @@ class PlayerAccount(Attribute):
     @classmethod
     def deserialize(cls, entity, value):
         from .accounts import Account
-        return Account.find("uid", value, n=1)
+        return Account.get(value)
 
 
 @Player.register_attr("name")
@@ -127,7 +127,7 @@ class PlayerName(Attribute):
         new_value = new_value.title()
         if PlayerName.check_reserved(new_value):
             raise ValueError("That name is reserved.")
-        if Player.find("name", new_value):
+        if Player.find(name=new_value):
             raise ValueError("That name is already in use.")
         return new_value
 

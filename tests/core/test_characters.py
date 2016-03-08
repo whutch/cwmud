@@ -51,13 +51,13 @@ def other_character():
 @pytest.fixture(scope="module")
 def room():
     """Create a Room instance for all tests to share."""
-    return Room({"x": 0, "y": 0, "z": 0}, savable=False)
+    return Room({"x": 4, "y": 4, "z": 4}, savable=False)
 
 
 @pytest.fixture(scope="module")
 def other_room():
     """Create another Room instance for all tests to share."""
-    _room = Room({"x": 1, "y": 0, "z": 0}, savable=False)
+    _room = Room({"x": 5, "y": 4, "z": 4}, savable=False)
     _room.name = "Another Room"
     return _room
 

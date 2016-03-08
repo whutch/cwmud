@@ -148,7 +148,7 @@ class AccountName(Attribute):
         new_value = new_value.lower()
         if AccountName.check_reserved(new_value):
             raise ValueError("That account name is reserved.")
-        if Account.find("name", new_value):
+        if Account.find(name=new_value):
             raise ValueError("That account name is already in use.")
         return new_value
 
@@ -408,7 +408,7 @@ def authenticate_account(session, success=None, fail=None, account=None):
                 # noinspection PyTypeChecker
                 authenticate_account(_session, fail, fail, account_email)
             else:
-                _account = Account.load(account_email)
+                _account = Account.get(email=account_email)
                 authenticate_account(_session, success, fail, _account)
         session.request(RequestString, _check_account,
                         initial_prompt="Account email: ",
@@ -446,9 +446,9 @@ class AccountMenu(Menu):
             log.warn("AccountMenu assigned to session with no account!")
             return
         # Add entries for the account's characters.
-        for n, char in enumerate(Player.find("account", account,
-                                             "account", account.uid,
-                                             match=any), 1):
+        chars = Player.find(store=False, account=account)
+        chars.update(Player.find(cache=False, account=account.uid))
+        for n, char in enumerate(sorted(chars, lambda c: c.name), 1):
             self.add_entry(str(n), char.name,
                            partial(_account_menu_select_char, char=char))
 
@@ -458,7 +458,7 @@ def _account_menu_select_char(session, char=None):
         return
     if not char.room:
         from .world import Room
-        start_room = Room.load("0,0,0", default=None)
+        start_room = Room.get(x=0, y=0, z=0)
         if start_room:
             char.room = start_room
     session.shell = SHELLS["CharacterShell"]

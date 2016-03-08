@@ -66,7 +66,7 @@ class TestRooms:
         with pytest.raises(ValueError):
             self.room.name = 123
         with pytest.raises(ValueError):
-            self.room.name = "x"*61
+            self.room.name = "x" * 61
         self.room.name = "test room"
         assert self.room.name == "Test Room"
 

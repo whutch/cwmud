@@ -49,7 +49,8 @@ class GotoCommand(Command):
                 coords.append("0")
             elif len(coords) != 3:
                 raise IndexError
-            room = Room.load(",".join(coords), default=None)
+            x, y, z = map(int, coords)
+            room = Room.get(x=x, y=y, z=z)
             if not room:
                 self.session.send("That doesn't seem to be a place.")
                 return

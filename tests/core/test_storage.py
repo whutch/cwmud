@@ -143,7 +143,7 @@ class TestDataStores:
     def test_store_get_not_found(self):
         """Test that trying to get a non-existent key from a store fails."""
         with pytest.raises(KeyError):
-            self.store.get("test")
+            self.store.get("test", default=KeyError)
 
     def test_store_delete_not_found(self):
         """Test that trying to delete a non-existent key from a store fails."""
@@ -226,7 +226,7 @@ class TestDataStores:
         assert "test" in self.store._stored
         assert "test" in self.store._transaction
         with pytest.raises(KeyError):
-            self.store.get("test")
+            self.store.get("test", default=KeyError)
 
     def test_store_delete_already_deleting(self):
         """Test that trying to delete a key already pending deletion fails."""

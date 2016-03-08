@@ -45,12 +45,12 @@ class TestEntities:
         # Entity should have been dereferenced and fallen out of instances,
         # an attempt to load it now should fall back to the store transaction.
         assert uid not in SomeEntity._instances.values()
-        assert key in SomeEntity._store._transaction
-        another_entity = SomeEntity.load(key, default=None)
+        assert uid in SomeEntity._store._transaction
+        another_entity = SomeEntity.get(uid=uid)
         assert another_entity and another_entity.uid
         assert another_entity.uid == uid
         del another_entity
         assert uid not in SomeEntity._instances.values()
-        another_copy = SomeEntity.load(key, default=None)
+        another_copy = SomeEntity.get(uid=uid)
         assert another_copy and another_copy.uid
         assert another_copy.uid == uid

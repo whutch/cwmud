@@ -62,7 +62,7 @@ def get_exits(self):
     found = {}
     for change, (dir_name, rev_name) in self._movement_strings.items():
         x, y, z = map(sum, zip(self.coords, change))
-        room = Room.load("{},{},{}".format(x, y, z), default=None)
+        room = Room.get(x=x, y=y, z=z)
         if not room and change[2] == 0:  # Don't auto-create "up" and "down"
             room = generate_room(x, y, z)
         if room:
@@ -114,8 +114,7 @@ def move_direction(self, x=0, y=0, z=0):
         # Can't move somewhere from nowhere.
         return
     to_x, to_y, to_z = map(sum, zip(self.room.coords, (x, y, z)))
-    to_coords = "{},{},{}".format(to_x, to_y, to_z)
-    room = Room.load(to_coords, default=None)
+    room = Room.get(x=to_x, y=to_x, z=to_z)
     if not room:
         room = generate_room(to_x, to_y, to_z)
     to_dir, from_dir = Room.get_movement_strings((x, y, z))
@@ -334,7 +333,7 @@ EVENTS.unhook("*", "setup_world")
 
 @EVENTS.hook("server_boot", "setup_world", after="parse_terrain_grid")
 def _hook_server_boot():
-    room = Room.load("0,0,0", default=None)
+    room = Room.get(x=0, y=0, z=0)
     if not room:
         generate_room(0, 0, 0)
         log.warn("Had to generate initial room at 0,0,0.")

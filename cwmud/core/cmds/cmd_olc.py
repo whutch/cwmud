@@ -35,7 +35,7 @@ class DigCommand(Command):
             self.session.send("That's not a direction.")
             return
         x, y, z = map(sum, zip(char.room.coords, change))
-        room = Room.find("x", x, "y", y, "z", z, n=1)
+        room = Room.find(x=x, y=y, z=z)
         if room:
             self.session.send("There's already a room over there!")
             return

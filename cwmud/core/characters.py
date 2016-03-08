@@ -217,7 +217,7 @@ class Character(Entity):
             # Can't move somewhere from nowhere.
             return
         to_x, to_y, to_z = map(sum, zip(self.room.coords, (x, y, z)))
-        room = Room.find("x", to_x, "y", to_y, "z", to_z, n=1)
+        room = Room.get(x=to_x, y=to_y, z=to_z)
         if not room:
             self.session.send("You can't go that way.")
             return
@@ -253,9 +253,9 @@ class CharacterRoom(Attribute):
 
     @classmethod
     def deserialize(cls, entity, value):
-        room = Room.load(value, default=None)
+        room = Room.get(uid=value)
         if not room:
-            room = Room.load("0,0,0")
+            room = Room.get(x=0, y=0, z=0, default=KeyError)
         return room
 
 

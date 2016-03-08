@@ -577,14 +577,14 @@ def _hook_server_load_state(state):
             menu = MENUS[menu](session)
         session._menu = menu
         if email:
-            session.account = Account.load(email)
+            session.account = Account.get(email=email)
         if char:
             if char.startswith("N-"):
                 # It's an NPC UID.
-                session.char = NPC.load(char)
+                session.char = NPC.get(char)
             else:
-                # It's a player name.
-                session.char = Player.load(char)
+                # It's a player UID.
+                session.char = Player.get(char)
                 session.char.resume(quiet=True)
         session.width = width
         session.color = color
