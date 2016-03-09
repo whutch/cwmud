@@ -350,9 +350,11 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         return False
 
     @classmethod
-    def _find_in_cache(cls, **attr_value_pairs):
+    def _find_in_cache(cls, ignore_keys=(), **attr_value_pairs):
         found = set()
-        for entity in cls._instances.values():
+        for key, entity in cls._instances.items():
+            if key in ignore_keys:
+                continue
             for attr, value in attr_value_pairs.items():
                 if getattr(entity, attr) != value:
                     break
@@ -361,20 +363,22 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         return found
 
     @classmethod
-    def find(cls, cache=True, store=True, **attr_value_pairs):
+    def find(cls, cache=True, store=True, ignore_keys=(), **attr_value_pairs):
         """Find one or more entities by one of their attribute values.
 
         :param bool cache: Whether to check the _instances cache
         :param bool store: Whether to check the store
+        :param iterable ignore_keys: A sequence of keys to ignore
         :param iterable attr_value_pairs: Pairs of attributes and values to
                                           match against
         :returns list: A list of found entities, if any
 
         """
         found = set()
-        checked_keys = set()
+        checked_keys = set(ignore_keys)
         if cache:
-            found.update(cls._find_in_cache(**attr_value_pairs))
+            found.update(cls._find_in_cache(ignore_keys=checked_keys,
+                                            **attr_value_pairs))
             checked_keys.update(cls._instances.keys())
         if store:
             found_uids = cls._store.find(ignore_keys=checked_keys,
