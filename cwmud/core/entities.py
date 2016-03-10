@@ -388,6 +388,29 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         return list(found)
 
     @classmethod
+    def find_relations(cls, **attr_value_pairs):
+        """Find one or more entities by a relation to another entity.
+
+        The purpose of this versus `find` is to match related entities by
+        direct reference (in the cache) or by UID (in the store) in one call.
+
+        :param iterable attr_value_pairs: Pairs of attributes and values to
+                                          match against
+        :returns list: A list of found entities, if any
+        :raises TypeError: If any of the pairs' values are not entity instances
+
+        """
+        found = set(cls.find(store=False, **attr_value_pairs))
+        found_keys = set(entity.uid for entity in found)
+        for key, value in attr_value_pairs.items():
+            if not isinstance(value, Entity):
+                raise TypeError(joins("relation value is not entity:", value))
+            attr_value_pairs[key] = value.uid
+        found.update(cls.find(cache=False, ignore_keys=found_keys,
+                              **attr_value_pairs))
+        return list(found)
+
+    @classmethod
     def get(cls, key=None, default=None, cache=True, store=True,
             **attr_value_pairs):
         """Get an entity by one or more of their attribute values.

@@ -446,9 +446,8 @@ class AccountMenu(Menu):
             log.warn("AccountMenu assigned to session with no account!")
             return
         # Add entries for the account's characters.
-        chars = Player.find(store=False, account=account)
-        chars.update(Player.find(cache=False, account=account.uid))
-        for n, char in enumerate(sorted(chars, lambda c: c.name), 1):
+        chars = Player.find_relations(account=account)
+        for n, char in enumerate(sorted(chars, key=lambda c: c.name), 1):
             self.add_entry(str(n), char.name,
                            partial(_account_menu_select_char, char=char))
 
