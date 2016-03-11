@@ -115,7 +115,7 @@ class RequestNewAccountEmail(Request):
 
     def _validate(self, data):
         try:
-            new_email = AccountEmail._validate(data)
+            new_email = AccountEmail.validate(None, data)
         except ValueError as exc:
             raise Request.ValidationFailed(*exc.args)
         return new_email
@@ -180,7 +180,7 @@ class RequestNewAccountName(Request):
 
     def _validate(self, data):
         try:
-            new_name = AccountName._validate(data)
+            new_name = AccountName.validate(None, data)
         except ValueError as exc:
             raise Request.ValidationFailed(*exc.args)
         return new_name
@@ -221,7 +221,7 @@ class RequestNewAccountPassword(Request):
 
     def _validate(self, data):
         try:
-            return AccountPassword._validate(data)
+            return AccountPassword.validate(None, data)
         except ValueError as exc:
             raise Request.ValidationFailed(*exc.args)
 
