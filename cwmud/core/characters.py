@@ -4,7 +4,7 @@
 # :copyright: (c) 2008 - 2016 Will Hutcheson
 # :license: MIT (https://github.com/whutch/cwmud/blob/master/LICENSE.txt)
 
-from .attributes import Attribute
+from .attributes import Attribute, SetAttribute
 from .const import *
 from .entities import ENTITIES, Entity
 from .items import ItemListAttribute
@@ -15,6 +15,29 @@ from .world import Room
 
 
 log = get_logger("characters")
+
+
+class CharacterSetAttribute(SetAttribute):
+
+    """An attribute for a set of characters."""
+
+    class Proxy(SetAttribute.Proxy):
+
+        def __repr__(self):
+            return repr(self._items)
+
+        def add(self, value):
+            if not isinstance(value, Character):
+                raise TypeError(joins(value, "is not a Character"))
+            super().add(value)
+
+    @classmethod
+    def serialize(cls, entity, value):
+        return [character.uid for character in value]
+
+    @classmethod
+    def deserialize(cls, entity, value):
+        return cls.Proxy(entity, [Character.get(uid) for uid in value])
 
 
 @ENTITIES.register
