@@ -113,6 +113,7 @@ class Server:
             log.info("Booting server.")
             # Subscribe to Redis channels.
             self._channels.psubscribe("server-*")
+            STORES.initialize()
 
         log.info("Server boot complete.")
 
