@@ -147,6 +147,11 @@ class Session(HasFlags):
         return self._client.port
 
     @property
+    def client(self):
+        """Return the client for this session."""
+        return self._client
+
+    @property
     def menu(self):
         """Return the current menu for this session."""
         return self._menu
@@ -397,7 +402,6 @@ class Session(HasFlags):
         self._output_queue.append(joins(data, *more, sep=sep) + end)
 
     def _send(self, data):
-
         """Put data in the client's output buffer to be sent next socket poll.
 
         The given data will be processed for any necessary text formatting
