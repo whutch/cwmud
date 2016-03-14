@@ -63,7 +63,7 @@ def get_exits(self):
     for change, (dir_name, rev_name) in self._movement_strings.items():
         x, y, z = map(sum, zip(self.coords, change))
         room = Room.get(x=x, y=y, z=z)
-        if not room and change[2] == 0:  # Don't auto-create "up" and "down"
+        if (not room) and change[2] == 0:  # Don't auto-create "up" and "down"
             room = generate_room(x, y, z)
         if room:
             found[dir_name] = room
@@ -114,7 +114,7 @@ def move_direction(self, x=0, y=0, z=0):
         # Can't move somewhere from nowhere.
         return
     to_x, to_y, to_z = map(sum, zip(self.room.coords, (x, y, z)))
-    room = Room.get(x=to_x, y=to_x, z=to_z)
+    room = Room.get(x=to_x, y=to_y, z=to_z)
     if not room:
         room = generate_room(to_x, to_y, to_z)
     to_dir, from_dir = Room.get_movement_strings((x, y, z))
@@ -132,7 +132,8 @@ def generate_room(x, y, z):
     :returns world.Room: The generated room
 
     """
-    room = Room({"x": x, "y": y, "z": z})
+    room = Room()
+    room.x, room.y, room.z = x, y, z
     terrain, diverse = get_terrain_for_coord(x, y)
     room.terrain = terrain
     if diverse and terrain.diversity_symbol:
