@@ -143,6 +143,38 @@ NAWS = chr(31)  # Negotiate About Window Size
 LINEMO = chr(34)  # Line Mode
 
 
+_COMMAND_NAMES = {
+    SE: "SE",
+    NOP: "NOP",
+    DATMK: "DATMK",
+    BREAK: "BREAK",
+    IP: "IP",
+    AO: "AO",
+    AYT: "AYT",
+    EC: "EC",
+    EL: "EL",
+    GA: "GA",
+    SB: "SB",
+    WILL: "WILL",
+    WONT: "WONT",
+    DO: "DO",
+    DONT: "DONT",
+    IAC: "IAC",
+    SEND: "SEND",
+    IS: "IS",
+}
+
+_OPTION_NAMES = {
+    BINARY: "BINARY",
+    ECHO: "ECHO",
+    RECON: "RECON",
+    SGA: "SGA",
+    TTYPE: "TTYPE",
+    NAWS: "NAWS",
+    LINEMODE: "LINEMODE",
+}
+
+
 class ConnectionLost(Exception):
     """Custom exception to signal a lost connection to the Telnet Server."""
     pass
@@ -554,7 +586,8 @@ class TelnetClient(object):
         :returns None:
 
         """
-        logging.debug("Got two byte cmd '{}'".format(ord(cmd)))
+        logging.debug("Got two byte cmd '{}'"
+                      .format(_COMMAND_NAMES.get(cmd, "?")))
         if cmd == SB:
             # Begin capturing a sub-negotiation string
             self.telnet_got_sb = True
@@ -592,7 +625,9 @@ class TelnetClient(object):
 
         """
         cmd = self.telnet_got_cmd
-        logging.debug("Got three byte cmd {}:{}".format(ord(cmd), ord(option)))
+        logging.debug("Got three byte cmd {}:{}"
+                      .format(_COMMAND_NAMES.get(cmd, "?"),
+                              _OPTION_NAMES.get(option, "?")))
         # Incoming DO's and DONT's refer to the status of this end
         if cmd == DO:
             if option == BINARY or option == SGA or option == ECHO:
@@ -681,6 +716,8 @@ class TelnetClient(object):
     def _sb_decoder(self):
         """Figure out what to do with a received sub-negotiation block."""
         bloc = self.telnet_sb_buffer
+        logging.debug("Got sub negotiation %s",
+                      " ".join([str(ord(c)) for c in bloc]))
         if len(bloc) > 2:
             if bloc[0] == TTYPE and bloc[1] == IS:
                 self.terminal_type = bloc[2:]
