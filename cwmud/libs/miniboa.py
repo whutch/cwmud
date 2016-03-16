@@ -140,7 +140,7 @@ RECON = chr(2)  # Reconnection
 SGA = chr(3)  # Suppress Go-Ahead
 TTYPE = chr(24)  # Terminal Type
 NAWS = chr(31)  # Negotiate About Window Size
-LINEMO = chr(34)  # Line Mode
+LINEMODE = chr(34)  # Line Mode
 
 
 _COMMAND_NAMES = {
@@ -280,6 +280,7 @@ class TelnetClient(object):
         self.command_list = []
         self.connect_time = time.time()
         self.last_input_time = time.time()
+        self.line_mode = True
 
         # State variables for interpreting incoming telnet commands
         self.telnet_got_iac = False  # Are we inside an IAC sequence?
@@ -432,6 +433,13 @@ class TelnetClient(object):
         self._iac_do(TTYPE)
         self._note_reply_pending(TTYPE, True)
 
+    def request_linemode_off(self):
+        """Tell the client to disable line-mode."""
+        self._iac_do(LINEMODE)
+        self.send("{}{}{}{}{}{}{}".format(IAC, SB, LINEMODE,
+                                          chr(1), chr(0), IAC, SE))
+        self.line_mode = False
+
     def socket_send(self):
         """Send data to the client socket.
 
@@ -483,15 +491,19 @@ class TelnetClient(object):
         # Test for telnet commands.
         for byte in data:
             self._iac_sniffer(byte)
-        # Look for newline characters to get whole lines from the buffer.
-        while True:
-            mark = self.recv_buffer.find('\n')
-            if mark == -1:
-                break
-            cmd = self.recv_buffer[:mark].strip()
-            self.command_list.append(cmd)
-            self.cmd_ready = True
-            self.recv_buffer = self.recv_buffer[mark + 1:]
+        if self.line_mode:
+            # Look for newline characters to get whole lines from the buffer.
+            while True:
+                mark = self.recv_buffer.find('\n')
+                if mark == -1:
+                    break
+                cmd = self.recv_buffer[:mark].strip()
+                self.command_list.append(cmd)
+                self.cmd_ready = True
+                self.recv_buffer = self.recv_buffer[mark + 1:]
+        else:
+            self.command_list.extend(self.recv_buffer)
+            self.recv_buffer = ""
 
     def _recv_byte(self, byte):
         """Process receiving a single byte.
@@ -731,6 +743,14 @@ class TelnetClient(object):
                     self.rows = (256 * ord(bloc[3])) + ord(bloc[4])
                 logging.info("Screen is {} x {}".format(self.columns,
                                                         self.rows))
+            if bloc[0] == LINEMODE:
+                if bloc[1] == chr(1):
+                    if len(bloc) != 3:
+                        logging.warning("Bad LINEMODE SB: %s",
+                                        " ".join([str(ord(c))
+                                                  for c in bloc[0:]]))
+                    else:
+                        self.line_mode = bool(ord(bloc[2]) & 1)
         self.telnet_sb_buffer = ''
 
     # Sometimes verbiage is tricky.  I use 'note' rather than 'set' here
@@ -903,7 +923,7 @@ class TelnetServer(object):
         # Build a list of connections that need to send data.
         send_list = []
         for client in self.clients.values():
-            if client.send_pending:
+            if client.send_buffer:
                 send_list.append(client.fileno)
 
         # Don't poll with three empty lists, Windows won't like it.
