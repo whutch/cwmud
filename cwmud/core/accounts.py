@@ -402,13 +402,13 @@ def authenticate_account(session, success=None, fail=None, account=None):
     if not account:
         # We need the account's email first.
         def _check_account(_session, account_email):
-            if not Account.exists(account_email):
+            _account = Account.get(email=account_email)
+            if not _account:
                 # Account not found, recursing with the account email string
                 # as the account will ensure that the password check fails.
                 # noinspection PyTypeChecker
                 authenticate_account(_session, fail, fail, account_email)
             else:
-                _account = Account.get(email=account_email)
                 authenticate_account(_session, success, fail, _account)
         session.request(RequestString, _check_account,
                         initial_prompt="Account email: ",
