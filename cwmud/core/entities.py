@@ -333,23 +333,6 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         return uid
 
     @classmethod
-    def exists(cls, uid):
-        """Check if an entity with the given uid exists.
-
-        :param uid: The key the entity's data is stored under
-        :returns bool: True if it exists, else False
-
-        """
-        # Check the store first.
-        if cls._store and cls._store.has(uid):
-            return True
-        # Then check unsaved instances.
-        if uid in cls._instances:
-            return True
-        # We didn't find one.
-        return False
-
-    @classmethod
     def _find_in_cache(cls, ignore_keys=(), **attr_value_pairs):
         found = set()
         for key, entity in cls._instances.items():
