@@ -172,7 +172,7 @@ class _EntityMeta(HasFlagsMeta, HasWeaksMeta):
 
         """
         if key in cls._caches:
-            raise KeyError(joins("entity already has cache:", key))
+            raise AlreadyExists(key, cls._caches[key])
         cls._caches[key] = lrucache(size, cls._cache_eject_callback)
 
 
@@ -203,7 +203,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
                 # We don't need to do anything with the blob returned by this
                 # because we're abusing the mutability of default arguments.
             if issubclass(cls, Entity):
-                if cls not in checked:
+                if cls not in checked:  # pragma: no cover
                     # noinspection PyProtectedMember
                     blob._update(cls._base_blob(self))
                     checked.add(cls)
@@ -227,8 +227,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
             self._uid = self.make_uid()
         self._instances[self._uid] = self
         cache = self._caches.get("uid")
-        if cache is not None and self.uid not in cache:
-            cache[self.uid] = self
+        cache[self.uid] = self
 
     def __repr__(self):
         return joins("Entity<", self.uid, ">", sep="")
