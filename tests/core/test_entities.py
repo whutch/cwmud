@@ -6,8 +6,9 @@
 
 import pytest
 
-from cwmud.core.entities import Entity
+from cwmud.core.entities import Entity, EntityManager
 from cwmud.core.pickle import PickleStore
+from cwmud.core.utils.exceptions import AlreadyExists
 
 
 class SomeEntity(Entity):
@@ -19,9 +20,34 @@ class SomeEntity(Entity):
 
 
 @pytest.fixture(scope="module")
+def manager():
+    """Create an entity manager for all tests to share."""
+    return EntityManager()
+
+
+@pytest.fixture(scope="module")
 def entity():
     """Create an entity for all tests to share."""
     return SomeEntity()
+
+
+class TestEntityManagers:
+
+    """A collection of tests for entity managers."""
+
+    def test_entity_manager_register(self, manager):
+        """Test that we can register an entity type with a manager."""
+        assert manager.register(SomeEntity) is SomeEntity
+
+    def test_entity_manager_register_bad_type(self, manager):
+        """Test that trying to register a non-entity with a manager fails."""
+        with pytest.raises(TypeError):
+            manager.register(manager)
+
+    def test_entity_manager_register_already_exists(self, manager):
+        """Test that trying to re-register an entity type fails."""
+        with pytest.raises(AlreadyExists):
+            manager.register(SomeEntity)
 
 
 class TestEntities:
