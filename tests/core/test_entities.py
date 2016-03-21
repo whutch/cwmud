@@ -4,6 +4,8 @@
 # :copyright: (c) 2008 - 2016 Will Hutcheson
 # :license: MIT (https://github.com/whutch/cwmud/blob/master/LICENSE.txt)
 
+from unittest.mock import Mock
+
 import pytest
 
 from cwmud.core.entities import Entity, EntityManager
@@ -48,6 +50,33 @@ class TestEntityManagers:
         """Test that trying to re-register an entity type fails."""
         with pytest.raises(AlreadyExists):
             manager.register(SomeEntity)
+
+    def test_entity_manager_contains(self, manager):
+        """Test that we can check if a manager contains an entity type."""
+        assert "SomeEntity" in manager
+        assert "NonExistentEntity" not in manager
+
+    def test_entity_manager_getitem(self, manager):
+        """Test that we can get an entity from a manager by name."""
+        assert manager["SomeEntity"] is SomeEntity
+        with pytest.raises(KeyError):
+            return manager["NonExistentEntity"]
+
+    def test_entity_manager_save(self, manager):
+        """Test that we can save all of a manager's dirty entities."""
+        mock1 = Mock(is_savable=True, is_dirty=False)
+        SomeEntity._instances["mock1"] = mock1
+        mock2 = Mock(is_savable=True, is_dirty=False)
+        SomeEntity._instances["mock2"] = mock2
+        # First test with no dirty entities.
+        manager.save()
+        assert not mock1.save.called
+        assert not mock1.save.called
+        # Then test with a dirty entity.
+        mock1.is_dirty = True
+        manager.save()
+        assert mock1.save.called
+        assert not mock2.save.called
 
 
 class TestEntities:
