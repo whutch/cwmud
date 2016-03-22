@@ -8,7 +8,8 @@ from unittest.mock import Mock
 
 import pytest
 
-from cwmud.core.entities import Entity, EntityManager
+from cwmud.core.attributes import Attribute, DataBlob
+from cwmud.core.entities import ENTITIES, Entity, EntityManager
 from cwmud.core.pickle import PickleStore
 from cwmud.core.utils.exceptions import AlreadyExists
 
@@ -82,6 +83,41 @@ class TestEntityManagers:
 class TestEntities:
 
     """A collection of tests for entities."""
+
+    def test_entity_register_blob(self):
+        """Test that we can register a data blob on an entity type."""
+        class TestBlob(DataBlob):
+            """A test blob."""
+        SomeEntity.register_blob("test_blob")(TestBlob)
+        with pytest.raises(AlreadyExists):
+            SomeEntity.register_blob("test_blob")(TestBlob)
+        with pytest.raises(TypeError):
+            SomeEntity.register_blob("another_blob")(None)
+
+    def test_entity_register_attr(self):
+        """Test that we can register an attribute on an entity type."""
+        class TestAttribute(Attribute):
+            """A test attribute."""
+        SomeEntity.register_attr("test_attr")(TestAttribute)
+        with pytest.raises(AlreadyExists):
+            SomeEntity.register_attr("test_attr")(TestAttribute)
+        with pytest.raises(TypeError):
+            SomeEntity.register_attr("another_attr")(None)
+
+    def test_entity_cache(self):
+        """Test entity caching and ejection."""
+        SomeEntity.register_cache("test", size=2)
+        with pytest.raises(AlreadyExists):
+            SomeEntity.register_cache("test")
+        # Test that insertions over the size limit will eject one.
+        mocks = [Mock(), Mock(), Mock()]
+        SomeEntity._caches["test"][0] = mocks[0]
+        SomeEntity._caches["test"][1] = mocks[1]
+        assert 0 in SomeEntity._caches["test"]
+        assert not mocks[0].save.called
+        SomeEntity._caches["test"][2] = mocks[2]
+        assert 0 not in SomeEntity._caches["test"]
+        assert mocks[0].save.called
 
     def test_entity_create(self, entity):
         """Test that we can create an entity."""
