@@ -119,9 +119,77 @@ class TestEntities:
         assert 0 not in SomeEntity._caches["test"]
         assert mocks[0].save.called
 
-    def test_entity_create(self, entity):
+    def test_entity_create(self):
         """Test that we can create an entity."""
-        assert entity
+        assert SomeEntity()
+
+    def test_entity_create_from_data(self):
+        """Test that we can create an entity from existing data."""
+        new_entity = SomeEntity({"uid": "purple", "version": 9000})
+        assert new_entity.uid == "purple"
+        assert new_entity.version == 9000
+
+    def test_entity_properties(self, entity):
+        """Test the properties of an entity."""
+        assert entity.uid
+        old_uid = entity.uid
+        entity._uid = "test"
+        assert entity.uid == "test"
+        entity._uid = old_uid
+        assert not entity.is_dirty
+        entity._dirty = True
+        assert entity.is_dirty
+        assert entity.is_savable
+        entity._savable = False
+        assert not entity.is_savable
+
+    def test_entity_dirtiness(self, entity):
+        """Test the dirtiness of an entity."""
+        entity._dirty = False
+        assert not entity.is_dirty
+        entity.dirty()
+        assert entity.is_dirty
+        entity._dirty = False
+        entity._flags_changed()
+        assert entity.is_dirty
+        entity._dirty = False
+        entity._tags_changed()
+        assert entity.is_dirty
+
+    def test_entity_serialization(self, entity):
+        """Test that we can serialize and deserialize an entity."""
+        data = entity.serialize()
+        assert data
+        assert "uid" in data and data["uid"] == entity.uid
+        assert "tags" in data and not data["tags"]
+        data["tags"]["test"] = True
+        new_entity = SomeEntity()
+        assert new_entity.uid != entity.uid
+        new_entity.deserialize(data)
+        assert new_entity.uid == entity.uid
+        assert new_entity.tags["test"] is True
+
+    def test_entity_reconstruct(self, entity):
+        """Test that we can reconstruct an entity of arbitrary type."""
+        data = entity.serialize()
+        del data["type"]
+        with pytest.raises(KeyError):
+            Entity.reconstruct(data)
+        data["type"] = "BadEntityType"
+        with pytest.raises(KeyError):
+            Entity.reconstruct(data)
+        ENTITIES.register(SomeEntity)
+        data["type"] = "SomeEntity"
+        new_entity = Entity.reconstruct(data)
+        assert new_entity.serialize() == entity.serialize()
+
+    def test_entity_make_uid(self):
+        """Test that we can create entity UIDs."""
+        type_code, time_code = Entity.make_uid().split("-")
+        assert type_code == "E" and len(time_code) >= 8
+        type_code, time_code = SomeEntity.make_uid().split("-")
+        assert type_code == "S" and len(time_code) >= 8
+        assert Entity.make_uid() != Entity.make_uid()
 
     def test_entity_load_data_integrity(self):
         """Test loading two copies of an entity from a store transaction."""
