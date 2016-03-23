@@ -224,10 +224,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         if data is not None:
             self.deserialize(data)
         if self._uid is None:
-            self._uid = self.make_uid()
-        self._instances[self._uid] = self
-        cache = self._caches.get("uid")
-        cache[self.uid] = self
+            self._set_uid(self.make_uid())
 
     def __repr__(self):
         return joins("Entity<", self.uid, ">", sep="")
@@ -236,6 +233,25 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
     def uid(self):
         """Return this entity's UID."""
         return self._uid
+
+    def _set_uid(self, uid):
+        """Set this entity's UID.
+
+        To ensure cache integrity, this should be the only place that an
+        entity's UID is updated.  This *only* updates references in the
+        internal caches, do not rely on it to change anything in the store
+        or any other external references (links from other entities).
+
+        """
+        cache = self._caches.get("uid")
+        if self._uid is not None:
+            if self._uid in self._instances:
+                del self._instances[self._uid]
+            if self._uid in cache:
+                del cache[self._uid]
+        self._uid = uid
+        self._instances[uid] = self
+        cache[uid] = self
 
     @property
     def is_dirty(self):
@@ -280,7 +296,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         if "type" in data:
             del data["type"]
         if "uid" in data:
-            self._uid = data.pop("uid")
+            self._set_uid(data.pop("uid"))
         if "flags" in data:
             self.flags.add(*data.pop("flags"))
         if "tags" in data:
@@ -478,7 +494,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         data = self.serialize()
         del data["uid"]
         new_entity = entity_class(data)
-        new_entity._uid = new_uid
+        new_entity._set_uid(new_uid)
         return new_entity
 
     def delete(self):
