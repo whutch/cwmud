@@ -22,6 +22,23 @@ class SomeEntity(Entity):
     _uid_code = "S"
 
 
+@SomeEntity.register_attr("buddy")
+class SomeEntityBuddy(Attribute):
+    """An attribute linking to another entity."""
+
+    @classmethod
+    def validate(cls, entity, new_value):
+        return new_value
+
+    @classmethod
+    def serialize(cls, entity, value):
+        return value.uid
+
+    @classmethod
+    def deserialize(cls, entity, value):
+        return SomeEntity.get(value)
+
+
 @pytest.fixture(scope="module")
 def manager():
     """Create an entity manager for all tests to share."""
@@ -78,6 +95,9 @@ class TestEntityManagers:
         manager.save()
         assert mock1.save.called
         assert not mock2.save.called
+        # Clean up the mock entities.
+        del SomeEntity._instances["mock1"]
+        del SomeEntity._instances["mock2"]
 
 
 class TestEntities:
@@ -142,6 +162,33 @@ class TestEntities:
         assert entity.is_savable
         entity._savable = False
         assert not entity.is_savable
+        entity._savable = True
+
+    def test_entity_set_uid(self, entity):
+        """Test that we can cleanly change the UID of an entity."""
+        old_uid = entity.uid
+        assert old_uid in SomeEntity._instances
+        assert old_uid in SomeEntity._caches["uid"]
+        assert "test" not in SomeEntity._instances
+        assert "test" not in SomeEntity._caches["uid"]
+        entity._set_uid("test")
+        assert old_uid not in SomeEntity._instances
+        assert old_uid not in SomeEntity._caches["uid"]
+        assert "test" in SomeEntity._instances
+        assert "test" in SomeEntity._caches["uid"]
+        # Changing it manually will ruin cache integrity.
+        entity._uid = "another test"
+        assert "another test" not in SomeEntity._instances
+        assert "another test" not in SomeEntity._caches["uid"]
+        entity._set_uid(old_uid)
+        assert old_uid in SomeEntity._instances
+        assert old_uid in SomeEntity._caches["uid"]
+        # An older UID is still in the caches from the manual change,
+        # so we can clean them up.
+        assert "test" in SomeEntity._instances
+        assert "test" in SomeEntity._caches["uid"]
+        del SomeEntity._instances["test"]
+        del SomeEntity._caches["uid"]["test"]
 
     def test_entity_dirtiness(self, entity):
         """Test the dirtiness of an entity."""
@@ -168,6 +215,9 @@ class TestEntities:
         new_entity.deserialize(data)
         assert new_entity.uid == entity.uid
         assert new_entity.tags["test"] is True
+        # Make sure our fixture entity is the one that's cached.
+        entity._set_uid(entity.uid)
+        assert SomeEntity._instances[entity.uid] is entity
 
     def test_entity_reconstruct(self, entity):
         """Test that we can reconstruct an entity of arbitrary type."""
@@ -182,6 +232,9 @@ class TestEntities:
         data["type"] = "SomeEntity"
         new_entity = Entity.reconstruct(data)
         assert new_entity.serialize() == entity.serialize()
+        # Make sure our fixture entity is the one that's cached.
+        entity._set_uid(entity.uid)
+        assert SomeEntity._instances[entity.uid] is entity
 
     def test_entity_make_uid(self):
         """Test that we can create entity UIDs."""
@@ -190,6 +243,34 @@ class TestEntities:
         type_code, time_code = SomeEntity.make_uid().split("-")
         assert type_code == "S" and len(time_code) >= 8
         assert Entity.make_uid() != Entity.make_uid()
+
+    def test_entity_find_in_cache(self, entity):
+        """Test that we can find a cached entity."""
+        found = SomeEntity.find(store=False, uid=entity.uid)
+        assert found and len(found) == 1 and found[0] is entity
+        assert not Entity.find(store=False, uid=entity.uid)
+        assert not SomeEntity.find(store=False, uid="some other uid")
+        assert not SomeEntity.find(store=False, ignore_keys=[entity.uid],
+                                   uid=entity.uid)
+
+    def test_entity_find_relations(self, entity):
+        """Test that we can find an entity by UID or reference."""
+        buddy = SomeEntity()
+        entity.buddy = buddy
+        entity.save()
+        # Find it by reference in the cache first.
+        assert SomeEntity.find_relations(buddy=buddy)[0] is entity
+        # Then remove it from the cache so we can find it by UID in the store.
+        del SomeEntity._instances[entity.uid]
+        assert entity.uid not in SomeEntity._instances
+        assert SomeEntity._store.has(entity.uid)
+        assert SomeEntity.find_relations(buddy=buddy)[0].uid == entity.uid
+        # Match values must be entity instances.
+        with pytest.raises(TypeError):
+            SomeEntity.find_relations(buddy=buddy.uid)
+        # Make sure our fixture entity is the one that's cached.
+        entity._set_uid(entity.uid)
+        assert SomeEntity._instances[entity.uid] is entity
 
     def test_entity_load_data_integrity(self):
         """Test loading two copies of an entity from a store transaction."""
