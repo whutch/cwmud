@@ -9,7 +9,7 @@ from weakref import WeakValueDictionary
 
 from pylru import lrucache
 
-from .attributes import Attribute, DataBlob
+from .attributes import Attribute, DataBlob, Unset
 from .json import JSONStore
 from .logs import get_logger
 from .storage import STORES
@@ -165,6 +165,14 @@ class _EntityMeta(HasFlagsMeta, HasWeaksMeta):
     def register_cache(cls, key, size=512):
         """Create a new cache for this entity, keyed by attribute.
 
+        Currently these caches are not searched, they merely serve as another
+        reference to keep their entries in _instances alive.
+
+        There is support for caching UIDs and Attribute values when
+        they change, if you want to register anything else (such as bare
+        properties not tied to an Attribute) then you'll need to make sure to
+        update the cache yourself when their values change.
+
         :param str key: The attribute name to use as a key
         :param int size: The size of the cache to create
         :returns None:
@@ -173,7 +181,16 @@ class _EntityMeta(HasFlagsMeta, HasWeaksMeta):
         """
         if key in cls._caches:
             raise AlreadyExists(key, cls._caches[key])
-        cls._caches[key] = lrucache(size, cls._cache_eject_callback)
+        cache = lrucache(size, cls._cache_eject_callback)
+        cls._caches[key] = cache
+        # Fill the cache with any existing entity data.
+        for entity in cls._instances.values():
+            attr_value = getattr(entity, key)
+            if attr_value not in (None, Unset):
+                if attr_value not in cache:
+                    cache[attr_value] = {entity}
+                else:
+                    cache[attr_value].add(entity)
 
 
 class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
@@ -188,8 +205,8 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
     # These are overridden in the metaclass, I just put them here
     # to avoid a lot of unresolved reference errors in IDE introspection.
     _base_blob = None
-    _instances = None
-    _caches = None
+    _instances = {}
+    _caches = {}
 
     __uid_timecode = 0  # Used internally for UID creation.
 
@@ -251,7 +268,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
                 del cache[self._uid]
         self._uid = uid
         self._instances[uid] = self
-        cache[uid] = self
+        cache[uid] = {self}
 
     @property
     def is_dirty(self):
@@ -498,10 +515,11 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         return new_entity
 
     def delete(self):
-        """Delete this entity from its store."""
-        cache = self._caches.get("uid")
-        if cache and self.uid in cache:
-            del cache[self.uid]
+        """Delete this entity from the caches and its store."""
+        for attr, cache in self._caches:
+            attr_value = getattr(self, attr)
+            if attr_value in cache:
+                del cache[attr_value]
         if self._store and self._store.has(self.uid):
             self._store.delete(self.uid)
 

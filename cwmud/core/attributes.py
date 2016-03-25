@@ -121,6 +121,15 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
         self._attr_values[name] = value
         entity.dirty()
         attr.changed(entity, self, old_value, value)
+        # Update entity caches.
+        cache = entity._caches.get(name)
+        if cache:
+            if old_value in cache:
+                cache[old_value].discard(entity)
+            if value not in cache:
+                cache[value] = {entity}
+            else:
+                cache[value].add(entity)
 
     def _update(self, blob):
         """Merge this blob with another, replacing blobs and attrs.
