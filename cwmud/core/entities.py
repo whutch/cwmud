@@ -496,22 +496,16 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         self.deserialize(data)
         self._dirty = False
 
-    def clone(self, new_uid):
+    def clone(self):
         """Create a new entity with a copy of this entity's data.
 
-        :param new_uid: The UID the new entity will be stored under
         :returns Entity: The new, cloned entity
 
         """
-        if not self._store:
-            raise TypeError("cannot clone entity with no store")
         entity_class = type(self)
-        if self._store.has(new_uid):
-            raise KeyError(joins("UID exists in entity store:", new_uid))
         data = self.serialize()
         del data["uid"]
         new_entity = entity_class(data)
-        new_entity._set_uid(new_uid)
         return new_entity
 
     def delete(self):
