@@ -229,10 +229,15 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         self._base_blob = _build_base_blob(self.__class__)
         self._dirty = False
         self._savable = savable
+
         # Never, ever manually change an object's UID! There are no checks
         # for removing the old UID from the store, updating UID links, or
         # anything else like that.  Bad things will happen!
         self._uid = None
+        if data and "uid" in data:
+            self._set_uid(data.pop("uid"))
+        else:
+            self._set_uid(self.make_uid())
 
         # An active entity is considered "in play", inactive entities are
         # hidden from the game world.
@@ -240,8 +245,6 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
 
         if data is not None:
             self.deserialize(data)
-        if self._uid is None:
-            self._set_uid(self.make_uid())
 
     def __repr__(self):
         return joins("Entity<", self.uid, ">", sep="")
@@ -353,7 +356,9 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         entity_name = data.pop("type", None)
         if not entity_name or entity_name not in ENTITIES:
             raise KeyError("failed to reconstruct entity: bad class key")
-        return ENTITIES[entity_name](data)
+        entity = ENTITIES[entity_name](data)
+        log.debug("Reconstructed %s (%s)", entity, entity.uid)
+        return entity
 
     @classmethod
     def make_uid(cls):
@@ -389,28 +394,49 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         return found
 
     @classmethod
-    def find(cls, cache=True, store=True, ignore_keys=(), **attr_value_pairs):
+    def find(cls, cache=True, store=True, subclasses=True,
+             ignore_keys=(), **attr_value_pairs):
         """Find one or more entities by one of their attribute values.
 
         :param bool cache: Whether to check the _instances cache
         :param bool store: Whether to check the store
+        :param bool subclasses: Whether to check subclasses as well
         :param iterable ignore_keys: A sequence of keys to ignore
         :param iterable attr_value_pairs: Pairs of attributes and values to
                                           match against
         :returns list: A list of found entities, if any
+        :raises SyntaxError: If both `cache` and `store` are False
 
         """
+        if not cache and not store:
+            raise SyntaxError("can't find without cache or store")
         found = set()
-        checked_keys = set(ignore_keys)
+        # We might be recursing from a parent class, so if they passed
+        # us an existing set we want to use the same one.
+        if ignore_keys == ():
+            ignore_keys = set()
+        elif not isinstance(ignore_keys, set):
+            ignore_keys = set(ignore_keys)
         if cache:
-            found.update(cls._find_in_cache(ignore_keys=checked_keys,
+            found.update(cls._find_in_cache(ignore_keys=ignore_keys,
                                             **attr_value_pairs))
-            checked_keys.update(cls._instances.keys())
+            ignore_keys.update(cls._instances.keys())
+            if subclasses:
+                for subclass in cls.__subclasses__():
+                    found.update(subclass.find(store=False,
+                                               ignore_keys=ignore_keys,
+                                               **attr_value_pairs))
         if store:
-            found_uids = cls._store.find(ignore_keys=checked_keys,
+            found_uids = cls._store.find(ignore_keys=ignore_keys,
                                          **attr_value_pairs)
             found.update([cls.reconstruct(cls._store.get(uid))
                           for uid in found_uids])
+            ignore_keys.update(cls._store.keys())
+            if subclasses:
+                for subclass in cls.__subclasses__():
+                    found.update(subclass.find(cache=False,
+                                               ignore_keys=ignore_keys,
+                                               **attr_value_pairs))
         return list(found)
 
     @classmethod
@@ -438,7 +464,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
 
     @classmethod
     def get(cls, key=None, default=None, cache=True, store=True,
-            **attr_value_pairs):
+            subclasses=True, **attr_value_pairs):
         """Get an entity by one or more of their attribute values.
 
         :param key: The key to get; if given `attr_value_pairs` will be ignored
@@ -446,6 +472,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
                         default is an exception, it will be raised instead
         :param bool cache: Whether to check the caches
         :param bool store: Whether to check the store
+        :param bool subclasses: Whether to check subclasses as well
         :param iterable attr_value_pairs: Pairs of attributes and values to
                                           match against
         :returns Entity: A matching entity, or default
@@ -453,7 +480,9 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
 
         """
         if key is None:
-            matches = cls.find(cache=cache, store=store, **attr_value_pairs)
+            matches = cls.find(cache=cache, store=store,
+                               subclasses=subclasses,
+                               **attr_value_pairs)
             if len(matches) > 1:
                 raise KeyError(joins("get returned more than one match:",
                                      matches, "using attrs", attr_value_pairs))
@@ -463,9 +492,14 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
             if cache:
                 if key in cls._instances:
                     return cls._instances[key]
+            if subclasses:
+                for subclass in cls.__subclasses__():
+                    found = subclass.get(key, cache=cache, store=store)
+                    if found:
+                        return found
             if store:
                 if cls._store.has(key):
-                    return cls._store.get(key)
+                    return cls.reconstruct(cls._store.get(key))
         # Nothing was found.
         if isinstance(default, type) and issubclass(default, Exception):
             raise default

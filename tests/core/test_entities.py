@@ -248,10 +248,12 @@ class TestEntities:
         """Test that we can find a cached entity."""
         found = SomeEntity.find(store=False, uid=entity.uid)
         assert found and len(found) == 1 and found[0] is entity
-        assert not Entity.find(store=False, uid=entity.uid)
         assert not SomeEntity.find(store=False, uid="some other uid")
         assert not SomeEntity.find(store=False, ignore_keys=[entity.uid],
                                    uid=entity.uid)
+        # Check that we can find an entity through a parent class
+        assert Entity.find(store=False, uid=entity.uid, subclasses=True)
+        assert not Entity.find(store=False, uid=entity.uid, subclasses=False)
 
     def test_entity_find_relations(self, entity):
         """Test that we can find an entity by UID or reference."""
