@@ -246,6 +246,17 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
     def __repr__(self):
         return joins("Entity<", self.uid, ">", sep="")
 
+    def __hash__(self):
+        if not self.uid:
+            raise ValueError("cannot hash entity with no uid")
+        return hash(self.uid)
+
+    def __eq__(self, other):
+        if not hasattr(other, "uid") or self.uid != other.uid:
+            return False
+        else:
+            return True
+
     @property
     def uid(self):
         """Return this entity's UID."""
