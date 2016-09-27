@@ -55,9 +55,7 @@ class TestRooms:
         char.resume(quiet=True)
         char.room = self.room
         assert set(self.room.chars) == {char}
-        del Player._caches["uid"][char.uid]
-        del char
-        gc.collect()
+        char.room = Unset
         assert not self.room.chars
 
     def test_room_name(self):

@@ -86,10 +86,8 @@ class TestCharacters:
         assert character.room is Unset
         with pytest.raises(ValueError):
             character.room = "test"
-        assert not character.active
         character.room = room
-        assert character not in room.chars
-        character.active = True
+        assert character in room.chars
         character.room = Unset
         assert character not in room.chars
         character.room = room
@@ -98,6 +96,7 @@ class TestCharacters:
 
     def test_character_act(self, character, other_character):
         """Test that we can generate 'act' messages for a character."""
+        character.active = True
         assert not character.session._output
         assert not other_character.session._output
         # Generate messages for neither the source nor the target.

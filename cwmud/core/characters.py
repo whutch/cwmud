@@ -40,6 +40,11 @@ class CharacterSetAttribute(SetAttribute):
         return cls.Proxy(entity, [Character.get(uid) for uid in value])
 
 
+@Room.register_attr("chars")
+class RoomChars(CharacterSetAttribute):
+    """The characters in this room."""
+
+
 @ENTITIES.register
 class Character(Entity):
 
@@ -264,12 +269,11 @@ class CharacterRoom(Attribute):
 
     @classmethod
     def changed(cls, entity, blob, old_value, new_value):
-        if entity.active:
-            # Update the rooms' character sets.
-            if old_value and entity in old_value.chars:
-                old_value.chars.remove(entity)
-            if new_value:
-                new_value.chars.add(entity)
+        # Update the rooms' character sets.
+        if old_value and entity in old_value.chars:
+            old_value.chars.remove(entity)
+        if new_value:
+            new_value.chars.add(entity)
 
     @classmethod
     def serialize(cls, entity, value):
