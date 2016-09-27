@@ -137,7 +137,7 @@ class Character(Entity):
                 context["ts"] = "s"
             msg = _build_msg(message, context)
             for char in to:
-                if char is not self and char is not target:
+                if char.active and char is not self and char is not target:
                     char.session.send(msg)
 
     def show_room(self, room=None):
@@ -157,7 +157,8 @@ class Character(Entity):
         is_builder = (self.session.account.trust >= TRUST_BUILDER
                       if self.session and self.session.account else False)
         char_list = "\n".join([char.get_short_description()
-                               for char in room.chars if char is not self])
+                               for char in room.chars
+                               if char.active and char is not self])
         extra = " ({})".format(room.get_coord_str()) if is_builder else ""
         self.session.send("^Y", room.name or "A Room", extra, "^~", sep="")
         if room.description:
