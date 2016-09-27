@@ -170,6 +170,7 @@ class Server:
                 # this point so that it is considered in the pulse delay.
                 TIMERS.sleep_excess()  # Wait until the next pulse is ready.
         except KeyboardInterrupt:
+            print()  # Because I hate the "^C" offsetting the log line.
             log.info("Received keyboard interrupt, stopping.")
         except ServerShutdown:
             log.info("Received server shutdown.")
