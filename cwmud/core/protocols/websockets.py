@@ -71,7 +71,7 @@ class WebSocketServer(ProtocolServer):
             handler.uid, *websocket.remote_address))
         while handler.alive:
             # Keep the websocket alive.
-            yield from asyncio.sleep(0.01)
+            yield from asyncio.sleep(1)
 
     @asyncio.coroutine
     def _poll_forever(self):
@@ -85,7 +85,7 @@ class WebSocketServer(ProtocolServer):
                         TRACKER.print_diff()
                 message = self._messages.get_message()
             yield from self.poll()
-            yield from asyncio.sleep(0.01)
+            yield from asyncio.sleep(0.025)
 
 
 class WebSocketHandler(ProtocolHandler):
@@ -106,8 +106,11 @@ class WebSocketHandler(ProtocolHandler):
 
     @asyncio.coroutine
     def _process_input(self):
-        data = yield from self._websocket.recv()
-        BROKER.publish("ws:input:{}".format(self._uid), data)
+        try:
+            data = yield from self._websocket.recv()
+            BROKER.publish("ws:input:{}".format(self._uid), data)
+        except asyncio.queues.QueueEmpty:
+            pass
 
     @asyncio.coroutine
     def _process_output(self):
@@ -120,9 +123,8 @@ class WebSocketHandler(ProtocolHandler):
         """Poll this handler to process any queued IO."""
         if not self.alive:
             return
-        tasks = [asyncio_ensure_future(self._process_input()),
-                 asyncio_ensure_future(self._process_output())]
         done, pending = yield from asyncio.wait(
-            tasks, return_when=asyncio.FIRST_COMPLETED)
+            [self._process_input(), self._process_output()],
+            return_when=asyncio.FIRST_COMPLETED)
         for task in pending:
             task.cancel()
