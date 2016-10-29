@@ -463,7 +463,7 @@ def _account_menu_select_char(session, char=None):
     session.shell = SHELLS["CharacterShell"]
     if char.session and char.session is not session:
         session.send("^RConnecting to active character. Previous connection"
-                     " from {}.^~".format(char.session.address))
+                     " from {}.^~".format(char.session.host))
         char.session.char = None
         char.session.close("^RThis character has been logged in from another"
                            " session. Good bye.^~",

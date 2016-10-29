@@ -66,7 +66,7 @@ class WhoCommand(Command):
 
     def _action(self):
         chars = [session.char for session in SESSIONS.all()
-                 if session.char.active]
+                 if session.char and session.char.active]
         self.session.send("Players online:", len(chars))
         for char in chars:
             self.session.send("  ^W", char.name, "^~  ", char.title, sep="")

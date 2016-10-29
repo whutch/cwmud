@@ -4,26 +4,21 @@
 # :copyright: (c) 2008 - 2016 Will Hutcheson
 # :license: MIT (https://github.com/whutch/cwmud/blob/master/LICENSE.txt)
 
-from multiprocessing import Process, Queue, Value
+from multiprocessing import Process, Value
 from time import sleep
-
-import redis
 
 # Note: Any modules imported here are not reloadable by the game server,
 # you'll need to do a full reboot to reload changes to them.
 from . import __version__, settings
 from .core.logs import get_logger
-from .libs.miniboa import TelnetServer
+from .core.messages import BROKER, get_pubsub
 
 
 log = get_logger("main")
 
 
-socket_queue = Queue()
-rdb = redis.StrictRedis(decode_responses=True)
-channels = rdb.pubsub(ignore_subscribe_messages=True)
+messages = get_pubsub()
 servers = {}
-listener = None
 
 
 class ServerProcess:
@@ -59,24 +54,36 @@ class ServerProcess:
         assert not self._process, "server instance already started"
         pid = Value("i")
         self._process = Process(target=_start_server,
-                                args=(pid, socket_queue),
+                                args=(pid,),
                                 kwargs={"reload_from": reload_from})
         self._process.start()
         pid.value = self._process.pid
 
 
-def _start_server(pid, _socket_queue, reload_from=None):
-        from .core.server import SERVER
-        # Wait for our pid.
-        while not pid.value:  # pragma: no cover
-            continue
-        SERVER._pid = pid.value
-        SERVER.boot(_socket_queue, reload_from)
-        SERVER.loop()
+def _start_server(pid, reload_from=None):
+    from .core.server import SERVER
+    # Wait for our pid.
+    while not pid.value:  # pragma: no cover
+        continue
+    SERVER._pid = pid.value
+    SERVER.boot(reload_from)
+    SERVER.loop()
 
 
-def _on_connect(new_socket, addr_port):  # pragma: no cover
-    socket_queue.put((new_socket, addr_port))
+def _start_telnet_server():
+    from .core.protocols.telnet import TelnetServer
+    server = TelnetServer()
+    server.serve()
+
+
+CERT = None
+KEY = None
+
+
+def _start_websocket_server():
+    from .core.protocols.websockets import WebSocketServer
+    server = WebSocketServer("moonside.local", ssl_cert=CERT, ssl_key=KEY)
+    server.serve()
 
 
 def _handle_reload_request(msg):
@@ -86,31 +93,23 @@ def _handle_reload_request(msg):
         return
     log.info("Received reload request from process %s.", pid)
     new_server = ServerProcess()
-    listener.on_connect = _on_connect
     new_server.start(reload_from=pid)
     servers[new_server.pid] = new_server
 
 
 def start_nanny():
     """Start the nanny process and listen for sockets."""
-    global listener
     log.info("Starting %s %s.", settings.MUD_NAME_FULL, __version__)
-    try:
-        listener = TelnetServer(address=settings.BIND_ADDRESS,
-                                port=settings.BIND_PORT,
-                                timeout=0,
-                                create_client=False)
-    except OSError as exc:
-        if exc.errno == 98 or exc.strerror == "Address already in use":
-            log.error("Could not open listener: port already in use!")
-            return
-        else:
-            raise
-    channels.subscribe(**{"server-reload-request": _handle_reload_request})
+    messages.subscribe(**{"server-reload-request": _handle_reload_request})
+    # Start a MUD server.
     server = ServerProcess()
-    listener.on_connect = _on_connect
     server.start()
     servers[server.pid] = server
+    # Start listener servers.
+    telnet_server = Process(target=_start_telnet_server)
+    telnet_server.start()
+    websocket_server = Process(target=_start_websocket_server)
+    websocket_server.start()
     try:
         while True:
             dead_servers = []
@@ -124,11 +123,9 @@ def start_nanny():
             if not servers:
                 log.info("No servers running, goodbye.")
                 break
-            listener.poll()
-            channels.get_message()
-            sleep(0.1)
+            messages.get_message()
+            sleep(0.25)
     except KeyboardInterrupt:  # pragma: no cover
         pass
     finally:
-        listener.stop()
-        channels.unsubscribe()  # pragma: no cover
+        messages.unsubscribe()  # pragma: no cover

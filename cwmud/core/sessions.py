@@ -128,7 +128,7 @@ class Session(HasFlags):
         self._close()
 
     def __repr__(self):
-        return joins("Session<", self.address, ":", self.port, ">", sep="")
+        return joins("Session<", self.host, ":", self.port, ">", sep="")
 
     @property
     def active(self):
@@ -137,9 +137,9 @@ class Session(HasFlags):
                 self._client and self._client.active)
 
     @property
-    def address(self):
+    def host(self):
         """Return the address this session is connected from."""
-        return self._client.address
+        return self._client.host
 
     @property
     def port(self):
@@ -324,7 +324,7 @@ class Session(HasFlags):
 
     def _check_idle(self):
         """Check if this session is idle."""
-        idle = self._client.idle()
+        idle = self._client.get_idle_time()
         if settings.IDLE_TIME and idle >= settings.IDLE_TIME:
             if ((settings.IDLE_TIME_MAX and idle >= settings.IDLE_TIME_MAX) or
                     not self._shell or self._shell.state < STATE_PLAYING):
@@ -418,7 +418,7 @@ class Session(HasFlags):
                 formatted.extend(self.wrap_to_width(line, self.width))
             else:
                 formatted.append("")
-        self._client.send_cc("\n".join(formatted))
+        self._client.send("\n".join(formatted))
 
     def poll(self, output_only=False):
         """Check the status of this session and process any queued IO.
@@ -445,7 +445,7 @@ class Session(HasFlags):
             data = None
             if not output_only:
                 # Process input through the command queue.
-                if self._client.cmd_ready and self.active:
+                if self._client.command_pending and self.active:
                     data = self._client.get_command()
                     if data is not None:
                         self._parse_input(data)
@@ -473,7 +473,6 @@ class Session(HasFlags):
         if self.char:
             self.char.save()
         if self._client:
-            self._client.sock.close()
             self._client.active = False
 
     def close(self, reason, log_msg=""):
@@ -545,7 +544,7 @@ def _hook_server_boot():
 def _hook_server_save_state(state):
     sessions = {}
     for session in SESSIONS._sessions.values():
-        sessions[session.port] = (
+        sessions[session.uid] = (
             session._output_queue,
             class_name(session.shell) if session.shell else None,
             class_name(session.menu) if session.menu else None,
@@ -554,41 +553,3 @@ def _hook_server_save_state(state):
             session.width,
             session.color)
     state["sessions"] = sessions
-
-
-# noinspection PyProtectedMember
-@EVENTS.hook("server_load_state", "sessions")
-def _hook_server_load_state(state):
-    from .accounts import Account
-    from .menus import MENUS
-    from .net import CLIENTS
-    sessions = state["sessions"]
-    for port, (output, shell, menu, email,
-               char, width, color) in sessions.items():
-        client = CLIENTS.find_by_port(port)
-        if not client:
-            # The client is gone, so no need for the session.
-            continue
-        session = SESSIONS.find_by_client(client)
-        if session:
-            if shell:
-                session.shell = SHELLS[shell]
-        else:
-            if shell:
-                shell = SHELLS[shell]
-            session = SESSIONS.create(client, shell)
-        if menu:
-            menu = MENUS[menu](session)
-        session._menu = menu
-        if email:
-            session.account = Account.get(email=email)
-        if char:
-            if char.startswith("N-"):
-                # It's an NPC UID.
-                session.char = NPC.get(char)
-            else:
-                # It's a player UID.
-                session.char = Player.get(char)
-                session.char.resume(quiet=True)
-        session.width = width
-        session.color = color
