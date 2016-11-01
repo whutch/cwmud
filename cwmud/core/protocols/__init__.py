@@ -51,9 +51,14 @@ class ProtocolServer:
         """
         if not self.is_started:
             self.start()
-        while self.is_started:
-            self.poll()
-            sleep(0.025)
+        try:
+            while self.is_started:
+                self.poll()
+                sleep(0.025)
+        except KeyboardInterrupt:
+            pass
+        finally:
+            self.stop()
 
 
 class ProtocolHandler:

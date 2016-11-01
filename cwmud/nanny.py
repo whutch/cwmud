@@ -76,13 +76,15 @@ def _start_telnet_server():
     server.serve()
 
 
+# Temporary until these are read from something else.
 CERT = None
 KEY = None
+HOST = "localhost"
 
 
 def _start_websocket_server():
     from .core.protocols.websockets import WebSocketServer
-    server = WebSocketServer("moonside.local", ssl_cert=CERT, ssl_key=KEY)
+    server = WebSocketServer(HOST, ssl_cert=CERT, ssl_key=KEY)
     server.serve()
 
 

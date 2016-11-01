@@ -40,6 +40,7 @@ class TelnetServer(ProtocolServer):
         super().stop()
         self._server.stop()
         self._server = None
+        log.info("Shutting down Telnet server.")
 
     def poll(self):
         """Poll the Telnet server to process any queued IO."""

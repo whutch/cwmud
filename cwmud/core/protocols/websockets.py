@@ -16,10 +16,10 @@ from ..messages import BROKER, get_pubsub
 from . import ProtocolHandler, ProtocolServer
 
 
-logging.getLogger("asyncio").setLevel(logging.INFO)
-logging.getLogger("websockets").setLevel(logging.INFO)
+logging.getLogger("asyncio").setLevel(logging.WARN)
+logging.getLogger("websockets").setLevel(logging.WARN)
 
-log = get_logger("websockets")
+log = get_logger("websocket")
 
 
 class WebSocketServer(ProtocolServer):
@@ -41,7 +41,18 @@ class WebSocketServer(ProtocolServer):
             context.set_ciphers("RSA")
         self._ssl_context = context
         self._messages = get_pubsub()
-        self._messages.subscribe("ws:command")
+
+    def start(self):
+        """Start the WebSocket server."""
+        super().start()
+        # There's not much to set up here, it's all handled in `serve`.
+        log.info("WebSocket server listening at %s:%s.",
+                 self._host, self._port)
+
+    def stop(self):
+        """Stop the WebSocket server."""
+        super().stop()
+        log.info("Shutting down WebSocket server.")
 
     @asyncio.coroutine
     def poll(self):
@@ -56,12 +67,17 @@ class WebSocketServer(ProtocolServer):
 
     def serve(self):
         """Continuously serve WebSocket IO."""
+        self.start()
         loop = asyncio.get_event_loop()
         asyncio_ensure_future(websockets.serve(self._accept_socket,
                                                self._host, self._port,
                                                ssl=self._ssl_context))
-        log.info("WebSocket server listening at %s:%s.", self._host, self._port)
-        loop.run_until_complete(self._poll_forever())
+        try:
+            loop.run_until_complete(self._poll_forever())
+        except KeyboardInterrupt:
+            pass
+        finally:
+            self.stop()
 
     @asyncio.coroutine
     def _accept_socket(self, websocket, path):
@@ -76,14 +92,6 @@ class WebSocketServer(ProtocolServer):
     @asyncio.coroutine
     def _poll_forever(self):
         while True:
-            message = self._messages.get_message()
-            while message:
-                if message["channel"] == "ws:command":
-                    command = message["data"]
-                    if command == "debug":
-                        from ...contrib.profiling import TRACKER
-                        TRACKER.print_diff()
-                message = self._messages.get_message()
             yield from self.poll()
             yield from asyncio.sleep(0.025)
 
@@ -96,7 +104,6 @@ class WebSocketHandler(ProtocolHandler):
         """Create a new WebSocket client handler."""
         super().__init__(uid=hash(websocket))
         self._websocket = websocket
-        # Subscribe to messages to this socket.
         self._messages.subscribe("ws:output:{}".format(self._uid))
 
     @property
