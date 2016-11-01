@@ -6,15 +6,15 @@
 clean: clean-coverage clean-pyc clean-test
 
 clean-coverage:
-	-rm .coverage
-	-rm -r .coverage-html
+	rm -f .coverage
+	rm -rf .coverage-html
 
 clean-pyc:
-	-find . -type f -and -name "*.pyc" | xargs rm
-	-find . -type d -and -name "__pycache__" | xargs rm -r
+	find . -type f -and -name "*.pyc" | xargs --no-run-if-empty rm
+	find . -type d -and -name "__pycache__" | xargs --no-run-if-empty rm -r
 
 clean-test:
-	-rm -r .cache
+	rm -rf .cache
 
 coverage: clean-coverage clean-test
 	py.test --cov-report html --cov cwmud tests

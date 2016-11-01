@@ -6,8 +6,8 @@
 
 from weakref import WeakValueDictionary
 
+from . import const
 from .commands import Command
-from .const import *
 from .logs import get_logger
 from .utils.exceptions import AlreadyExists
 from .utils.funcs import joins
@@ -76,7 +76,7 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
     _verbs = None
     _truncated_verbs = None
 
-    state = STATE_CONNECTED
+    state = const.STATE_CONNECTED
 
     # Delimiters should be a pair of equal-length strings that contain
     # opening and closing delimiter characters.  A delimiter at any given index
@@ -347,7 +347,7 @@ class EchoShell(Shell):
 
     """A simple shell that echos back anything the client sends."""
 
-    state = STATE_PLAYING
+    state = const.STATE_PLAYING
 
     def parse(self, data):
         """Echo any input back to the client.

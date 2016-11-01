@@ -12,10 +12,10 @@ import redis
 
 from .. import BASE_PACKAGE, settings
 from ..libs.miniboa import TelnetClient
+from . import const
 from .accounts import AccountMenu, authenticate_account, create_account
 from .attributes import Unset
 from .channels import Channel, CHANNELS
-from .const import *
 from .entities import ENTITIES
 from .events import EVENTS
 from .logs import get_logger
@@ -349,7 +349,7 @@ def _save_and_commit():
 def _get_announce_sessions():
     return (session for session in SESSIONS.all()
             if session.active and session.shell and
-            session.shell.state >= STATE_PLAYING)
+            session.shell.state >= const.STATE_PLAYING)
 
 
 ANNOUNCE = Channel("^Y[ANNOUNCE]^W {msg}^~",
