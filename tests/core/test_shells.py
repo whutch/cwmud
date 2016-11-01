@@ -29,7 +29,7 @@ class TestShells:
 
     session = _FakeSession()
 
-    class TestCommand(Command):
+    class ATestCommand(Command):
 
         """A test command."""
 
@@ -61,7 +61,7 @@ class TestShells:
         """Test that we can register a new shell through a shell manager."""
 
         @self.shells.register
-        class TestShell(Shell):
+        class ATestShell(Shell):
 
             """A test shell."""
 
@@ -69,8 +69,8 @@ class TestShells:
                 """Initialize this test shell."""
                 self.session.send("you just inited me!")
 
-        type(self).shell_class = TestShell
-        assert "TestShell" in self.shells
+        type(self).shell_class = ATestShell
+        assert "ATestShell" in self.shells
 
     def test_shell_manager_register_already_exists(self):
         """Test that trying to re-register a shell fails."""
@@ -84,12 +84,12 @@ class TestShells:
 
     def test_shell_manager_contains(self):
         """Test that we can see if a shell manager contains a shell."""
-        assert "TestShell" in self.shells
+        assert "ATestShell" in self.shells
         assert "SomeNonExistentShell" not in self.shells
 
     def test_shell_manager_get_shell(self):
         """Test that we can get a shell from a shell manager."""
-        assert self.shells["TestShell"] is self.shell_class
+        assert self.shells["ATestShell"] is self.shell_class
         with pytest.raises(KeyError):
             self.shells["SomeNonExistentShell"].init()
 
@@ -139,7 +139,7 @@ class TestShells:
     def test_shell_add_verbs(self):
         """Test that we can add verbs to a shell's verb store."""
         assert not self.shell._verbs
-        self.shell.add_verbs(self.TestCommand, "test", "t", "!")
+        self.shell.add_verbs(self.ATestCommand, "test", "t", "!")
         assert ("test" in self.shell._verbs and
                 "t" in self.shell._verbs and
                 "!" in self.shell._verbs)
@@ -154,7 +154,7 @@ class TestShells:
     def test_shell_add_verbs_already_exists(self):
         """Test that trying to re-add a verb to a store fails."""
         with pytest.raises(AlreadyExists):
-            self.shell.add_verbs(self.TestCommand, "nope", "test")
+            self.shell.add_verbs(self.ATestCommand, "nope", "test")
         # All of the verbs should have been validated first, so "nope"
         # shouldn't have been added either.
         assert "nope" not in self.shell._verbs
@@ -166,19 +166,19 @@ class TestShells:
             assert self.shell._verbs[verb] is self.AnotherCommand
         # "t" was explicitly registered to TestCommand, so it shouldn't
         # have been overridden by the truncation loop.
-        assert self.shell._verbs["t"] is self.TestCommand
+        assert self.shell._verbs["t"] is self.ATestCommand
 
     def test_shell_get_command(self):
         """Test that we can get a command by its verb in the shell."""
-        assert self.shell.get_command("test") is self.TestCommand
-        assert self.shell.get_command("!") is self.TestCommand
+        assert self.shell.get_command("test") is self.ATestCommand
+        assert self.shell.get_command("!") is self.ATestCommand
         assert not self.shell.get_command("nope")
 
     def test_shell_find_command(self):
         """Test that we can find a command in the shell's lineage."""
-        Shell.add_verbs(self.TestCommand, "beep")
+        Shell.add_verbs(self.ATestCommand, "beep")
         assert not self.shell.get_command("beep")
-        assert self.shell.find_command("beep") is self.TestCommand
+        assert self.shell.find_command("beep") is self.ATestCommand
 
     def test_shell_remove_verbs(self):
         """Test that we can remove verbs from a shell's verb store."""
@@ -231,7 +231,7 @@ class TestShells:
         self.shell.parse(" ")
         assert self.session._output.pop() == "Huh?\n"
         # Re-register the command so we know it can be executed.
-        self.shell.add_verbs(self.TestCommand, "test")
+        self.shell.add_verbs(self.ATestCommand, "test")
         self.shell.add_verbs(self.AnotherCommand, "!")
         with pytest.raises(NotImplementedError):
             self.shell.parse("test")

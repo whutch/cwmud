@@ -19,7 +19,6 @@ Including (but not limited to):
 With a few exceptions:
  * Python modules should include an encoding declaration, even when using the Python 3 default UTF-8.
  * Modules within the `cwmud.core` package should use relative imports when importing other modules from `cwmud.core`.
- * Wild-card importing is only allowed for the `cwmud.core.const` module (`from .const import *`).
 
 And additions:
  * Use double quotes for all strings, or single quotes for strings that contain double quotes.

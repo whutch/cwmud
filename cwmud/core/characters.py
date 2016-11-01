@@ -4,8 +4,8 @@
 # :copyright: (c) 2008 - 2016 Will Hutcheson
 # :license: MIT (https://github.com/whutch/cwmud/blob/master/LICENSE.txt)
 
+from . import const
 from .attributes import Attribute, SetAttribute
-from .const import *
 from .entities import ENTITIES, Entity
 from .items import ItemListAttribute
 from .logs import get_logger
@@ -159,7 +159,7 @@ class Character(Entity):
             if not self.room:
                 return
             room = self.room
-        is_builder = (self.session.account.trust >= TRUST_BUILDER
+        is_builder = (self.session.account.trust >= const.TRUST_BUILDER
                       if self.session and self.session.account else False)
         char_list = "\n".join([char.get_short_description()
                                for char in room.chars
@@ -187,7 +187,7 @@ class Character(Entity):
             if not self.room:
                 return
             room = self.room
-        is_builder = (self.session.account.trust >= TRUST_BUILDER
+        is_builder = (self.session.account.trust >= const.TRUST_BUILDER
                       if self.session and self.session.account else False)
         exits = room.get_exits()
         if short:
@@ -298,4 +298,4 @@ class CharacterShell(Shell):
 
     """The base shell for characters."""
 
-    state = STATE_PLAYING
+    state = const.STATE_PLAYING

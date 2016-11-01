@@ -82,7 +82,7 @@ class TestPlayers:
         with pytest.raises(ValueError):
             player.name = "a"  # Too short
         with pytest.raises(ValueError):
-            player.name = "a"*20  # Too long
+            player.name = "a" * 20  # Too long
         PlayerName.RESERVED.append("Nope")
         with pytest.raises(ValueError) as exc:
             player.name = "nope"

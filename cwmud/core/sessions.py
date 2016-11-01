@@ -9,9 +9,9 @@ from os.path import exists, join
 
 from .. import __version__, settings
 from ..libs.miniboa import ANSI_CODES
+from . import const
 from .accounts import Account
 from .characters import Character
-from .const import *
 from .events import EVENTS
 from .logs import get_logger
 from .menus import Menu
@@ -327,11 +327,12 @@ class Session(HasFlags):
         idle = self._client.get_idle_time()
         if settings.IDLE_TIME and idle >= settings.IDLE_TIME:
             if ((settings.IDLE_TIME_MAX and idle >= settings.IDLE_TIME_MAX) or
-                    not self._shell or self._shell.state < STATE_PLAYING):
+                    not self._shell or
+                    self._shell.state < const.STATE_PLAYING):
                 # They've been idle long enough, dump them.  If they haven't
                 # even logged in yet, don't wait for the max idle time.
                 if (self.account and
-                        self.account.trust >= TRUST_BUILDER):
+                        self.account.trust >= const.TRUST_BUILDER):
                     return
                 self.close("^RDisconnecting due to inactivity. Goodbye!^~",
                            log_msg=joins("Disconnecting idle ", self,

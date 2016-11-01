@@ -8,8 +8,8 @@ from functools import partial
 import re
 from weakref import WeakSet
 
+from . import const
 from .attributes import Attribute, DataBlob, Unset
-from .const import *
 from .entities import ENTITIES, Entity
 from .events import EVENTS
 from .logs import get_logger
@@ -231,7 +231,7 @@ class AccountTrust(Attribute):
 
     """An account's trust level."""
 
-    _default = TRUST_PLAYER
+    _default = const.TRUST_PLAYER
 
     @classmethod
     def validate(cls, entity, new_value):
