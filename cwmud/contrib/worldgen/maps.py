@@ -7,6 +7,7 @@
 import re
 
 from ...core.characters import Character
+from ...core.cmds.cmd_admin import GotoCommand
 from ...core.events import EVENTS
 from ...core.logs import get_logger
 from ...core.random import generate_noise
@@ -88,7 +89,8 @@ def show_room(self, room=None):
     char_list = "\n".join(["^G{} ^g{}^g is here.^~".format(
                            char.name, char.title)
                            for char in room.chars if char is not self])
-    self.session.send("^Y", room.name or "A Room", "^~", sep="")
+    self.session.send("^Y{}^~ ({},{})".format(
+        room.name or "A Room", room.x, room.y))
     _map = render_map(MAP_SMALL_WIDTH, MAP_SMALL_HEIGHT, (room.x, room.y))
     self.session.send(_map, "^~", sep="")
     if room.description:
@@ -121,6 +123,25 @@ def move_direction(self, x=0, y=0, z=0):
     self.move_to_room(room, "{s} move{ss} {dir}.",
                       "{s} arrives from {dir}.",
                       {"dir": to_dir}, {"dir": from_dir})
+
+
+@patch(GotoCommand)
+def _action(self):
+    try:
+        coords = self.args[0].split(",")
+        if len(coords) == 2:
+            coords.append("0")
+        elif len(coords) != 3:
+            raise IndexError
+        x, y, z = map(int, coords)
+        room = Room.get(x=x, y=y, z=z)
+        if not room:
+            room = generate_room(x, y, z)
+        poof_out = "{s} disappear{ss} in a puff of smoke."
+        poof_in = "{s} arrive{ss} in a puff of smoke."
+        self.session.char.move_to_room(room, poof_out, poof_in)
+    except IndexError:
+        self.session.send("Syntax: goto (x),(y)[,z]")
 
 
 def generate_room(x, y, z):
