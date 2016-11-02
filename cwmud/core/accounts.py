@@ -63,7 +63,7 @@ class Account(Entity):
     def logout(self, session):
         """Process an account logout for a session.
 
-        :param sessions.Session session: The session logging in
+        :param sessions.Session session: The session logging out
         :returns None:
 
         """
