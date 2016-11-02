@@ -7,6 +7,7 @@
 from time import time as now
 
 from ...libs.miniboa import TelnetServer as _TelnetServer
+from ..cli import CLI
 from ..logs import get_logger
 from ..messages import BROKER, get_pubsub
 from ..protocols import ProtocolHandler, ProtocolServer
@@ -19,7 +20,7 @@ class TelnetServer(ProtocolServer):
 
     """A manager for networking and client communication."""
 
-    def __init__(self, host="localhost", port=4000):
+    def __init__(self, host=CLI.args.host, port=CLI.args.port):
         """Create a new Telnet server."""
         super().__init__()
         self._host = host

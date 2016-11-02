@@ -10,8 +10,9 @@ from time import sleep
 # Note: Any modules imported here are not reloadable by the game server,
 # you'll need to do a full reboot to reload changes to them.
 from . import __version__, settings
+from .core.cli import CLI
 from .core.logs import get_logger
-from .core.messages import BROKER, get_pubsub
+from .core.messages import get_pubsub
 
 
 log = get_logger("main")
@@ -76,15 +77,9 @@ def _start_telnet_server():
     server.serve()
 
 
-# Temporary until these are read from something else.
-CERT = None
-KEY = None
-HOST = "localhost"
-
-
 def _start_websocket_server():
     from .core.protocols.websockets import WebSocketServer
-    server = WebSocketServer(HOST, ssl_cert=CERT, ssl_key=KEY)
+    server = WebSocketServer()
     server.serve()
 
 
@@ -109,9 +104,12 @@ def start_nanny():
     servers[server.pid] = server
     # Start listener servers.
     telnet_server = Process(target=_start_telnet_server)
+    telnet_server.daemon = True
     telnet_server.start()
-    websocket_server = Process(target=_start_websocket_server)
-    websocket_server.start()
+    if CLI.args.ws:
+        websocket_server = Process(target=_start_websocket_server)
+        websocket_server.daemon = True
+        websocket_server.start()
     try:
         while True:
             dead_servers = []

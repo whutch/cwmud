@@ -11,6 +11,7 @@ import ssl
 import websockets
 from websockets.compatibility import asyncio_ensure_future
 
+from ..cli import CLI
 from ..logs import get_logger
 from ..messages import BROKER, get_pubsub
 from . import ProtocolHandler, ProtocolServer
@@ -26,8 +27,8 @@ class WebSocketServer(ProtocolServer):
 
     """A server for the WebSocket protocol."""
 
-    def __init__(self, host="localhost", port=4443,
-                 ssl_cert=None, ssl_key=None):
+    def __init__(self, host=CLI.args.host, port=CLI.args.ws_port,
+                 ssl_cert=CLI.args.ssl_cert, ssl_key=CLI.args.ssl_key):
         """Create a new WebSocket server."""
         super().__init__()
         self._host = host

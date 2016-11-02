@@ -16,8 +16,6 @@ MUD_NAME = "Clockwork"
 MUD_NAME_FULL = "Clockwork MUD Server"
 
 # Networking
-BIND_ADDRESS = "127.0.0.1"
-BIND_PORT = 4000
 IDLE_TIME = 180  # seconds
 IDLE_TIME_MAX = 600  # seconds
 
@@ -33,9 +31,13 @@ LOG_UTC_TIMES = False
 DATA_DIR = join(ROOT_DIR, "data")
 
 # Optional modules
-INCLUDE_MODULES = [
-    # These should be import paths relative to the base package.
-    # ".contrib.my_module",
+CONTRIB_MODULES = [
+    # These should be import paths relative to the `contrib` package.
+    # ".my_contrib_module",
+]
+GAME_MODULES = [
+    # These should be import paths relative to the `game` package.
+    # ".my_game_module",
 ]
 
 # Advanced

@@ -13,6 +13,7 @@ from . import const
 from .accounts import AccountMenu, authenticate_account, create_account
 from .attributes import Unset
 from .channels import Channel, CHANNELS
+from .cli import CLI
 from .clients import Client, ClientManager
 from .entities import ENTITIES
 from .events import EVENTS
@@ -83,9 +84,28 @@ class Server:
         with EVENTS.fire("server_init", no_pre=True):
             log.debug("Initializing server process %s.", self._pid)
 
-        log.debug("Loading optional modules.")
-        for module in settings.INCLUDE_MODULES:
-            import_module(module, BASE_PACKAGE)
+        contrib_modules = settings.CONTRIB_MODULES
+        if CLI.args.contrib:
+            for module_name in CLI.args.contrib:
+                contrib_modules.append(".contrib.{}".format(module_name))
+        if contrib_modules:
+            for module in contrib_modules:
+                log.info("Loading '%s' module.", module.lstrip("."))
+                import_module(module, BASE_PACKAGE)
+
+        game_modules = settings.GAME_MODULES
+        if CLI.args.game:
+            for module_name in CLI.args.game:
+                game_modules.append(".game.{}".format(module_name))
+        if game_modules:
+            for module in game_modules:
+                log.info("Loading '%s' module.", module.lstrip("."))
+                import_module(module, BASE_PACKAGE)
+
+        # Parse command-line arguments again to account for anything that
+        # contrib modules might have added.  From this point, any
+        # unrecognized options or arguments will cause an error.
+        CLI.parse()
 
         with EVENTS.fire("server_boot"):
             log.info("Booting server.")
