@@ -16,12 +16,103 @@ from .text import strip_caret_codes
 log = get_logger("clients")
 
 
+class Client:
+
+    """A client handler."""
+
+    PENDING, OPEN, CLOSING, CLOSED = range(4)
+
+    def __init__(self, protocol, uid, host, port):
+        """Create a new client handler."""
+        self._commands = deque()
+        self._host = host
+        self._last_command_time = now()
+        self._messages = get_pubsub()
+        self._port = port
+        self._protocol = protocol
+        self._uid = uid
+        self._messages.subscribe("{}:input:{}".format(protocol, uid))
+        self.allow_formatting = False
+        self.state = self.OPEN
+
+    def __repr__(self):
+        return "{}{}{}".format(self._host,
+                               ":" if self._port is not None else "",
+                               self._port if self._port is not None else "")
+
+    @property
+    def active(self):
+        """Return whether this client is active or not."""
+        return self.state == self.OPEN
+
+    @property
+    def uid(self):
+        """Return the UID for this client."""
+        return self._uid
+
+    @property
+    def host(self):
+        """Return the host address of this client."""
+        return self._host
+
+    @property
+    def port(self):
+        """Return the port this client is connected to."""
+        return self._port
+
+    @property
+    def command_pending(self):
+        """Return whether there is a pending command or not."""
+        return len(self._commands) > 0
+
+    def close(self):
+        """Forcibly close this client's connection."""
+        BROKER.publish("{}:close".format(self._protocol), self._uid)
+        self.state = self.CLOSING
+
+    def get_command(self):
+        """Get the next command in the queue, if there is one."""
+        if len(self._commands) > 0:
+            return self._commands.popleft()
+        else:
+            return None
+
+    def get_idle_time(self):
+        """Calculate how long this client has been idle, in seconds."""
+        return now() - self._last_command_time
+
+    def poll(self):
+        """Process any queued IO for this client."""
+        if self.state == self.OPEN:
+            message = self._messages.get_message()
+            while message:
+                data = message["data"]
+                self._commands.append(data)
+                message = self._messages.get_message()
+            if message:
+                self._last_command_time = now()
+
+    def send(self, data, strip_formatting=False):
+        """Send data to this client.
+
+        :param str data: The data to send
+        :param bool strip_formatting: Whether to strip formatting codes out
+                                      of the data before sending
+        :returns None:
+
+        """
+        if strip_formatting or not self.allow_formatting:
+            data = strip_caret_codes(data)
+        BROKER.publish("{}:output:{}".format(self._protocol, self._uid), data)
+
+
 class ClientManager:
 
     """A manager for client handlers."""
 
-    def __init__(self, protocol):
+    def __init__(self, protocol, client_class=Client):
         """Create a new client manager."""
+        self._client_class = client_class
         self._clients = {}
         self._messages = get_pubsub()
         self._protocol = protocol
@@ -31,7 +122,7 @@ class ClientManager:
     def _add_client(self, uid, host, port):
         if uid in self._clients:
             log.warn("UID collision! {}:{}".format(self._protocol, uid))
-        client = Client(self._protocol, uid, host, port)
+        client = self._client_class(self._protocol, uid, host, port)
         self._clients[uid] = client
         with EVENTS.fire("client_connected", client, no_pre=True):
             log.info("Incoming connection from %s.", client)
@@ -42,7 +133,7 @@ class ClientManager:
             return
         with EVENTS.fire("client_disconnected", client, no_pre=True):
             log.info("Lost connection from %s.", client)
-            client.active = False
+            client.state = client.CLOSED
         del self._clients[uid]
 
     def find_by_uid(self, uid):
@@ -69,82 +160,10 @@ class ClientManager:
 
     def poll(self):
         """Process any queued IO for all clients."""
-        for client in self._clients.values():
-            client.poll()
-
-
-class Client:
-
-    """A client handler."""
-
-    def __init__(self, protocol, uid, host, port):
-        """Create a new client handler."""
-        self._commands = deque()
-        self._host = host
-        self._last_command_time = now()
-        self._messages = get_pubsub()
-        self._port = port
-        self._protocol = protocol
-        self._uid = uid
-        self._messages.subscribe("{}:input:{}".format(protocol, uid))
-        self.active = True
-        self.allow_formatting = False
-
-    def __repr__(self):
-        return "{}{}{}".format(self._host,
-                               ":" if self._port is not None else "",
-                               self._port if self._port is not None else "")
-
-    @property
-    def uid(self):
-        """Return the UID for this client."""
-        return self._uid
-
-    @property
-    def host(self):
-        """Return the host address of this client."""
-        return self._host
-
-    @property
-    def port(self):
-        """Return the port this client is connected to."""
-        return self._port
-
-    @property
-    def command_pending(self):
-        """Return whether there is a pending command or not."""
-        return len(self._commands) > 0
-
-    def get_command(self):
-        """Get the next command in the queue, if there is one."""
-        if len(self._commands) > 0:
-            return self._commands.popleft()
-        else:
-            return None
-
-    def get_idle_time(self):
-        """Calculate how long this client has been idle, in seconds."""
-        return now() - self._last_command_time
-
-    def poll(self):
-        """Process any queued IO for this client."""
-        message = self._messages.get_message()
-        while message:
-            data = message["data"]
-            self._commands.append(data)
-            message = self._messages.get_message()
-        if message:
-            self._last_command_time = now()
-
-    def send(self, data, strip_formatting=False):
-        """Send data to this client.
-
-        :param str data: The data to send
-        :param bool strip_formatting: Whether to strip formatting codes out
-                                      of the data before sending
-        :returns None:
-
-        """
-        if strip_formatting or not self.allow_formatting:
-            data = strip_caret_codes(data)
-        BROKER.publish("{}:output:{}".format(self._protocol, self._uid), data)
+        check = list(self._clients.values())
+        for client in check:
+            if client.state == client.OPEN:
+                client.poll()
+            elif client.state == client.CLOSING:
+                client.state = client.CLOSED
+                del self._clients[client.uid]
