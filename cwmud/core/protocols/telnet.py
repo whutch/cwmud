@@ -4,9 +4,11 @@
 # :copyright: (c) 2008 - 2016 Will Hutcheson
 # :license: MIT (https://github.com/whutch/cwmud/blob/master/LICENSE.txt)
 
+from time import time as now
+
 from ...libs.miniboa import TelnetServer as _TelnetServer
 from ..logs import get_logger
-from ..messages import BROKER
+from ..messages import BROKER, get_pubsub
 from ..protocols import ProtocolHandler, ProtocolServer
 
 
@@ -20,8 +22,9 @@ class TelnetServer(ProtocolServer):
     def __init__(self, host="localhost", port=4000):
         """Create a new Telnet server."""
         super().__init__()
-        self._handlers = set()
         self._host = host
+        self._messages = get_pubsub()
+        self._messages.subscribe("telnet:close")
         self._port = port
         self._server = None
 
@@ -46,6 +49,19 @@ class TelnetServer(ProtocolServer):
         """Poll the Telnet server to process any queued IO."""
         if self._server:
             self._server.poll()
+        message = self._messages.get_message()
+        while message:
+            if message["channel"] == "telnet:close":
+                uid = int(message["data"])
+                handler = self.get_handler(uid)
+                if handler:
+                    # Perform a final poll to flush any output
+                    log.info("Closing connection from %s:%s.",
+                             handler.host, handler.port)
+                    handler.poll()
+                    handler.close()
+                    self._handlers.remove(handler)
+            message = self._messages.get_message()
         check = self._handlers.copy()
         for handler in check:
             if not handler.alive:
@@ -78,7 +94,11 @@ class TelnetHandler(ProtocolHandler):
 
     def __init__(self, client):
         """Create a new Telnet client handler."""
-        super().__init__(uid=hash(client))
+        # Miniboa seems to reuse clients somehow, so I can't just hash them
+        # to get a UID.  Hashing the client and the current time will be
+        # much more likely to be unique.
+        uid = hash((client, now()))
+        super().__init__(uid=uid)
         self._client = client
         self._messages.subscribe("telnet:output:{}".format(self._uid))
 
@@ -91,6 +111,20 @@ class TelnetHandler(ProtocolHandler):
     def client(self):
         """Return the miniboa.TelnetClient used by this handler."""
         return self._client
+
+    @property
+    def host(self):
+        """Return the host address of this handler's client."""
+        return self._client.address
+
+    @property
+    def port(self):
+        """Return the port this handler's client is connected to."""
+        return self._client.port
+
+    def close(self):
+        """Forcibly close this handler's socket."""
+        self._client.deactivate()
 
     def poll(self):
         """Poll this handler to process any queued IO."""

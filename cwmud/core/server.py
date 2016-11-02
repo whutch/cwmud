@@ -13,7 +13,7 @@ from . import const
 from .accounts import AccountMenu, authenticate_account, create_account
 from .attributes import Unset
 from .channels import Channel, CHANNELS
-from .clients import ClientManager
+from .clients import Client, ClientManager
 from .entities import ENTITIES
 from .events import EVENTS
 from .logs import get_logger
@@ -30,7 +30,14 @@ from .utils.funcs import joins
 log = get_logger("server")
 
 
-TEL_CLIENTS = ClientManager("telnet")
+class TelnetClient(Client):
+
+    def __init__(self, protocol, uid, host, port):
+        super().__init__(protocol, uid, host, port)
+        self.allow_formatting = True
+
+
+TEL_CLIENTS = ClientManager("telnet", client_class=TelnetClient)
 WS_CLIENTS = ClientManager("ws")
 
 

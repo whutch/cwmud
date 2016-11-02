@@ -23,12 +23,24 @@ class ProtocolServer:
 
     def __init__(self):
         """Create a new server."""
+        self._handlers = set()
         self._started = False
 
     @property
     def is_started(self):
         """Return whether the server is started or not."""
         return self._started
+
+    def get_handler(self, uid):
+        """Find a handler by its UID.
+
+        :param uid: The UID to search for
+        :returns WebSocketHandler: The found handler or None
+
+        """
+        for handler in self._handlers:
+            if handler.uid == uid:
+                return handler
 
     def start(self):
         """Start the server."""

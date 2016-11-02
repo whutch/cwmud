@@ -474,7 +474,7 @@ class Session(HasFlags):
         if self.char:
             self.char.save()
         if self._client:
-            self._client.active = False
+            self._client.close()
 
     def close(self, reason, log_msg=""):
         """Close this session.

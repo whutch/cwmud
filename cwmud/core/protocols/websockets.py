@@ -30,8 +30,9 @@ class WebSocketServer(ProtocolServer):
                  ssl_cert=None, ssl_key=None):
         """Create a new WebSocket server."""
         super().__init__()
-        self._handlers = set()
         self._host = host
+        self._messages = get_pubsub()
+        self._messages.subscribe("ws:close")
         self._port = port
         if ssl_cert is None:
             context = None
@@ -40,7 +41,6 @@ class WebSocketServer(ProtocolServer):
             context.load_cert_chain(certfile=ssl_cert, keyfile=ssl_key)
             context.set_ciphers("RSA")
         self._ssl_context = context
-        self._messages = get_pubsub()
 
     def start(self):
         """Start the WebSocket server."""
@@ -57,6 +57,16 @@ class WebSocketServer(ProtocolServer):
     @asyncio.coroutine
     def poll(self):
         """Poll the server to process any queued IO."""
+        message = self._messages.get_message()
+        while message:
+            if message["channel"] == "ws:close":
+                handler = self.get_handler(message["data"])
+                if handler:
+                    # Perform a final poll to flush any output
+                    yield from handler.poll()
+                    yield from handler.close()
+                    self._handlers.remove(handler)
+            message = self._messages.get_message()
         check = self._handlers.copy()
         for handler in check:
             if not handler.alive:
@@ -110,6 +120,10 @@ class WebSocketHandler(ProtocolHandler):
     def alive(self):
         """Return whether this handler's socket is open or not."""
         return self._websocket.open
+
+    def close(self):
+        """Forcibly close this handler's socket."""
+        self._websocket.close()
 
     @asyncio.coroutine
     def _process_input(self):
