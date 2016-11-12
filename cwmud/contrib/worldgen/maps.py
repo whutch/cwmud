@@ -267,7 +267,7 @@ def render_map_from_layers(elevation_layer, moisture_layer,
             for index, tile in enumerate(row):
                 row[index] = colorize(tile)
     if join_tiles:
-        return "\n".join("".join(tile for tile in row) for row in rows)
+        return "\n".join("".join(tile for tile in row) for row in rows) + "^~"
     else:
         return rows
 
