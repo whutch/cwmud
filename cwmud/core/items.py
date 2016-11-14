@@ -9,8 +9,6 @@ from collections import Counter
 from .attributes import Attribute, ListAttribute, Unset
 from .entities import ENTITIES, Entity
 from .logs import get_logger
-from .pickle import PickleStore
-from .storage import STORES
 from .utils.funcs import joins
 
 

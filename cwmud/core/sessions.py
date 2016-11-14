@@ -15,9 +15,7 @@ from .characters import Character
 from .events import EVENTS
 from .logs import get_logger
 from .menus import Menu
-from .npcs import NPC
-from .players import Player
-from .shells import Shell, SHELLS
+from .shells import Shell
 from .utils.exceptions import AlreadyExists
 from .utils.funcs import class_name, joins
 from .utils.mixins import HasFlags
