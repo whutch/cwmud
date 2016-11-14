@@ -49,16 +49,13 @@ class Account(Entity):
         :returns None:
 
         """
-        if session in self._sessions:
-            log.warn("Tried to login %s to %s but it was already logged in.",
-                     session, self)
-        else:
+        with EVENTS.fire("account_login", session, self):
+            log.info("%s has logged in to %s.", session, self)
+            session.send("\nMOTD will go here!")
+            if session not in self._sessions:
+                self._sessions.add(session)
             if not self.active:
                 self.active = True
-            self._sessions.add(session)
-            with EVENTS.fire("account_login", session, self):
-                log.info("%s has logged in to %s.", session, self)
-                session.send("\nMOTD will go here!")
 
     def logout(self, session):
         """Process an account logout for a session.
@@ -67,13 +64,10 @@ class Account(Entity):
         :returns None:
 
         """
-        if session not in self._sessions:
-            log.warn("Tried to logout %s from %s but it was already logged"
-                     " out.", session, self)
-        else:
-            with EVENTS.fire("account_logout", session, self):
-                log.info("%s has logged out of %s.", session, self)
-            self._sessions.remove(session)
+        with EVENTS.fire("account_logout", session, self):
+            log.info("%s has logged out of %s.", session, self)
+            if session in self._sessions:
+                self._sessions.remove(session)
             if not self._sessions:
                 self.active = False
 
