@@ -62,7 +62,6 @@ class Item(Entity):
 
     """An item."""
 
-    _store = STORES.register("items", PickleStore("items"))
     _uid_code = "I"
 
     type = "item"
