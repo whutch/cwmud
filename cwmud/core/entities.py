@@ -555,12 +555,14 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
 
     def delete(self):
         """Delete this entity from the caches and its store."""
-        for attr, cache in self._caches:
+        for attr, cache in self._caches.items():
             attr_value = getattr(self, attr)
             if attr_value in cache:
                 del cache[attr_value]
         if self._store and self._store.has(self.uid):
             self._store.delete(self.uid)
+        if self.uid in self._instances:
+            del self._instances[self.uid]
 
 
 # We create a global EntityManager here for convenience, and while the
