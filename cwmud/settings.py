@@ -4,9 +4,8 @@
 # :copyright: (c) 2008 - 2016 Will Hutcheson
 # :license: MIT (https://github.com/whutch/cwmud/blob/master/LICENSE.txt)
 
+from os import getcwd
 from os.path import join
-
-from . import ROOT_DIR
 
 
 DEBUG = False
@@ -23,7 +22,7 @@ IDLE_TIME = 180  # seconds
 IDLE_TIME_MAX = 600  # seconds
 
 # Logging
-LOG_PATH = join(ROOT_DIR, "logs", "mud.log")
+LOG_PATH = join(getcwd(), "logs", "mud.log")
 LOG_TIME_FORMAT_CONSOLE = "%H:%M:%S,%F"
 LOG_TIME_FORMAT_FILE = "%Y-%m-%d %a %H:%M:%S,%F"
 LOG_ROTATE_WHEN = "midnight"
@@ -31,7 +30,7 @@ LOG_ROTATE_INTERVAL = 1
 LOG_UTC_TIMES = False
 
 # Storage
-DATA_DIR = join(ROOT_DIR, "data")
+DATA_DIR = join(getcwd(), "data")
 
 # Optional modules
 CONTRIB_MODULES = [
