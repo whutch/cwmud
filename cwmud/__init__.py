@@ -12,7 +12,7 @@ __homepage__ = "https://github.com/whutch/cwmud"
 __license__ = "MIT"
 __docformat__ = "restructuredtext"
 
-VERSION = (0, 3, 0, 0, "Count Chocula")
+VERSION = (0, 4, 0, 0, "Dapper Dan")
 
 
 def get_version():
