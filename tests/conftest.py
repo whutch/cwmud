@@ -10,8 +10,7 @@ import time
 
 import redis
 
-# Until Clockwork is an installable package, we need to add it to our Python
-# path so that we can do "from cwmud" imports in the tests.
+
 TEST_ROOT = dirname(abspath(__file__))
 sys.path.insert(0, dirname(TEST_ROOT))
 
