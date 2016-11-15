@@ -12,13 +12,14 @@ __homepage__ = "https://github.com/whutch/cwmud"
 __license__ = "MIT"
 __docformat__ = "restructuredtext"
 
-VERSION = (0, 3, 0, "dev", "Count Chocula")
+VERSION = (0, 3, 0, 0, "Count Chocula")
 
 
 def get_version():
     """Return the version string."""
     return "{}{}".format(".".join([str(n) for n in VERSION[:3]]),
-                         "-{}".format(VERSION[3]) if VERSION[3] else "")
+                         "" if VERSION[3] == 0
+                         else ".dev{}".format(VERSION[3]))
 
 
 def get_codename():
