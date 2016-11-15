@@ -6,7 +6,6 @@
 
 from importlib import reload
 
-import pytest
 import redis
 
 import cwmud.nanny as nanny
@@ -28,7 +27,6 @@ class TestMain:
         for listener in cls.listeners:
             listener.terminate()
 
-    @pytest.mark.timeout(2)
     def test_main(self):
 
         """Test that the nanny process runs properly."""
@@ -45,7 +43,6 @@ class TestMain:
         worker.stop()
         reload(nanny)
 
-    @pytest.mark.timeout(2)
     def test_main_reload(self):
 
         """Test that the nanny process can handle a reload request."""

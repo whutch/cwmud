@@ -7,7 +7,6 @@
 from importlib import reload
 from telnetlib import Telnet
 
-import pytest
 import redis
 
 from cwmud import settings
@@ -31,7 +30,6 @@ class TestMain:
         for listener in cls.listeners:
             listener.terminate()
 
-    @pytest.mark.timeout(5)
     def test_meta(self):
 
         """Test several client interactions."""
