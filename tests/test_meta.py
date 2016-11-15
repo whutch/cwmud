@@ -20,6 +20,16 @@ class TestMain:
 
     client = Telnet()
     rdb = redis.StrictRedis(decode_responses=True)
+    listeners = []
+
+    @classmethod
+    def setup_class(cls):
+        cls.listeners = nanny.start_listeners()
+
+    @classmethod
+    def teardown_class(cls):
+        for listener in cls.listeners:
+            listener.terminate()
 
     @pytest.mark.timeout(5)
     def test_meta(self):
@@ -33,7 +43,7 @@ class TestMain:
             # so reloading doesn't loop forever.
             channels.unsubscribe("server-boot-complete")
             # Connect to the server.
-            self.client.open(settings.BIND_ADDRESS, settings.BIND_PORT)
+            self.client.open(settings.DEFAULT_HOST, settings.DEFAULT_PORT)
             # Create a new account.
             self.client.write(b"c\ntest@account.com\ntest@account.com\n")
             self.client.write(b"testaccount\nyes\n")

@@ -17,6 +17,16 @@ class TestMain:
     """A collection of tests for the server's nanny process."""
 
     rdb = redis.StrictRedis(decode_responses=True)
+    listeners = []
+
+    @classmethod
+    def setup_class(cls):
+        cls.listeners = nanny.start_listeners()
+
+    @classmethod
+    def teardown_class(cls):
+        for listener in cls.listeners:
+            listener.terminate()
 
     @pytest.mark.timeout(2)
     def test_main(self):

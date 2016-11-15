@@ -24,35 +24,28 @@ class TestSessions:
 
         def __init__(self, port):
             self.active = True
-            self.address = "127.0.0.1"
+            self.host = "127.0.0.1"
             self.port = port
             self._idle = 0
             self._commands = []
             self._output = []
 
-        def addrport(self):
-            return "{}:{}".format(self.address, self.port)
-
         @property
-        def cmd_ready(self):
+        def command_pending(self):
             return bool(self._commands)
 
         def get_command(self):
             if self._commands:
                 return self._commands.pop(0)
 
-        def idle(self):
+        def get_idle_time(self):
             return self._idle
 
-        def send_cc(self, output):
+        def send(self, output):
             return self._output.append(output)
 
-        # noinspection PyPep8Naming,PyDocstring
-        class sock:
-
-            @staticmethod
-            def close():
-                pass
+        def close(self):
+            self.active = False
 
     client = _FakeClient(56789)
 
@@ -92,9 +85,9 @@ class TestSessions:
         self.session.flags.toggle("closed")
         assert self.session.active
 
-    def test_session_address(self):
+    def test_session_host(self):
         """Test that we can get the host address of the session."""
-        assert self.session.address
+        assert self.session.host
 
     def test_session_set_shell(self):
         """Test that we can set a session's current shell."""
@@ -157,9 +150,9 @@ class TestSessions:
     def test_session_poll(self):
         """Test that we can poll a session to process its queued IO."""
         self.client._commands.append("test")
-        assert self.client.cmd_ready
+        assert self.client.command_pending
         self.session.poll()
-        assert not self.client.cmd_ready
+        assert not self.client.command_pending
         assert self.client._output.pop(0) == "You sent: test\n"
         assert self.client._output.pop(0) == "\n" + self.prompt
         assert not self.client._output
@@ -211,18 +204,18 @@ class TestSessions:
         # The first session was flagged for closing in the previous test,
         # so its input should have been ignored and its flag should have
         # been changed from close to closed.
-        assert sessions[0]._client.cmd_ready
+        assert sessions[0]._client.command_pending
         assert not sessions[0]._client._output
         assert not sessions[0].active
         assert "closed" in sessions[0].flags
         # The second session should have been parsed and output returned.
-        assert not sessions[1]._client.cmd_ready
+        assert not sessions[1]._client.command_pending
         assert sessions[1]._client._output.pop(0) == "You sent: test\n"
         assert sessions[1]._client._output.pop(0) == "\n" + self.prompt
         assert not sessions[1]._client._output
         assert sessions[1].active
         # And the third session didn't do anything, so should be unchanged.
-        assert not sessions[2]._client.cmd_ready
+        assert not sessions[2]._client.command_pending
         assert not sessions[2]._client._output
         assert sessions[2].active
 

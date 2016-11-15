@@ -18,16 +18,18 @@ sys.path.insert(0, dirname(TEST_ROOT))
 from cwmud import ROOT_DIR, settings
 
 
+settings.TESTING = True
+
 # Change the log path during testing.
 settings.LOG_PATH = join(ROOT_DIR, "logs", "test.log")
 
 # Change the data path during testing.
 settings.DATA_DIR = join(ROOT_DIR, ".cache", "data")
 
-settings.BIND_ADDRESS = "localhost"
+settings.DEFAULT_HOST = "localhost"
 # Use a different listen port, in case the tests are run while a
 # real server is running on the same system.
-settings.BIND_PORT = 4445
+settings.DEFAULT_PORT = 4445
 
 # Make sure the idle times are defaults
 settings.IDLE_TIME = 180
@@ -36,6 +38,8 @@ settings.IDLE_TIME_MAX = 600
 # Clear out the contrib modules
 settings.INCLUDE_MODULES = []
 
+
+# This needs to be imported after the settings are updated.
 from cwmud.core.logs import get_logger
 
 log = get_logger("tests")

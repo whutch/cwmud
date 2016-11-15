@@ -10,6 +10,7 @@ from . import ROOT_DIR
 
 
 DEBUG = False
+TESTING = False
 
 # General
 MUD_NAME = "Clockwork"

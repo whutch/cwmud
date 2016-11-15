@@ -34,7 +34,7 @@ class CommandLineInterface:
         :returns None:
 
         """
-        if known_only:
+        if known_only or settings.TESTING:
             self._args = self._parser.parse_known_args()[0]
         else:
             self._args = self._parser.parse_args()

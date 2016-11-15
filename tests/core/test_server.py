@@ -4,11 +4,9 @@
 # :copyright: (c) 2008 - 2016 Will Hutcheson
 # :license: MIT (https://github.com/whutch/cwmud/blob/master/LICENSE.txt)
 
-from multiprocessing import Queue
-
 import pytest
 
-from cwmud.core.server import CLIENTS, EVENTS, SERVER
+from cwmud.core.server import EVENTS, SERVER
 
 
 def test_boot():
@@ -33,9 +31,8 @@ def test_boot():
     def _init_post_hook_2():
         array.append(2)
 
-    SERVER.boot(Queue())
+    SERVER.boot()
     assert array == [1, 2]
-    assert CLIENTS.listening
 
 
 def test_loop():
