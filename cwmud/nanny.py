@@ -94,6 +94,21 @@ def _handle_reload_request(msg):
     servers[new_server.pid] = new_server
 
 
+def start_listeners():
+    """Start the listener servers."""
+    listeners = []
+    telnet_server = Process(target=_start_telnet_server)
+    telnet_server.daemon = True
+    telnet_server.start()
+    listeners.append(telnet_server)
+    if CLI.args.ws:
+        websocket_server = Process(target=_start_websocket_server)
+        websocket_server.daemon = True
+        websocket_server.start()
+        listeners.append(websocket_server)
+    return listeners
+
+
 def start_nanny():
     """Start the nanny process and listen for sockets."""
     log.info("Starting %s %s.", settings.MUD_NAME_FULL, __version__)
@@ -102,14 +117,6 @@ def start_nanny():
     server = ServerProcess()
     server.start()
     servers[server.pid] = server
-    # Start listener servers.
-    telnet_server = Process(target=_start_telnet_server)
-    telnet_server.daemon = True
-    telnet_server.start()
-    if CLI.args.ws:
-        websocket_server = Process(target=_start_websocket_server)
-        websocket_server.daemon = True
-        websocket_server.start()
     try:
         while True:
             dead_servers = []
