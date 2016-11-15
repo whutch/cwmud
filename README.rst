@@ -2,7 +2,7 @@ cwmud
 =====
 An extendable, modular MUD server.
 
-|version| |pyversions| |build| |coverage|
+|version| |license| |pyversions| |build| |coverage|
 
 Clockwork is a pure-Python MUD server designed with modularity and ease of development in mind.
 
@@ -11,6 +11,8 @@ Current State
 -------------
 
 This isn't a viable MUD server yet. There's account creation, basic character creation, rooms, talking, and walking around, but that's about it. There are also no permission controls on admin commands yet, so anyone can do whatever they want (which is good because there is no concept of an admin yet).
+
+The ``reload`` command was broken with the recent changes to client/protocol serving (the server reloads, but any connected clients will get dumped into a limbo state of disconnected I/O), but it should be fixed in the next minor version.
 
 So anyway, very under-construction at the moment.
 
@@ -129,6 +131,9 @@ You can email me questions and comments at will@whutch.com. You can also find me
 .. |coverage| image:: https://codecov.io/github/whutch/cwmud/coverage.svg?branch=master
     :target: https://codecov.io/github/whutch/cwmud?branch=master
     :alt: Latest code coverage via Codecov
+.. |license| image:: https://img.shields.io/pypi/l/cwmud.svg
+    :target: https://github.com/whutch/cwmud/blob/master/LICENSE.txt
+    :alt: MIT license
 .. |pyversions| image:: https://img.shields.io/pypi/pyversions/cwmud.svg
     :target: http://pypi.python.org/pypi/cwmud/
     :alt: Supported Python versions
