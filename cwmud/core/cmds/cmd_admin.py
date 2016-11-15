@@ -88,7 +88,7 @@ class ShutdownCommand(Command):
                 self.session.send("There is no shutdown in progress.")
             else:
                 TIMERS.kill("shutdown")
-                self.session.send("Shutdown canceled.")
+                CHANNELS["announce"].send("Shutdown canceled.")
             return
         try:
             if arg is None:
@@ -100,12 +100,14 @@ class ShutdownCommand(Command):
             self.session.send("Invalid time until shutdown.")
         else:
             if when:
-                self.session.send("Shutdown initiated in",
-                                  when // PULSE_PER_SECOND, "seconds!")
+
+                CHANNELS["announce"].send(
+                    "Shutdown initiated in",
+                    when // PULSE_PER_SECOND, "seconds!")
 
             @TIMERS.create(when, "shutdown")
             def _shutdown():
-                self.session.send("Server is shutting down!")
+                CHANNELS["announce"].send("Server is shutting down!")
                 SERVER.shutdown()
 
 
