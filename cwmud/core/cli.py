@@ -6,7 +6,7 @@
 
 import argparse
 
-from .. import __version__
+from .. import __version__, settings
 
 
 class CommandLineInterface:
@@ -102,10 +102,10 @@ LOGGING_GROUP.add_argument(
 # Networking options.
 NETWORKING_GROUP = CLI.add_argument_group("Networking Options")
 NETWORKING_GROUP.add_argument(
-    "-H", "--host", default="localhost", metavar="ADDRESS",
+    "-H", "--host", default=settings.DEFAULT_HOST, metavar="ADDRESS",
     help="Hostname to bind the servers to")
 NETWORKING_GROUP.add_argument(
-    "-p", "--port", default=4000, metavar="N",
+    "-p", "--port", default=settings.DEFAULT_PORT, metavar="N",
     help="Port to bind the Telnet server to")
 NETWORKING_GROUP.add_argument(
     "--ws", action="store_true",

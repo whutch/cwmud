@@ -9,13 +9,15 @@ from os.path import join
 from . import ROOT_DIR
 
 
-DEBUG = True
+DEBUG = False
 
 # General
 MUD_NAME = "Clockwork"
 MUD_NAME_FULL = "Clockwork MUD Server"
 
 # Networking
+DEFAULT_HOST = "localhost"
+DEFAULT_PORT = 4000
 IDLE_TIME = 180  # seconds
 IDLE_TIME_MAX = 600  # seconds
 
