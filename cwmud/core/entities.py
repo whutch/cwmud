@@ -519,7 +519,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
     def save(self):
         """Store this entity."""
         if not self.is_savable:
-            log.warn("Tried to save non-savable entity %s!", self)
+            log.warning("Tried to save non-savable entity %s!", self)
             return
         if "_old_key" in self.tags:
             # The entity's key has changed, so we need to handle that.

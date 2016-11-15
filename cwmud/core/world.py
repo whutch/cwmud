@@ -217,4 +217,4 @@ def _hook_server_boot():
     room = Room.get(x=0, y=0, z=0)
     if not room:
         Room.generate("0,0,0", "Starting Room", "There's not much to look at.")
-        log.warn("Had to generate initial room at 0,0,0.")
+        log.warning("Had to generate initial room at 0,0,0.")

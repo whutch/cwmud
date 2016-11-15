@@ -189,9 +189,9 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
             elif key in self._blobs:
                 self._blobs[key].deserialize(value)
             else:
-                log.warn(joins("Unused data while deserializing ",
-                               class_name(self), ": '", key, "':'",
-                               value, "'.", sep=""))
+                log.warning(joins("Unused data while deserializing ",
+                                  class_name(self), ": '", key, "':'",
+                                  value, "'.", sep=""))
 
 
 class _UnsetMeta(type):

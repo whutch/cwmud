@@ -365,7 +365,7 @@ class Session(HasFlags):
         elif self._shell:
             self._shell.parse(data)
         else:
-            log.warn("Input not handled for %s: '%s'!", self, data)
+            log.warning("Input not handled for %s: '%s'!", self, data)
 
     def _get_prompt(self):
         """Generate the current prompt for this session.

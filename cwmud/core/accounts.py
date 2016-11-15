@@ -437,7 +437,7 @@ class AccountMenu(Menu):
         """Add account-specific entries to the menu."""
         account = self.session.account
         if not account:
-            log.warn("AccountMenu assigned to session with no account!")
+            log.warning("AccountMenu assigned to session with no account!")
             return
         # Add entries for the account's characters.
         chars = Player.find_relations(account=account)
