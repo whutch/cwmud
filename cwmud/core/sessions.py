@@ -538,12 +538,11 @@ def _hook_server_boot():
                 setattr(SESSIONS, name, greeting_file.read())
 
 
-# noinspection PyProtectedMember
 @EVENTS.hook("server_save_state", "sessions", pre=True)
 def _hook_server_save_state(state):
     sessions = {}
     for session in SESSIONS._sessions.values():
-        sessions[session.uid] = (
+        sessions[(session.client.protocol, session.client.uid)] = (
             session._output_queue,
             class_name(session.shell) if session.shell else None,
             class_name(session.menu) if session.menu else None,
@@ -552,3 +551,33 @@ def _hook_server_save_state(state):
             session.width,
             session.color)
     state["sessions"] = sessions
+
+
+@EVENTS.hook("server_load_state", "sessions", after="clients")
+def _hook_server_load_state(state):
+    from .menus import MENUS
+    from .players import Player
+    from .server import CLIENT_MANAGERS
+    from .shells import SHELLS
+    sessions = state["sessions"]
+    for (protocol, uid), (output, shell, menu, email,
+                          char, width, color) in sessions.items():
+        client = CLIENT_MANAGERS[protocol].find_by_uid(uid)
+        if not client:
+            # The client is gone, so no need for the session.
+            log.warning("Lost client during reload: %s:%s", protocol, uid)
+            continue
+        if shell:
+            shell = SHELLS[shell]
+        session = SESSIONS.create(client, shell)
+        if menu:
+            menu = MENUS[menu](session)
+        session._menu = menu
+        if email:
+            session.account = Account.get(email=email)
+        if char:
+            session.char = Character.get(char)
+            if isinstance(session.char, Player):
+                session.char.resume(quiet=True)
+        session.width = width
+        session.color = color

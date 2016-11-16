@@ -178,3 +178,31 @@ class ClientManager:
             elif client.state == client.CLOSING:
                 client.state = client.CLOSED
                 del self._clients[client.uid]
+
+
+@EVENTS.hook("server_save_state", "clients", pre=True)
+def _hook_server_save_state(state):
+    managers = {}
+    for protocol, manager in CLIENT_MANAGERS.items():
+        clients = {}
+        for uid, client in manager._clients.items():
+            if client.state != client.OPEN:
+                continue
+            clients[uid] = (
+                client.host, client.port, client.allow_formatting,
+                client._last_command_time, client._commands)
+        managers[protocol] = clients
+    state["clients"] = managers
+
+
+@EVENTS.hook("server_load_state", "clients")
+def _hook_server_load_state(state):
+    managers = state["clients"]
+    for protocol, clients in managers.items():
+        manager = CLIENT_MANAGERS[protocol]
+        for uid, (host, port, allow_formatting,
+                  last_command_time, commands) in clients.items():
+            client = manager._add_client(uid, host, port, quiet=True)
+            client.allow_formatting = allow_formatting
+            client._last_command_time = last_command_time
+            client._commands = commands
