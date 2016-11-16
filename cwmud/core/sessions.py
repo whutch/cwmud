@@ -565,7 +565,7 @@ def _hook_server_load_state(state):
         client = CLIENT_MANAGERS[protocol].find_by_uid(uid)
         if not client:
             # The client is gone, so no need for the session.
-            log.warning("Lost client during reload: %s:%s", protocol, uid)
+            log.warning("Lost client during reload: %s:%s.", protocol, uid)
             continue
         if shell:
             shell = SHELLS[shell]

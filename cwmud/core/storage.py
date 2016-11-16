@@ -175,7 +175,7 @@ class DataStore:
 
         """
         if key in self._indexes:
-            log.warning("Tried to add existing index '%s' to %s", key, self)
+            log.warning("Tried to add existing index '%s' to %s.", key, self)
             return
         self._indexes[key] = {}
         if unique:

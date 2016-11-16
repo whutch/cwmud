@@ -357,7 +357,7 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
         if not entity_name or entity_name not in ENTITIES:
             raise KeyError("failed to reconstruct entity: bad class key")
         entity = ENTITIES[entity_name](data)
-        log.debug("Reconstructed %s (%s)", entity, entity.uid)
+        log.debug("Reconstructed %s (%s).", entity, entity.uid)
         return entity
 
     @classmethod

@@ -130,7 +130,7 @@ class ClientManager:
 
     def _add_client(self, uid, host, port, quiet=False):
         if uid in self._clients:
-            log.warning("UID collision! {}:{}".format(self._protocol, uid))
+            log.warning("UID collision! {}:{}.".format(self._protocol, uid))
         client = self._client_class(self._protocol, uid, host, port)
         self._clients[uid] = client
         if not quiet:
