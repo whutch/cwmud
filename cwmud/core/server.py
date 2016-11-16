@@ -14,7 +14,7 @@ from .accounts import AccountMenu, authenticate_account, create_account
 from .attributes import Unset
 from .channels import Channel, CHANNELS
 from .cli import CLI
-from .clients import Client, ClientManager
+from .clients import Client, ClientManager, CLIENT_MANAGERS
 from .entities import ENTITIES
 from .events import EVENTS
 from .logs import get_logger
@@ -38,8 +38,10 @@ class TelnetClient(Client):
         self.allow_formatting = True
 
 
-TEL_CLIENTS = ClientManager("telnet", client_class=TelnetClient)
-WS_CLIENTS = ClientManager("ws")
+CLIENT_MANAGERS["telnet"] = ClientManager("telnet", client_class=TelnetClient)
+
+if CLI.args.ws:
+    CLIENT_MANAGERS["ws"] = ClientManager("ws")
 
 
 class Server:
@@ -149,10 +151,10 @@ class Server:
                 # Then do the main game logic.
                 with EVENTS.fire("server_loop"):
                     TIMERS.pulse()  # Pulse each timer once.
-                    for clients in (TEL_CLIENTS, WS_CLIENTS):
+                    for clients in CLIENT_MANAGERS.values():
                         clients.check_connections()
                     SESSIONS.poll()  # Process queued IO.
-                    for clients in (TEL_CLIENTS, WS_CLIENTS):
+                    for clients in CLIENT_MANAGERS.values():
                         clients.poll()  # Check for new IO.
                     SESSIONS.prune()  # Clean up closed/dead sessions.
                 # Any thing you want polled or updated should be done before
@@ -171,7 +173,7 @@ class Server:
             # Do one last session and client poll to clear the output queues.
             EVENTS.fire("server_reload", no_post=True).now()
             SESSIONS.poll(output_only=True)
-            for clients in (TEL_CLIENTS, WS_CLIENTS):
+            for clients in CLIENT_MANAGERS.values():
                 clients.poll()
             SESSIONS.prune()
             # Save the state data for the new process to resume from.

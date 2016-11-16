@@ -16,6 +16,10 @@ from .text import strip_caret_codes
 log = get_logger("clients")
 
 
+# Might replace this with something more sophisticated.
+CLIENT_MANAGERS = {}
+
+
 class Client:
 
     """A client handler."""
@@ -59,6 +63,11 @@ class Client:
     def port(self):
         """Return the port this client is connected to."""
         return self._port
+
+    @property
+    def protocol(self):
+        """Return the protocol used by this client."""
+        return self._protocol
 
     @property
     def command_pending(self):
@@ -119,13 +128,15 @@ class ClientManager:
         self._messages.subscribe("{}:connect".format(protocol))
         self._messages.subscribe("{}:disconnect".format(protocol))
 
-    def _add_client(self, uid, host, port):
+    def _add_client(self, uid, host, port, quiet=False):
         if uid in self._clients:
             log.warning("UID collision! {}:{}".format(self._protocol, uid))
         client = self._client_class(self._protocol, uid, host, port)
         self._clients[uid] = client
-        with EVENTS.fire("client_connected", client, no_pre=True):
-            log.info("Incoming connection from %s.", client)
+        if not quiet:
+            with EVENTS.fire("client_connected", client, no_pre=True):
+                log.info("Incoming connection from %s.", client)
+        return client
 
     def _remove_client(self, uid):
         client = self._clients.get(uid)
