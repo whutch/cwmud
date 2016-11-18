@@ -6,7 +6,8 @@
 
 import pytest
 
-from cwmud.core.storage import AlreadyExists, DataStore, DataStoreManager
+from cwmud.core.storage import DataStore, DataStoreManager
+from cwmud.core.utils.exceptions import AlreadyExists
 
 
 class TestDataStores:
@@ -72,7 +73,7 @@ class TestDataStores:
     def test_store_manager_register(self):
         """Test that we can register a new store through a store manager."""
         self.stores.register("test", self.store)
-        assert "test" in self.stores._stores
+        assert "test" in self.stores
 
     def test_store_manager_register_already_exists(self):
         """Test that trying to re-register a store fails."""

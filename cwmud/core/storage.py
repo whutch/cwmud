@@ -9,77 +9,11 @@ from copy import deepcopy
 from itertools import chain
 
 from .logs import get_logger
-from .utils.exceptions import AlreadyExists
+from .utils.bases import Manager
 from .utils.funcs import joins
 
 
 log = get_logger("storage")
-
-
-# noinspection PyProtectedMember
-class DataStoreManager:
-
-    """A manager for data store registration."""
-
-    def __init__(self):
-        """Create a new data store manager."""
-        self._stores = {}
-
-    def __contains__(self, store):
-        return store in self._stores
-
-    def __getitem__(self, store):
-        return self._stores[store]
-
-    def register(self, name, store):
-        """Register a data store.
-
-        :param str name: The name of the data store
-        :param DataStore store: The data store to be registered
-        :returns DataStore: The registered data store
-        :raises AlreadyExists: If a store with that name already exists
-        :raises TypeError: If `store` is not an instance of DataStore
-
-        """
-        if not isinstance(store, DataStore):
-            raise TypeError("must be instance of DataStore to register")
-        if name in self._stores:
-            raise AlreadyExists(name, self._stores[name], store)
-        self._stores[name] = store
-        return store
-
-    def initialize(self):
-        """Initialize all registered data stores."""
-        log.info("Initializing stores.")
-        for store in self._stores.values():
-            store.initialize()
-            store.build_indexes()
-
-    def commit(self):
-        """Commit the transactions of all registered data stores."""
-        item_count = 0
-        transaction_count = 0
-        for store in self._stores.values():
-            if store.pending:
-                item_count += len(store._transaction)
-                transaction_count += 1
-                store.commit()
-        if item_count or transaction_count:
-            log.debug("Commit %s items from %s transactions.",
-                      item_count, transaction_count)
-
-    def abort(self):
-        """Abort the transactions of all registered data stores."""
-        item_count = 0
-        transaction_count = 0
-        for store in self._stores.values():
-            if store.pending:
-                item_count += len(store._transaction)
-                transaction_count += 1
-                store.abort()
-        if item_count or transaction_count:
-            log.debug("Abort %s items from %s transactions.",
-                      item_count, transaction_count)
 
 
 class DataStore:
@@ -412,7 +346,44 @@ class DataStore:
         self._transaction.clear()
 
 
-# We create a global DataStoreManager here for convenience, and while the
-# server will generally only need one to work with, they are NOT singletons
-# and you can make more DataStoreManager instances if you like.
+class DataStoreManager(Manager):
+
+    """A manager for data store registration."""
+
+    _managed_type = DataStore
+
+    def initialize(self):
+        """Initialize all registered data stores."""
+        log.info("Initializing stores.")
+        for store in self._items.values():
+            store.initialize()
+            store.build_indexes()
+
+    def commit(self):
+        """Commit the transactions of all registered data stores."""
+        item_count = 0
+        transaction_count = 0
+        for store in self._items.values():
+            if store.pending:
+                item_count += len(store._transaction)
+                transaction_count += 1
+                store.commit()
+        if item_count or transaction_count:
+            log.debug("Commit %s items from %s transactions.",
+                      item_count, transaction_count)
+
+    def abort(self):
+        """Abort the transactions of all registered data stores."""
+        item_count = 0
+        transaction_count = 0
+        for store in self._items.values():
+            if store.pending:
+                item_count += len(store._transaction)
+                transaction_count += 1
+                store.abort()
+        if item_count or transaction_count:
+            log.debug("Abort %s items from %s transactions.",
+                      item_count, transaction_count)
+
+
 STORES = DataStoreManager()
