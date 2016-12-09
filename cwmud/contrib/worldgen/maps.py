@@ -257,7 +257,8 @@ def _render_map_data(width, height, center=(0, 0)):
 
 def render_map_from_layers(elevation_layer, moisture_layer,
                            temperature_layer, diversity_layer=None,
-                           convert_color=False, join_tiles=True):
+                           convert_color=False, join_tiles=True,
+                           show_center=True):
     """Render an ASCII terrain map from raw layer data.
 
     :param elevation_layer: The elevation layer
@@ -266,6 +267,7 @@ def render_map_from_layers(elevation_layer, moisture_layer,
     :param diversity_layer: Optional, a diversity layer
     :param bool convert_color: Whether to convert color codes or not
     :param bool join_tiles: Whether to join the tiles into a string
+    :param bool show_center: Whether to show a @ at the map's center
     :returns str: A rendered map
 
     """
@@ -278,7 +280,7 @@ def render_map_from_layers(elevation_layer, moisture_layer,
             elevation_layer[y], moisture_layer[y], temperature_layer[y]))
         row = []
         for x in range(width):
-            if (x, y) == center:
+            if (x, y) == center and show_center:
                 row.append("^W@")
             else:
                 elevation, moisture, temperature = values[x]
@@ -307,13 +309,16 @@ def render_map_from_layers(elevation_layer, moisture_layer,
         return rows
 
 
-def render_map(width, height, center=(0, 0), convert_color=False):
+def render_map(width, height, center=(0, 0), convert_color=False,
+               join_tiles=True, show_center=True):
     """Render an ASCII terrain map.
 
     :param int width: The width of the map
     :param int height: The height of the map
     :param tuple(int, int) center: The center of the map in (x, y) form
-    :param convert_color: Whether to convert color codes or not
+    :param bool convert_color: Whether to convert color codes or not
+    :param bool join_tiles: Whether to join the tiles into a string
+    :param bool show_center: Whether to show a @ at the map's center
     :returns str: A rendered map
 
     """
@@ -321,7 +326,8 @@ def render_map(width, height, center=(0, 0), convert_color=False):
         width, height, center=center)
     return render_map_from_layers(
         elevation, moisture, temperature, diversity,
-        convert_color=convert_color)
+        convert_color=convert_color, join_tiles=join_tiles,
+        show_center=show_center)
 
 
 def get_terrain_for_coord(x, y):
@@ -347,7 +353,7 @@ _VISUALIZE_TABLE = {
 }
 
 
-def _visualize_map_layer(map_layer, formatter=None):
+def _visualize_map_layer(map_layer, formatter=None, printed=True):
     """Print raw, colored map data for visualization.
 
     :param map_layer: The base layer
@@ -361,9 +367,14 @@ def _visualize_map_layer(map_layer, formatter=None):
     for values in map_layer:
         if not formatter or not callable(formatter):
             formatter = lambda value: _VISUALIZE_TABLE[value]
-        rows.append("".join([formatter(round(value, 1))
-                            for value in values]))
-    print(colorize("\n".join(rows)))
+        values = [formatter(round(value, 1)) for value in values]
+        if printed:
+            values = "".join(values)
+        rows.append(values)
+    if printed:
+        print(colorize("\n".join(rows)))
+    else:
+        return rows
 
 
 # Unhook all the default events in the setup_world namespace.
