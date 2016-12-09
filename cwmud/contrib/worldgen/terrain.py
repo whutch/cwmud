@@ -4,12 +4,10 @@
 # :copyright: (c) 2008 - 2016 Will Hutcheson
 # :license: MIT (https://github.com/whutch/cwmud/blob/master/LICENSE.txt)
 
-from os.path import exists, join
+from os.path import dirname, exists, join
 
-from ... import BASE_PACKAGE
 from ...core.attributes import Unset
 from ...core.entities import Attribute
-from ...core.events import EVENTS
 from ...core.logs import get_logger
 from ...core.utils.exceptions import AlreadyExists
 from ...core.world import Room
@@ -69,17 +67,19 @@ class TerrainManager:
                                 terrain)
         self._point_table[point_data] = terrain
 
-    def get_terrain_for_point(self, elevation, moisture):
+    def get_terrain_for_point(self, elevation, moisture, temperature):
         """Get the terrain type for the given point data.
 
         :param float elevation: The elevation value, from -1 to 1
         :param float moisture: The moisture value, from -1 to 1
+        :param float temperature: The temperature value, from -1 to 1
         :returns Terrain: The terrain type or None if not found
 
         """
         elevation = round(elevation, 1)
         moisture = round(moisture, 1)
-        return self._point_table.get((elevation, moisture))
+        temperature = round(temperature, 1)
+        return self._point_table.get((elevation, moisture, temperature))
 
 
 TERRAIN = TerrainManager()
@@ -133,58 +133,76 @@ class RoomTerrain(Attribute):
 
 def _parse_terrain_grid():
     log.info("Loading terrain point values.")
-    path = join(BASE_PACKAGE, "contrib", "worldgen", "terrain_grid.txt")
+    path = join(dirname(__file__), "terrain_grid.txt")
     if not exists(path):
         raise IOError("cannot find terrain grid file!")
     with open(path) as terrain_grid:
-        elevation = 1.0
-        while elevation >= -1.0:
-            line = terrain_grid.readline()
-            fields = line.strip().split()[1:]
-            moisture = 1.0
-            while moisture >= -1.0:
-                code = fields.pop()
-                terrain = TERRAIN[code]
-                point = (round(elevation, 1), round(moisture, 1))
-                TERRAIN.set_terrain_for_point(point, terrain)
-                moisture -= 0.1
-            elevation -= 0.1
+        temperature = -1.0
+        for line in terrain_grid.readlines():
+            line = line.strip()
+            if not line:
+                continue
+            parts = line.split()
+            if len(parts) == 1:
+                temperature = float(parts[0])
+            elif len(parts) == 22:
+                elevation = float(parts[0])
+                moisture = -1.0
+                for code in parts[1:]:
+                    terrain = TERRAIN[code]
+                    point = (round(elevation, 1),
+                             round(moisture, 1),
+                             round(temperature, 1))
+                    TERRAIN.set_terrain_for_point(point, terrain)
+                    moisture += 0.1
+            else:
+                if parts[0] == "xxx":
+                    continue
+                raise ValueError("malformed terrain grid! {}".format(parts))
 
 
-TERRAIN.register(Terrain("snm", "Snow-capped Mountains", "^W^^"))
-TERRAIN.register(Terrain("mop", "Mountain Peak", "^w^^"))
-TERRAIN.register(Terrain("mou", "Mountain Range", "^K^^"))
-TERRAIN.register(Terrain("hil", "Rolling Hills", "^yn"))
-TERRAIN.register(Terrain("for", "Forest", "^Gt",
-                                diversity_name="Dense Forest",
-                                diversity_symbol="^gt",
-                                diversity_minimum=0.3))
-TERRAIN.register(Terrain("gra", "Grasslands", "^G\"",
-                                diversity_name="Tall Grass",
-                                diversity_symbol="^g\"",
-                                diversity_minimum=0.3))
 TERRAIN.register(Terrain("bea", "Sandy Beach", "^Y."))
 TERRAIN.register(Terrain("shw", "Shallow Water", "^C,"))
 TERRAIN.register(Terrain("dpw", "Deep Water", "^c,"))
 TERRAIN.register(Terrain("sea", "Open Sea", "^B~"))
 TERRAIN.register(Terrain("oce", "Open Ocean", "^b~"))
+TERRAIN.register(Terrain("mud", "Muddy Banks", "^y."))
+TERRAIN.register(Terrain("frs", "Frozen Shore", "^c."))
 
-TERRAIN.register(Terrain("arp", "Arid Mountain Peak", "^k^^"))
-TERRAIN.register(Terrain("bmo", "Barren Mountains", "^y^^"))
-TERRAIN.register(Terrain("dun", "Sand Dunes", "^Yn"))
-TERRAIN.register(Terrain("des", "Desert", "^Y~"))
-TERRAIN.register(Terrain("bhi", "Barren Hills", "^wn"))
-TERRAIN.register(Terrain("bar", "Barren Land", "^y."))
-TERRAIN.register(Terrain("swa", "Swamp", "^G."))
-TERRAIN.register(Terrain("mar", "Marshland", "^c&"))
+TERRAIN.register(Terrain("aup", "Austere Point", "^KA"))
+TERRAIN.register(Terrain("wic", "Windswept Crags", "^w^^"))
+TERRAIN.register(Terrain("deh", "Desolate Headlands", "^Kn"))
+TERRAIN.register(Terrain("tun", "Bleak Tundra", "^c\""))
+
+TERRAIN.register(Terrain("fri", "Frigid Summit", "^cA"))
+TERRAIN.register(Terrain("chc", "Chilled Cliffs", "^c^^"))
+TERRAIN.register(Terrain("icd", "Icy Drift", "^c~"))
+TERRAIN.register(Terrain("scf", "Snow-covered Fields", "^W\""))
+
+TERRAIN.register(Terrain("glp", "Glacial Peaks", "^CA"))
+TERRAIN.register(Terrain("fra", "Frosted Alps", "^C^^"))
+TERRAIN.register(Terrain("shi", "Snowy Hillside", "^Wn"))
+TERRAIN.register(Terrain("bwo", "Boreal Woods", "^Wt"))
+
+TERRAIN.register(Terrain("arr", "Arid Ridges", "^yA"))
+TERRAIN.register(Terrain("dus", "Dusty Mesa", "^y^^"))
+TERRAIN.register(Terrain("bsl", "Barren Slopes", "^wn"))
+TERRAIN.register(Terrain("dry", "Dry Brush", "^y\""))
+
+TERRAIN.register(Terrain("mop", "Mountain Peak", "^wA"))
+TERRAIN.register(Terrain("mou", "Mountain Range", "^K^^"))
+TERRAIN.register(Terrain("hil", "Rolling Hills", "^yn"))
+TERRAIN.register(Terrain("gra", "Grasslands", "^G\"",
+                                diversity_name="Tall Grass",
+                                diversity_symbol="^g\"",
+                                diversity_minimum=0.3))
+
+TERRAIN.register(Terrain("snm", "Snow-capped Mountains", "^WA"))
 TERRAIN.register(Terrain("whi", "Wooded Hills", "^gn"))
-TERRAIN.register(Terrain("wmo", "Wooded Mountains", "^g^^"))
-TERRAIN.register(Terrain("mud", "Muddy Fields", "^y\""))
-TERRAIN.register(Terrain("jun", "Dense Jungle", "^G%"))
-TERRAIN.register(Terrain("jhi", "Jungle Hills", "^Gn"))
-TERRAIN.register(Terrain("jmo", "Jungle Mountains", "^c^^"))
+TERRAIN.register(Terrain("for", "Sparse Forest", "^Gt",
+                                diversity_name="Dense Forest",
+                                diversity_symbol="^gt",
+                                diversity_minimum=0.3))
 
 
-@EVENTS.hook("server_boot", "parse_terrain_grid")
-def _hook_server_boot():
-    _parse_terrain_grid()
+_parse_terrain_grid()

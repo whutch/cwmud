@@ -43,6 +43,8 @@ _BASE_ELEVATION_ARGS = {"scale": 100, "seed": 15051}
 _ELEVATION_NOISE_ARGS = {"scale": 20, "seed": 15051, "octaves": 3}
 _BASE_MOISTURE_ARGS = {"scale": 200, "seed": 23230}
 _MOISTURE_NOISE_ARGS = {"scale": 40, "seed": 23230, "octaves": 3}
+_BASE_TEMPERATURE_ARGS = {"scale": 200, "seed": 5150}
+_TEMPERATURE_NOISE_ARGS = {"scale": 50, "seed": 5150, "octaves": 3}
 _DIVERSITY_NOISE_ARGS = {"scale": 5, "seed": 19578}
 
 
@@ -239,22 +241,31 @@ def _render_map_data(width, height, center=(0, 0)):
     moisture_noise = generate_map_layer(width, height, center=center,
                                         **_MOISTURE_NOISE_ARGS)
     moisture_layer = combine_map_layers(base_moisture, moisture_noise)
+    # Calculate the temperature layer
+    base_temperature = generate_map_layer(width, height, center=center,
+                                          **_BASE_TEMPERATURE_ARGS)
+    temperature_noise = generate_map_layer(width, height, center=center,
+                                           **_TEMPERATURE_NOISE_ARGS)
+    temperature_layer = combine_map_layers(base_temperature,
+                                           temperature_noise)
     # Calculate the diversity layer
     diversity_layer = generate_map_layer(width, height, center=center,
                                          **_DIVERSITY_NOISE_ARGS)
-    return elevation_layer, moisture_layer, diversity_layer
+    return (elevation_layer, moisture_layer,
+            temperature_layer, diversity_layer)
 
 
 def render_map_from_layers(elevation_layer, moisture_layer,
-                           diversity_layer=None, convert_color=False,
-                           join_tiles=True):
+                           temperature_layer, diversity_layer=None,
+                           convert_color=False, join_tiles=True):
     """Render an ASCII terrain map from raw layer data.
 
     :param elevation_layer: The elevation layer
     :param moisture_layer: The moisture layer
+    :param temperature_layer: The temperature layer
     :param diversity_layer: Optional, a diversity layer
-    :param convert_color: Whether to convert color codes or not
-    :param join_tiles: Whether to join the tiles into a string
+    :param bool convert_color: Whether to convert color codes or not
+    :param bool join_tiles: Whether to join the tiles into a string
     :returns str: A rendered map
 
     """
@@ -263,14 +274,16 @@ def render_map_from_layers(elevation_layer, moisture_layer,
     center = (width // 2, height // 2)
     rows = []
     for y in range(height):
-        values = list(zip(elevation_layer[y], moisture_layer[y]))
+        values = list(zip(
+            elevation_layer[y], moisture_layer[y], temperature_layer[y]))
         row = []
         for x in range(width):
             if (x, y) == center:
                 row.append("^W@")
             else:
-                elevation, moisture = values[x]
-                terrain = TERRAIN.get_terrain_for_point(elevation, moisture)
+                elevation, moisture, temperature = values[x]
+                terrain = TERRAIN.get_terrain_for_point(
+                    elevation, moisture, temperature)
                 symbol = None
                 if not terrain:
                     symbol = "^R?"
@@ -288,7 +301,8 @@ def render_map_from_layers(elevation_layer, moisture_layer,
             for index, tile in enumerate(row):
                 row[index] = colorize(tile)
     if join_tiles:
-        return "\n".join("".join(tile for tile in row) for row in rows) + "^~"
+        return "\n".join("".join(tile for tile in row)
+                         for row in rows) + "^~"
     else:
         return rows
 
@@ -303,10 +317,11 @@ def render_map(width, height, center=(0, 0), convert_color=False):
     :returns str: A rendered map
 
     """
-    elevation, moisture, diversity = _render_map_data(width, height,
-                                                      center=center)
-    return render_map_from_layers(elevation, moisture, diversity,
-                                  convert_color=convert_color)
+    elevation, moisture, temperature, diversity = _render_map_data(
+        width, height, center=center)
+    return render_map_from_layers(
+        elevation, moisture, temperature, diversity,
+        convert_color=convert_color)
 
 
 def get_terrain_for_coord(x, y):
@@ -317,8 +332,10 @@ def get_terrain_for_coord(x, y):
     :returns tuple(Terrain, bool): The terrain type and whether it is diverse
 
     """
-    elevation, moisture, diversity = _render_map_data(1, 1, (x, y))
-    terrain = TERRAIN.get_terrain_for_point(elevation[0][0], moisture[0][0])
+    elevation, moisture, temperature, diversity = _render_map_data(
+        1, 1, (x, y))
+    terrain = TERRAIN.get_terrain_for_point(
+        elevation[0][0], moisture[0][0], temperature[0][0])
     return terrain, terrain.is_diverse(diversity[0][0])
 
 
