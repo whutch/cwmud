@@ -144,22 +144,22 @@
  xxx -1.0-0.9-0.8-0.7-0.6-0.5-0.4-0.3-0.2-0.1 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
 
 -0.4
- 1.0  arr arr arr arr arr arr arr mop mop mop mop mop mop mop snm snm snm snm snm snm snm
- 0.9  arr arr arr arr arr arr arr mop mop mop mop mop mop mop snm snm snm snm snm snm snm
- 0.8  arr arr arr arr arr arr arr mop mop mop mop mop mop mop snm snm snm snm snm snm snm
- 0.7  dus dus dus dus dus dus dus mou mou mou mou mou mou mou mou mou mou mou mou mou mou
- 0.6  dus dus dus dus dus dus dus mou mou mou mou mou mou mou mou mou mou mou mou mou mou
- 0.5  dus dus dus dus dus dus dus mou mou mou mou mou mou mou mou mou mou mou mou mou mou
- 0.4  bsl bsl bsl bsl bsl bsl bsl hil hil hil hil hil hil hil whi whi whi whi whi whi whi
- 0.3  bsl bsl bsl bsl bsl bsl bsl hil hil hil hil hil hil hil whi whi whi whi whi whi whi
- 0.2  dry dry dry dry dry dry dry gra gra gra gra gra gra gra for for for for for for for
- 0.1  dry dry dry dry dry dry dry gra gra gra gra gra gra gra for for for for for for for
- 0.0  dry dry dry dry dry dry dry gra gra gra gra gra gra gra for for for for for for for
--0.1  dry dry dry dry dry bea bea bea bea bea bea bea bea bea mud mud mud mud mud mud mud
--0.2  bea bea bea bea bea bea bea bea bea bea bea bea bea bea mud mud shw shw shw shw shw
--0.3  bea bea bea bea bea shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw
--0.4  shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw
--0.5  shw shw shw shw shw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
+ 1.0  aup aup aup aup aup aup aup fri fri fri fri fri fri fri glp glp glp glp glp glp glp
+ 0.9  aup aup aup aup aup aup aup fri fri fri fri fri fri fri glp glp glp glp glp glp glp
+ 0.8  aup aup aup aup aup aup aup fri fri fri fri fri fri fri glp glp glp glp glp glp glp
+ 0.7  wic wic wic wic wic wic wic chc chc chc chc chc chc chc fra fra fra fra fra fra fra
+ 0.6  wic wic wic wic wic wic wic chc chc chc chc chc chc chc fra fra fra fra fra fra fra
+ 0.5  wic wic wic wic wic wic wic chc chc chc chc chc chc chc fra fra fra fra fra fra fra
+ 0.4  deh deh deh deh deh deh deh icd icd icd icd icd icd icd shi shi shi shi shi shi shi
+ 0.3  deh deh deh deh deh deh deh icd icd icd icd icd icd icd shi shi shi shi shi shi shi
+ 0.2  tun tun tun tun tun tun tun scf scf scf scf scf scf scf bwo bwo bwo bwo bwo bwo bwo
+ 0.1  tun tun tun tun tun tun tun scf scf scf scf scf scf scf bwo bwo bwo bwo bwo bwo bwo
+ 0.0  tun tun tun tun tun tun tun scf scf scf scf scf scf scf bwo bwo bwo bwo bwo bwo bwo
+-0.1  tun tun tun tun tun tun tun frs frs frs frs frs frs frs frs frs frs frs frs frs frs
+-0.2  tun tun tun tun frs frs frs frs frs frs frs frs frs frs frs frs frs frs frs frs frs
+-0.3  frs frs frs frs frs frs frs frs frs frs frs frs frs frs frs frs frs frs frs frs frs
+-0.4  frs frs frs frs frs frs frs shw shw shw shw shw shw shw shw shw shw shw shw shw shw
+-0.5  shw shw shw shw shw shw shw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
 -0.6  dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
 -0.7  dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
 -0.8  sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea
@@ -336,22 +336,22 @@
  xxx -1.0-0.9-0.8-0.7-0.6-0.5-0.4-0.3-0.2-0.1 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
 
  0.4
- 1.0  arr arr arr arr arr arr arr mop mop mop mop mop mop mop snm snm snm snm snm snm snm
- 0.9  arr arr arr arr arr arr arr mop mop mop mop mop mop mop snm snm snm snm snm snm snm
- 0.8  arr arr arr arr arr arr arr mop mop mop mop mop mop mop snm snm snm snm snm snm snm
- 0.7  dus dus dus dus dus dus dus mou mou mou mou mou mou mou mou mou mou mou mou mou mou
- 0.6  dus dus dus dus dus dus dus mou mou mou mou mou mou mou mou mou mou mou mou mou mou
- 0.5  dus dus dus dus dus dus dus mou mou mou mou mou mou mou mou mou mou mou mou mou mou
- 0.4  bsl bsl bsl bsl bsl bsl bsl hil hil hil hil hil hil hil whi whi whi whi whi whi whi
- 0.3  bsl bsl bsl bsl bsl bsl bsl hil hil hil hil hil hil hil whi whi whi whi whi whi whi
- 0.2  dry dry dry dry dry dry dry gra gra gra gra gra gra gra for for for for for for for
- 0.1  dry dry dry dry dry dry dry gra gra gra gra gra gra gra for for for for for for for
- 0.0  dry dry dry dry dry dry dry gra gra gra gra gra gra gra for for for for for for for
--0.1  dry dry dry dry dry bea bea bea bea bea bea bea bea bea mud mud mud mud mud mud mud
--0.2  bea bea bea bea bea bea bea bea bea bea bea bea bea bea mud mud shw shw shw shw shw
--0.3  bea bea bea bea bea shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw
--0.4  shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw
--0.5  shw shw shw shw shw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
+ 1.0  sun sun sun sun sun sun sun sco sco sco sco sco sco sco vol vol vol vol vol vol vol
+ 0.9  sun sun sun sun sun sun sun sco sco sco sco sco sco sco vol vol vol vol vol vol vol
+ 0.8  sun sun sun sun sun sun sun sco sco sco sco sco sco sco vol vol vol vol vol vol vol
+ 0.7  wic wic wic wic wic wic wic tor tor tor tor tor tor tor jun jun jun jun jun jun jun
+ 0.6  wic wic wic wic wic wic wic tor tor tor tor tor tor tor jun jun jun jun jun jun jun
+ 0.5  wic wic wic wic wic wic wic tor tor tor tor tor tor tor jun jun jun jun jun jun jun
+ 0.4  dun dun dun dun dun dun dun bal bal bal bal bal bal bal can can can can can can can
+ 0.3  dun dun dun dun dun dun dun bal bal bal bal bal bal bal can can can can can can can
+ 0.2  des des des des des des des gla gla gla gla gla gla gla rai rai rai rai rai rai rai
+ 0.1  des des des des des des des gla gla gla gla gla gla gla rai rai rai rai rai rai rai
+ 0.0  des des des des des des des gla gla gla gla gla gla gla rai rai rai rai rai rai rai
+-0.1  des des des des des des des mar mar mar mar mar mar mar swa swa swa swa swa swa swa
+-0.2  des des des des bea bea bea mar mar mar mar mar mar mar swa swa swa swa swa swa swa
+-0.3  bea bea bea bea bea bea bea mar mar mar mar mar mar mar swa swa swa swa swa swa swa
+-0.4  bea bea bea bea bea bea bea shw shw shw shw shw shw shw shw shw shw shw shw shw shw
+-0.5  shw shw shw shw shw shw shw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
 -0.6  dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
 -0.7  dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
 -0.8  sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea
@@ -360,22 +360,22 @@
  xxx -1.0-0.9-0.8-0.7-0.6-0.5-0.4-0.3-0.2-0.1 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
 
  0.5
- 1.0  arr arr arr arr arr arr arr mop mop mop mop mop mop mop snm snm snm snm snm snm snm
- 0.9  arr arr arr arr arr arr arr mop mop mop mop mop mop mop snm snm snm snm snm snm snm
- 0.8  arr arr arr arr arr arr arr mop mop mop mop mop mop mop snm snm snm snm snm snm snm
- 0.7  dus dus dus dus dus dus dus mou mou mou mou mou mou mou mou mou mou mou mou mou mou
- 0.6  dus dus dus dus dus dus dus mou mou mou mou mou mou mou mou mou mou mou mou mou mou
- 0.5  dus dus dus dus dus dus dus mou mou mou mou mou mou mou mou mou mou mou mou mou mou
- 0.4  bsl bsl bsl bsl bsl bsl bsl hil hil hil hil hil hil hil whi whi whi whi whi whi whi
- 0.3  bsl bsl bsl bsl bsl bsl bsl hil hil hil hil hil hil hil whi whi whi whi whi whi whi
- 0.2  dry dry dry dry dry dry dry gra gra gra gra gra gra gra for for for for for for for
- 0.1  dry dry dry dry dry dry dry gra gra gra gra gra gra gra for for for for for for for
- 0.0  dry dry dry dry dry dry dry gra gra gra gra gra gra gra for for for for for for for
--0.1  dry dry dry dry dry bea bea bea bea bea bea bea bea bea mud mud mud mud mud mud mud
--0.2  bea bea bea bea bea bea bea bea bea bea bea bea bea bea mud mud shw shw shw shw shw
--0.3  bea bea bea bea bea shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw
--0.4  shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw
--0.5  shw shw shw shw shw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
+ 1.0  sun sun sun sun sun sun sun sco sco sco sco sco sco sco vol vol vol vol vol vol vol
+ 0.9  sun sun sun sun sun sun sun sco sco sco sco sco sco sco vol vol vol vol vol vol vol
+ 0.8  sun sun sun sun sun sun sun sco sco sco sco sco sco sco vol vol vol vol vol vol vol
+ 0.7  wic wic wic wic wic wic wic tor tor tor tor tor tor tor jun jun jun jun jun jun jun
+ 0.6  wic wic wic wic wic wic wic tor tor tor tor tor tor tor jun jun jun jun jun jun jun
+ 0.5  wic wic wic wic wic wic wic tor tor tor tor tor tor tor jun jun jun jun jun jun jun
+ 0.4  dun dun dun dun dun dun dun bal bal bal bal bal bal bal can can can can can can can
+ 0.3  dun dun dun dun dun dun dun bal bal bal bal bal bal bal can can can can can can can
+ 0.2  des des des des des des des gla gla gla gla gla gla gla rai rai rai rai rai rai rai
+ 0.1  des des des des des des des gla gla gla gla gla gla gla rai rai rai rai rai rai rai
+ 0.0  des des des des des des des gla gla gla gla gla gla gla rai rai rai rai rai rai rai
+-0.1  des des des des des des des mar mar mar mar mar mar mar swa swa swa swa swa swa swa
+-0.2  des des des des bea bea bea mar mar mar mar mar mar mar swa swa swa swa swa swa swa
+-0.3  bea bea bea bea bea bea bea mar mar mar mar mar mar mar swa swa swa swa swa swa swa
+-0.4  bea bea bea bea bea bea bea shw shw shw shw shw shw shw shw shw shw shw shw shw shw
+-0.5  shw shw shw shw shw shw shw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
 -0.6  dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
 -0.7  dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
 -0.8  sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea
@@ -384,22 +384,22 @@
  xxx -1.0-0.9-0.8-0.7-0.6-0.5-0.4-0.3-0.2-0.1 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
 
  0.6
- 1.0  arr arr arr arr arr arr arr mop mop mop mop mop mop mop snm snm snm snm snm snm snm
- 0.9  arr arr arr arr arr arr arr mop mop mop mop mop mop mop snm snm snm snm snm snm snm
- 0.8  arr arr arr arr arr arr arr mop mop mop mop mop mop mop snm snm snm snm snm snm snm
- 0.7  dus dus dus dus dus dus dus mou mou mou mou mou mou mou mou mou mou mou mou mou mou
- 0.6  dus dus dus dus dus dus dus mou mou mou mou mou mou mou mou mou mou mou mou mou mou
- 0.5  dus dus dus dus dus dus dus mou mou mou mou mou mou mou mou mou mou mou mou mou mou
- 0.4  bsl bsl bsl bsl bsl bsl bsl hil hil hil hil hil hil hil whi whi whi whi whi whi whi
- 0.3  bsl bsl bsl bsl bsl bsl bsl hil hil hil hil hil hil hil whi whi whi whi whi whi whi
- 0.2  dry dry dry dry dry dry dry gra gra gra gra gra gra gra for for for for for for for
- 0.1  dry dry dry dry dry dry dry gra gra gra gra gra gra gra for for for for for for for
- 0.0  dry dry dry dry dry dry dry gra gra gra gra gra gra gra for for for for for for for
--0.1  dry dry dry dry dry bea bea bea bea bea bea bea bea bea mud mud mud mud mud mud mud
--0.2  bea bea bea bea bea bea bea bea bea bea bea bea bea bea mud mud shw shw shw shw shw
--0.3  bea bea bea bea bea shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw
--0.4  shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw
--0.5  shw shw shw shw shw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
+ 1.0  sun sun sun sun sun sun sun sco sco sco sco sco sco sco vol vol vol vol vol vol vol
+ 0.9  sun sun sun sun sun sun sun sco sco sco sco sco sco sco vol vol vol vol vol vol vol
+ 0.8  sun sun sun sun sun sun sun sco sco sco sco sco sco sco vol vol vol vol vol vol vol
+ 0.7  wic wic wic wic wic wic wic tor tor tor tor tor tor tor jun jun jun jun jun jun jun
+ 0.6  wic wic wic wic wic wic wic tor tor tor tor tor tor tor jun jun jun jun jun jun jun
+ 0.5  wic wic wic wic wic wic wic tor tor tor tor tor tor tor jun jun jun jun jun jun jun
+ 0.4  dun dun dun dun dun dun dun bal bal bal bal bal bal bal can can can can can can can
+ 0.3  dun dun dun dun dun dun dun bal bal bal bal bal bal bal can can can can can can can
+ 0.2  des des des des des des des gla gla gla gla gla gla gla rai rai rai rai rai rai rai
+ 0.1  des des des des des des des gla gla gla gla gla gla gla rai rai rai rai rai rai rai
+ 0.0  des des des des des des des gla gla gla gla gla gla gla rai rai rai rai rai rai rai
+-0.1  des des des des des des des mar mar mar mar mar mar mar swa swa swa swa swa swa swa
+-0.2  des des des des bea bea bea mar mar mar mar mar mar mar swa swa swa swa swa swa swa
+-0.3  bea bea bea bea bea bea bea mar mar mar mar mar mar mar swa swa swa swa swa swa swa
+-0.4  bea bea bea bea bea bea bea shw shw shw shw shw shw shw shw shw shw shw shw shw shw
+-0.5  shw shw shw shw shw shw shw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
 -0.6  dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
 -0.7  dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
 -0.8  sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea
@@ -408,22 +408,22 @@
  xxx -1.0-0.9-0.8-0.7-0.6-0.5-0.4-0.3-0.2-0.1 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
 
  0.7
- 1.0  arr arr arr arr arr arr arr mop mop mop mop mop mop mop snm snm snm snm snm snm snm
- 0.9  arr arr arr arr arr arr arr mop mop mop mop mop mop mop snm snm snm snm snm snm snm
- 0.8  arr arr arr arr arr arr arr mop mop mop mop mop mop mop snm snm snm snm snm snm snm
- 0.7  dus dus dus dus dus dus dus mou mou mou mou mou mou mou mou mou mou mou mou mou mou
- 0.6  dus dus dus dus dus dus dus mou mou mou mou mou mou mou mou mou mou mou mou mou mou
- 0.5  dus dus dus dus dus dus dus mou mou mou mou mou mou mou mou mou mou mou mou mou mou
- 0.4  bsl bsl bsl bsl bsl bsl bsl hil hil hil hil hil hil hil whi whi whi whi whi whi whi
- 0.3  bsl bsl bsl bsl bsl bsl bsl hil hil hil hil hil hil hil whi whi whi whi whi whi whi
- 0.2  dry dry dry dry dry dry dry gra gra gra gra gra gra gra for for for for for for for
- 0.1  dry dry dry dry dry dry dry gra gra gra gra gra gra gra for for for for for for for
- 0.0  dry dry dry dry dry dry dry gra gra gra gra gra gra gra for for for for for for for
--0.1  dry dry dry dry dry bea bea bea bea bea bea bea bea bea mud mud mud mud mud mud mud
--0.2  bea bea bea bea bea bea bea bea bea bea bea bea bea bea mud mud shw shw shw shw shw
--0.3  bea bea bea bea bea shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw
--0.4  shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw
--0.5  shw shw shw shw shw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
+ 1.0  sun sun sun sun sun sun sun sco sco sco sco sco sco sco vol vol vol vol vol vol vol
+ 0.9  sun sun sun sun sun sun sun sco sco sco sco sco sco sco vol vol vol vol vol vol vol
+ 0.8  sun sun sun sun sun sun sun sco sco sco sco sco sco sco vol vol vol vol vol vol vol
+ 0.7  wic wic wic wic wic wic wic tor tor tor tor tor tor tor jun jun jun jun jun jun jun
+ 0.6  wic wic wic wic wic wic wic tor tor tor tor tor tor tor jun jun jun jun jun jun jun
+ 0.5  wic wic wic wic wic wic wic tor tor tor tor tor tor tor jun jun jun jun jun jun jun
+ 0.4  dun dun dun dun dun dun dun bal bal bal bal bal bal bal can can can can can can can
+ 0.3  dun dun dun dun dun dun dun bal bal bal bal bal bal bal can can can can can can can
+ 0.2  des des des des des des des gla gla gla gla gla gla gla rai rai rai rai rai rai rai
+ 0.1  des des des des des des des gla gla gla gla gla gla gla rai rai rai rai rai rai rai
+ 0.0  des des des des des des des gla gla gla gla gla gla gla rai rai rai rai rai rai rai
+-0.1  des des des des des des des mar mar mar mar mar mar mar swa swa swa swa swa swa swa
+-0.2  des des des des bea bea bea mar mar mar mar mar mar mar swa swa swa swa swa swa swa
+-0.3  bea bea bea bea bea bea bea mar mar mar mar mar mar mar swa swa swa swa swa swa swa
+-0.4  bea bea bea bea bea bea bea shw shw shw shw shw shw shw shw shw shw shw shw shw shw
+-0.5  shw shw shw shw shw shw shw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
 -0.6  dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
 -0.7  dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
 -0.8  sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea
@@ -432,22 +432,22 @@
  xxx -1.0-0.9-0.8-0.7-0.6-0.5-0.4-0.3-0.2-0.1 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
 
  0.8
- 1.0  arr arr arr arr arr arr arr mop mop mop mop mop mop mop snm snm snm snm snm snm snm
- 0.9  arr arr arr arr arr arr arr mop mop mop mop mop mop mop snm snm snm snm snm snm snm
- 0.8  arr arr arr arr arr arr arr mop mop mop mop mop mop mop snm snm snm snm snm snm snm
- 0.7  dus dus dus dus dus dus dus mou mou mou mou mou mou mou mou mou mou mou mou mou mou
- 0.6  dus dus dus dus dus dus dus mou mou mou mou mou mou mou mou mou mou mou mou mou mou
- 0.5  dus dus dus dus dus dus dus mou mou mou mou mou mou mou mou mou mou mou mou mou mou
- 0.4  bsl bsl bsl bsl bsl bsl bsl hil hil hil hil hil hil hil whi whi whi whi whi whi whi
- 0.3  bsl bsl bsl bsl bsl bsl bsl hil hil hil hil hil hil hil whi whi whi whi whi whi whi
- 0.2  dry dry dry dry dry dry dry gra gra gra gra gra gra gra for for for for for for for
- 0.1  dry dry dry dry dry dry dry gra gra gra gra gra gra gra for for for for for for for
- 0.0  dry dry dry dry dry dry dry gra gra gra gra gra gra gra for for for for for for for
--0.1  dry dry dry dry dry bea bea bea bea bea bea bea bea bea mud mud mud mud mud mud mud
--0.2  bea bea bea bea bea bea bea bea bea bea bea bea bea bea mud mud shw shw shw shw shw
--0.3  bea bea bea bea bea shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw
--0.4  shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw
--0.5  shw shw shw shw shw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
+ 1.0  sun sun sun sun sun sun sun sco sco sco sco sco sco sco vol vol vol vol vol vol vol
+ 0.9  sun sun sun sun sun sun sun sco sco sco sco sco sco sco vol vol vol vol vol vol vol
+ 0.8  sun sun sun sun sun sun sun sco sco sco sco sco sco sco vol vol vol vol vol vol vol
+ 0.7  wic wic wic wic wic wic wic tor tor tor tor tor tor tor jun jun jun jun jun jun jun
+ 0.6  wic wic wic wic wic wic wic tor tor tor tor tor tor tor jun jun jun jun jun jun jun
+ 0.5  wic wic wic wic wic wic wic tor tor tor tor tor tor tor jun jun jun jun jun jun jun
+ 0.4  dun dun dun dun dun dun dun bal bal bal bal bal bal bal can can can can can can can
+ 0.3  dun dun dun dun dun dun dun bal bal bal bal bal bal bal can can can can can can can
+ 0.2  des des des des des des des gla gla gla gla gla gla gla rai rai rai rai rai rai rai
+ 0.1  des des des des des des des gla gla gla gla gla gla gla rai rai rai rai rai rai rai
+ 0.0  des des des des des des des gla gla gla gla gla gla gla rai rai rai rai rai rai rai
+-0.1  des des des des des des des mar mar mar mar mar mar mar swa swa swa swa swa swa swa
+-0.2  des des des des bea bea bea mar mar mar mar mar mar mar swa swa swa swa swa swa swa
+-0.3  bea bea bea bea bea bea bea mar mar mar mar mar mar mar swa swa swa swa swa swa swa
+-0.4  bea bea bea bea bea bea bea shw shw shw shw shw shw shw shw shw shw shw shw shw shw
+-0.5  shw shw shw shw shw shw shw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
 -0.6  dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
 -0.7  dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
 -0.8  sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea
@@ -456,22 +456,22 @@
  xxx -1.0-0.9-0.8-0.7-0.6-0.5-0.4-0.3-0.2-0.1 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
 
  0.9
- 1.0  arr arr arr arr arr arr arr mop mop mop mop mop mop mop snm snm snm snm snm snm snm
- 0.9  arr arr arr arr arr arr arr mop mop mop mop mop mop mop snm snm snm snm snm snm snm
- 0.8  arr arr arr arr arr arr arr mop mop mop mop mop mop mop snm snm snm snm snm snm snm
- 0.7  dus dus dus dus dus dus dus mou mou mou mou mou mou mou mou mou mou mou mou mou mou
- 0.6  dus dus dus dus dus dus dus mou mou mou mou mou mou mou mou mou mou mou mou mou mou
- 0.5  dus dus dus dus dus dus dus mou mou mou mou mou mou mou mou mou mou mou mou mou mou
- 0.4  bsl bsl bsl bsl bsl bsl bsl hil hil hil hil hil hil hil whi whi whi whi whi whi whi
- 0.3  bsl bsl bsl bsl bsl bsl bsl hil hil hil hil hil hil hil whi whi whi whi whi whi whi
- 0.2  dry dry dry dry dry dry dry gra gra gra gra gra gra gra for for for for for for for
- 0.1  dry dry dry dry dry dry dry gra gra gra gra gra gra gra for for for for for for for
- 0.0  dry dry dry dry dry dry dry gra gra gra gra gra gra gra for for for for for for for
--0.1  dry dry dry dry dry bea bea bea bea bea bea bea bea bea mud mud mud mud mud mud mud
--0.2  bea bea bea bea bea bea bea bea bea bea bea bea bea bea mud mud shw shw shw shw shw
--0.3  bea bea bea bea bea shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw
--0.4  shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw
--0.5  shw shw shw shw shw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
+ 1.0  sun sun sun sun sun sun sun sco sco sco sco sco sco sco vol vol vol vol vol vol vol
+ 0.9  sun sun sun sun sun sun sun sco sco sco sco sco sco sco vol vol vol vol vol vol vol
+ 0.8  sun sun sun sun sun sun sun sco sco sco sco sco sco sco vol vol vol vol vol vol vol
+ 0.7  wic wic wic wic wic wic wic tor tor tor tor tor tor tor jun jun jun jun jun jun jun
+ 0.6  wic wic wic wic wic wic wic tor tor tor tor tor tor tor jun jun jun jun jun jun jun
+ 0.5  wic wic wic wic wic wic wic tor tor tor tor tor tor tor jun jun jun jun jun jun jun
+ 0.4  dun dun dun dun dun dun dun bal bal bal bal bal bal bal can can can can can can can
+ 0.3  dun dun dun dun dun dun dun bal bal bal bal bal bal bal can can can can can can can
+ 0.2  des des des des des des des gla gla gla gla gla gla gla rai rai rai rai rai rai rai
+ 0.1  des des des des des des des gla gla gla gla gla gla gla rai rai rai rai rai rai rai
+ 0.0  des des des des des des des gla gla gla gla gla gla gla rai rai rai rai rai rai rai
+-0.1  des des des des des des des mar mar mar mar mar mar mar swa swa swa swa swa swa swa
+-0.2  des des des des bea bea bea mar mar mar mar mar mar mar swa swa swa swa swa swa swa
+-0.3  bea bea bea bea bea bea bea mar mar mar mar mar mar mar swa swa swa swa swa swa swa
+-0.4  bea bea bea bea bea bea bea shw shw shw shw shw shw shw shw shw shw shw shw shw shw
+-0.5  shw shw shw shw shw shw shw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
 -0.6  dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
 -0.7  dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
 -0.8  sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea
@@ -480,22 +480,22 @@
  xxx -1.0-0.9-0.8-0.7-0.6-0.5-0.4-0.3-0.2-0.1 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
 
  1.0
- 1.0  arr arr arr arr arr arr arr mop mop mop mop mop mop mop snm snm snm snm snm snm snm
- 0.9  arr arr arr arr arr arr arr mop mop mop mop mop mop mop snm snm snm snm snm snm snm
- 0.8  arr arr arr arr arr arr arr mop mop mop mop mop mop mop snm snm snm snm snm snm snm
- 0.7  dus dus dus dus dus dus dus mou mou mou mou mou mou mou mou mou mou mou mou mou mou
- 0.6  dus dus dus dus dus dus dus mou mou mou mou mou mou mou mou mou mou mou mou mou mou
- 0.5  dus dus dus dus dus dus dus mou mou mou mou mou mou mou mou mou mou mou mou mou mou
- 0.4  bsl bsl bsl bsl bsl bsl bsl hil hil hil hil hil hil hil whi whi whi whi whi whi whi
- 0.3  bsl bsl bsl bsl bsl bsl bsl hil hil hil hil hil hil hil whi whi whi whi whi whi whi
- 0.2  dry dry dry dry dry dry dry gra gra gra gra gra gra gra for for for for for for for
- 0.1  dry dry dry dry dry dry dry gra gra gra gra gra gra gra for for for for for for for
- 0.0  dry dry dry dry dry dry dry gra gra gra gra gra gra gra for for for for for for for
--0.1  dry dry dry dry dry bea bea bea bea bea bea bea bea bea mud mud mud mud mud mud mud
--0.2  bea bea bea bea bea bea bea bea bea bea bea bea bea bea mud mud shw shw shw shw shw
--0.3  bea bea bea bea bea shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw
--0.4  shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw shw
--0.5  shw shw shw shw shw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
+ 1.0  sun sun sun sun sun sun sun sco sco sco sco sco sco sco vol vol vol vol vol vol vol
+ 0.9  sun sun sun sun sun sun sun sco sco sco sco sco sco sco vol vol vol vol vol vol vol
+ 0.8  sun sun sun sun sun sun sun sco sco sco sco sco sco sco vol vol vol vol vol vol vol
+ 0.7  wic wic wic wic wic wic wic tor tor tor tor tor tor tor jun jun jun jun jun jun jun
+ 0.6  wic wic wic wic wic wic wic tor tor tor tor tor tor tor jun jun jun jun jun jun jun
+ 0.5  wic wic wic wic wic wic wic tor tor tor tor tor tor tor jun jun jun jun jun jun jun
+ 0.4  dun dun dun dun dun dun dun bal bal bal bal bal bal bal can can can can can can can
+ 0.3  dun dun dun dun dun dun dun bal bal bal bal bal bal bal can can can can can can can
+ 0.2  des des des des des des des gla gla gla gla gla gla gla rai rai rai rai rai rai rai
+ 0.1  des des des des des des des gla gla gla gla gla gla gla rai rai rai rai rai rai rai
+ 0.0  des des des des des des des gla gla gla gla gla gla gla rai rai rai rai rai rai rai
+-0.1  des des des des des des des mar mar mar mar mar mar mar swa swa swa swa swa swa swa
+-0.2  des des des des bea bea bea mar mar mar mar mar mar mar swa swa swa swa swa swa swa
+-0.3  bea bea bea bea bea bea bea mar mar mar mar mar mar mar swa swa swa swa swa swa swa
+-0.4  bea bea bea bea bea bea bea shw shw shw shw shw shw shw shw shw shw shw shw shw shw
+-0.5  shw shw shw shw shw shw shw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
 -0.6  dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
 -0.7  dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw dpw
 -0.8  sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea sea

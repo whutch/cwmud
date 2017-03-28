@@ -168,6 +168,8 @@ TERRAIN.register(Terrain("sea", "Open Sea", "^B~"))
 TERRAIN.register(Terrain("oce", "Open Ocean", "^b~"))
 TERRAIN.register(Terrain("mud", "Muddy Banks", "^y."))
 TERRAIN.register(Terrain("frs", "Frozen Shore", "^c."))
+TERRAIN.register(Terrain("mar", "Marshland", "^c&"))
+TERRAIN.register(Terrain("swa", "Swamp", "^G."))
 
 TERRAIN.register(Terrain("aup", "Austere Point", "^KA"))
 TERRAIN.register(Terrain("wic", "Windswept Crags", "^w^^"))
@@ -203,6 +205,21 @@ TERRAIN.register(Terrain("for", "Sparse Forest", "^Gt",
                                 diversity_name="Dense Forest",
                                 diversity_symbol="^gt",
                                 diversity_minimum=0.3))
+
+TERRAIN.register(Terrain("sun", "Sun-bleached Pinnacle", "^W^^"))
+TERRAIN.register(Terrain("par", "Parched Rocks", "^Y%"))
+TERRAIN.register(Terrain("dun", "Sand Dunes", "^Ym"))
+TERRAIN.register(Terrain("des", "Desert Sands", "^Y~"))
+
+TERRAIN.register(Terrain("sco", "Scorched Rise", "^YA"))
+TERRAIN.register(Terrain("tor", "Torrid Bluffs", "^Y^^"))
+TERRAIN.register(Terrain("bal", "Balmy Highlands", "^ym"))
+TERRAIN.register(Terrain("gla", "Mossy Glade", "^g&"))
+
+TERRAIN.register(Terrain("vol", "Volcanic Crown", "^rA"))
+TERRAIN.register(Terrain("jun", "Jungle Mountains", "^g^^"))
+TERRAIN.register(Terrain("can", "Canopied Hills", "^Gm"))
+TERRAIN.register(Terrain("rai", "Dense Rainforest", "^G%"))
 
 
 _parse_terrain_grid()
