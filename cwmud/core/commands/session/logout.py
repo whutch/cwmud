@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
-"""Commands for basic MUD interaction."""
+"""Logout command."""
 # Part of Clockwork MUD Server (https://github.com/whutch/cwmud)
 # :copyright: (c) 2008 - 2017 Will Hutcheson
 # :license: MIT (https://github.com/whutch/cwmud/blob/master/LICENSE.txt)
 
-from ..accounts import AccountMenu
-from ..characters import CharacterShell
-from ..commands import Command, COMMANDS
-from ..utils.funcs import joins
+from .. import Command, COMMANDS
+from ...accounts import AccountMenu
+from ...characters import CharacterShell
 
 
 @COMMANDS.register
@@ -22,15 +21,4 @@ class LogoutCommand(Command):
         self.session.menu = AccountMenu
 
 
-@COMMANDS.register
-class QuitCommand(Command):
-
-    """A command for quitting the game."""
-
-    def _action(self):
-        self.session.close("Okay, goodbye!",
-                           log_msg=joins(self.session, "has quit."))
-
-
 CharacterShell.add_verbs(LogoutCommand, "logout", truncate=False)
-CharacterShell.add_verbs(QuitCommand, "quit", truncate=False)

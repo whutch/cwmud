@@ -9,8 +9,8 @@ from copy import deepcopy
 from itertools import chain
 
 from .logs import get_logger
+from .utils import joins
 from .utils.bases import Manager
-from .utils.funcs import joins
 
 
 log = get_logger("storage")

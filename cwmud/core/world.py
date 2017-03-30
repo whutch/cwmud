@@ -10,7 +10,7 @@ from .attributes import Attribute, Unset
 from .entities import ENTITIES, Entity
 from .events import EVENTS
 from .logs import get_logger
-from .utils.funcs import joins
+from .utils import joins
 
 
 log = get_logger("world")

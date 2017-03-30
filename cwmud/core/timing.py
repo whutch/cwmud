@@ -10,8 +10,8 @@ from time import sleep, time as now
 
 from .events import EVENTS
 from .logs import get_logger
+from .utils import is_hashable
 from .utils.exceptions import AlreadyExists
-from .utils.funcs import is_hashable
 
 
 log = get_logger("time")

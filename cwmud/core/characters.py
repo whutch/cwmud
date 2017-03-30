@@ -10,7 +10,7 @@ from .entities import ENTITIES, Entity
 from .items import ItemListAttribute
 from .logs import get_logger
 from .shells import Shell, SHELLS
-from .utils.funcs import joins
+from .utils import joins
 from .world import Room
 
 

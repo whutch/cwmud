@@ -13,7 +13,7 @@ from .entities import ENTITIES
 from .events import EVENTS
 from .logs import get_logger
 from .requests import Request, REQUESTS
-from .utils.funcs import joins
+from .utils import joins
 
 
 log = get_logger("players")

@@ -14,8 +14,8 @@ from .json import JSONStore
 from .logs import get_logger
 from .storage import STORES
 from .timing import TIMERS
+from .utils import class_name, int_to_base_n, joins
 from .utils.exceptions import AlreadyExists
-from .utils.funcs import class_name, int_to_base_n, joins
 from .utils.mixins import (HasFlags, HasFlagsMeta, HasTags,
                            HasWeaks, HasWeaksMeta)
 

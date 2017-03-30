@@ -10,7 +10,7 @@ from .attributes import Attribute
 from .characters import Character
 from .entities import ENTITIES
 from .logs import get_logger
-from .utils.funcs import joins
+from .utils import joins
 
 
 log = get_logger("npcs")

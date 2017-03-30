@@ -10,7 +10,7 @@ import pickle
 
 from .. import settings
 from .storage import DataStore
-from .utils.funcs import joins
+from .utils import joins
 
 
 class PickleStore(DataStore):

@@ -7,7 +7,7 @@
 import pytest
 
 from cwmud.core.shells import AlreadyExists, Command, Shell, ShellManager
-from cwmud.core.utils.funcs import joins
+from cwmud.core.utils import joins
 
 
 class TestShells:

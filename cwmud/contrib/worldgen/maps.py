@@ -7,7 +7,7 @@
 import re
 
 from ...core.characters import Character
-from ...core.cmds.cmd_admin import GotoCommand
+from ...core.commands.immortal.goto import GotoCommand
 from ...core.events import EVENTS
 from ...core.logs import get_logger
 from ...core.random import generate_noise

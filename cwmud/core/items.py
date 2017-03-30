@@ -9,7 +9,7 @@ from collections import Counter
 from .attributes import Attribute, ListAttribute, Unset
 from .entities import ENTITIES, Entity
 from .logs import get_logger
-from .utils.funcs import joins
+from .utils import joins
 
 
 log = get_logger("items")

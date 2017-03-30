@@ -10,7 +10,7 @@ from os.path import abspath, exists, join, splitext
 
 from .. import settings
 from ..core.storage import DataStore
-from ..core.utils.funcs import joins
+from ..core.utils import joins
 
 
 class JSONStore(DataStore):

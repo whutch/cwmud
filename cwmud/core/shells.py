@@ -9,8 +9,8 @@ from weakref import WeakValueDictionary
 from . import const
 from .commands import Command
 from .logs import get_logger
+from .utils import joins
 from .utils.exceptions import AlreadyExists
-from .utils.funcs import joins
 from .utils.mixins import (HasFlags, HasFlagsMeta, HasParent, HasParentMeta,
                            HasWeaks, HasWeaksMeta)
 

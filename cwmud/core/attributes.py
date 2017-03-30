@@ -7,8 +7,8 @@
 from collections import abc
 
 from .logs import get_logger
+from .utils import class_name, joins
 from .utils.exceptions import AlreadyExists
-from .utils.funcs import class_name, joins
 from .utils.mixins import HasWeaks, HasWeaksMeta
 
 

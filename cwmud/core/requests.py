@@ -6,7 +6,7 @@
 
 from .logs import get_logger
 from .utils.exceptions import AlreadyExists
-from .utils.funcs import joins
+from .utils import joins
 from .utils.mixins import HasFlags, HasFlagsMeta, HasWeaks, HasWeaksMeta
 
 

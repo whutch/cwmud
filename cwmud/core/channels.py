@@ -8,8 +8,8 @@ from weakref import WeakSet
 
 from ..libs.miniboa import strip_caret_codes
 from .logs import get_logger
+from .utils import joins
 from .utils.exceptions import AlreadyExists
-from .utils.funcs import joins
 
 
 log = get_logger("channels")

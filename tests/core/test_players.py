@@ -11,7 +11,7 @@ from cwmud.core.accounts import Account
 from cwmud.core.attributes import Unset
 from cwmud.core.players import (create_player, Player, PlayerName,
                                 RequestNewPlayerName)
-from cwmud.core.utils.funcs import joins
+from cwmud.core.utils import joins
 from cwmud.core.world import Room
 
 

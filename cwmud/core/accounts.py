@@ -17,7 +17,7 @@ from .menus import Menu, MENUS
 from .players import Player, create_player
 from .requests import Request, REQUESTS, RequestString
 from .shells import SHELLS
-from .utils.funcs import check_hash, generate_hash, joins
+from .utils import check_hash, generate_hash, joins
 
 
 log = get_logger("accounts")

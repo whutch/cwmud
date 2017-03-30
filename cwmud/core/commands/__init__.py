@@ -4,15 +4,14 @@
 # :copyright: (c) 2008 - 2017 Will Hutcheson
 # :license: MIT (https://github.com/whutch/cwmud/blob/master/LICENSE.txt)
 
-from importlib import import_module
-from os import walk
 from os.path import join
 
-from .. import BASE_PACKAGE, ROOT_DIR
-from .events import EVENTS
-from .logs import get_logger
-from .utils.exceptions import AlreadyExists
-from .utils.mixins import HasFlags, HasFlagsMeta, HasWeaks, HasWeaksMeta
+from ... import BASE_PACKAGE, ROOT_DIR
+from ..events import EVENTS
+from ..logs import get_logger
+from ..utils import recursive_import
+from ..utils.exceptions import AlreadyExists
+from ..utils.mixins import HasFlags, HasFlagsMeta, HasWeaks, HasWeaksMeta
 
 
 log = get_logger("commands")
@@ -120,10 +119,6 @@ COMMANDS = CommandManager()
 @EVENTS.hook("server_boot")
 def _hook_server_boot():
     # Import commands modules.
-    core_module = ".".join((BASE_PACKAGE, "core"))
-    import_module(".cmds", core_module)
-    for root, dirs, files in walk(join(ROOT_DIR, BASE_PACKAGE,
-                                       "core", "cmds")):
-        for file in files:
-            if file.endswith(".py"):
-                import_module(".cmds.{}".format(file[:-3]), core_module)
+    commands_package = ".".join((BASE_PACKAGE, "core", "commands"))
+    base_path = join(ROOT_DIR, BASE_PACKAGE, "core", "commands")
+    recursive_import(base_path, commands_package)

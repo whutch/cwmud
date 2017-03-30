@@ -24,8 +24,8 @@ from .pickle import PickleStore
 from .sessions import SESSIONS
 from .storage import STORES
 from .timing import TIMERS
+from .utils import joins
 from .utils.exceptions import ServerReboot, ServerReload, ServerShutdown
-from .utils.funcs import joins
 
 
 log = get_logger("server")

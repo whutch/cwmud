@@ -7,7 +7,7 @@
 import pytest
 
 from cwmud.core.menus import AlreadyExists, Menu, MenuManager
-from cwmud.core.utils.funcs import joins
+from cwmud.core.utils import joins
 
 
 class TestMenus:

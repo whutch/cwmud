@@ -7,7 +7,7 @@
 import pytest
 
 from cwmud.core.requests import AlreadyExists, Request, RequestManager
-from cwmud.core.utils.funcs import joins
+from cwmud.core.utils import joins
 
 
 class TestRequests:
