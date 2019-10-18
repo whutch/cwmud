@@ -181,8 +181,8 @@ class Server:
             # Wait for the new process to pick up the state.
             while True:
                 msg = self._messages.get_message()
-                if (msg and msg["type"] == "message" and
-                        msg["channel"] == "server-reload-complete"):
+                if (msg and msg["type"] == "message"
+                        and msg["channel"] == "server-reload-complete"):
                     pid = int(msg["data"])
                     if pid == exc.new_pid:
                         break
@@ -328,8 +328,8 @@ def _save_and_commit():
 
 def _get_announce_sessions():
     return (session for session in SESSIONS.all()
-            if session.active and session.shell and
-            session.shell.state >= const.STATE_PLAYING)
+            if session.active and session.shell
+            and session.shell.state >= const.STATE_PLAYING)
 
 
 ANNOUNCE = Channel("^Y[ANNOUNCE]^W {msg}^~",

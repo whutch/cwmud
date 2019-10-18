@@ -116,8 +116,8 @@ class PlayerName(Attribute):
 
     @classmethod
     def validate(cls, entity, new_value):
-        if (not isinstance(new_value, str) or
-                not cls._valid_chars.match(new_value)):
+        if (not isinstance(new_value, str)
+                or not cls._valid_chars.match(new_value)):
             raise ValueError("Character names can only contain letters.")
         name_len = len(new_value)
         if name_len < cls._min_len or name_len > cls._max_len:

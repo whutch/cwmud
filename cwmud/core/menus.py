@@ -48,8 +48,8 @@ class MenuManager:
                            subclass of Menu
 
         """
-        if (not isinstance(menu, type) or
-                not issubclass(menu, Menu)):
+        if (not isinstance(menu, type)
+                or not issubclass(menu, Menu)):
             raise TypeError("must be subclass of Menu to register")
         name = menu.__name__
         if name in self._menus:

@@ -328,8 +328,8 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
                 # noinspection PyCallingNonCallable
                 instance = command(self.session, args)
                 instance.execute()
-            except:
-                # To be expanded later with some checking and logging.
+            except:  # noqa
+                # TODO: To be expanded later with some checking and logging.
                 raise
         else:
             self.session.send("Huh?")

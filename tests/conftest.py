@@ -14,16 +14,16 @@ import redis
 TEST_ROOT = dirname(abspath(__file__))
 sys.path.insert(0, dirname(TEST_ROOT))
 
-from cwmud import ROOT_DIR, settings
+from cwmud import ROOT_DIR, settings  # noqa
 
 
 settings.TESTING = True
 
 # Change the log path during testing.
-settings.LOG_PATH = join(ROOT_DIR, "logs", "test.log")
+settings.LOG_PATH = join(ROOT_DIR, ".pytest_cache", "logs", "test.log")
 
 # Change the data path during testing.
-settings.DATA_DIR = join(ROOT_DIR, ".cache", "data")
+settings.DATA_DIR = join(ROOT_DIR, ".pytest_cache", "data")
 
 settings.DEFAULT_HOST = "localhost"
 # Use a different listen port, in case the tests are run while a
@@ -39,7 +39,7 @@ settings.INCLUDE_MODULES = []
 
 
 # This needs to be imported after the settings are updated.
-from cwmud.core.logs import get_logger
+from cwmud.core.logs import get_logger  # noqa
 
 log = get_logger("tests")
 

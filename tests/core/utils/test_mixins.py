@@ -75,13 +75,13 @@ class TestHasFlags:
 
     def test_drop_multiple_flags(self):
         """Test that we can drop multiple flags at once."""
-        assert (1 in self.instance.flags and
-                2 in self.instance.flags and
-                3 not in self.instance.flags)
+        assert (1 in self.instance.flags
+                and 2 in self.instance.flags
+                and 3 not in self.instance.flags)
         self.instance.flags.drop(1, 2, 3)
-        assert (1 not in self.instance.flags and
-                2 not in self.instance.flags and
-                3 not in self.instance.flags)
+        assert (1 not in self.instance.flags
+                and 2 not in self.instance.flags
+                and 3 not in self.instance.flags)
 
     def test_toggle_flags(self):
         """Test that we can toggle one flag in the flag set."""
@@ -338,10 +338,10 @@ class TestHasParent:
 
     def test_get_lineage(self):
         """Test that we can get an objects lineage through the parents."""
-        assert (tuple(self._C.get_lineage()) ==
-                (self._C, self._B, self._A))
-        assert (tuple(self._E.get_lineage()) ==
-                (self._E, self._C, self._B, self._A))
+        assert (tuple(self._C.get_lineage())
+                == (self._C, self._B, self._A))
+        assert (tuple(self._E.get_lineage())
+                == (self._E, self._C, self._B, self._A))
 
     def test_get_lineage_higher_priority(self):
         """Test that we can get the higher priority objects in a lineage."""
@@ -349,28 +349,28 @@ class TestHasParent:
 
     def test_get_lineage_lower_priority(self):
         """Test that we can get the lower priority objects in a lineage."""
-        assert (tuple(self._C.get_lineage(priority=-1)) ==
-                (self._B, self._A))
+        assert (tuple(self._C.get_lineage(priority=-1))
+                == (self._B, self._A))
 
     def test_get_lineage_parent_first(self):
         """Test that we can get an objects lineage with a parent first flag."""
         self._C.parent_first = True
-        assert (tuple(self._C.get_lineage()) ==
-                (self._B, self._A, self._C))
-        assert (tuple(self._C.get_lineage(priority=1)) ==
-                (self._B, self._A))
+        assert (tuple(self._C.get_lineage())
+                == (self._B, self._A, self._C))
+        assert (tuple(self._C.get_lineage(priority=1))
+                == (self._B, self._A))
         assert (tuple(self._C.get_lineage(priority=-1)) == ())
         self._E.parent_first = True
-        assert (tuple(self._E.get_lineage()) ==
-                (self._B, self._A, self._C, self._E))
+        assert (tuple(self._E.get_lineage())
+                == (self._B, self._A, self._C, self._E))
 
     def test_get_ancestors(self):
         """Test that we can get the ancestors of an object."""
-        assert (tuple(self._C.get_ancestors()) ==
-                (self._B, self._A))
+        assert (tuple(self._C.get_ancestors())
+                == (self._B, self._A))
         assert tuple(self._A.get_ancestors()) == ()
-        assert (tuple(self._F.get_ancestors()) ==
-                (self._E, self._C, self._B, self._A))
+        assert (tuple(self._F.get_ancestors())
+                == (self._E, self._C, self._B, self._A))
 
     def test_has_ancestor(self):
         """Test that we can see if an object has an ancestor."""

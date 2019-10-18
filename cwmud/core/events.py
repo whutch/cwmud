@@ -72,8 +72,8 @@ class EventManager:
                     move = []
                     for hook in event.hooks:
                         for check_hook in check_hooks:
-                            if (hook.after is not None and
-                                    hook.after == check_hook.namespace):
+                            if (hook.after is not None
+                                    and hook.after == check_hook.namespace):
                                 move.append(hook)
                     if move:
                         for hook in move:
@@ -130,8 +130,8 @@ class EventManager:
                 # Unhook by namespace, with or without a callback.
                 if callback:
                     event.hooks = [hook for hook in event.hooks
-                                   if hook.namespace != namespace or
-                                   hook.callback is not callback]
+                                   if hook.namespace != namespace
+                                   or hook.callback is not callback]
                 else:
                     event.hooks = [hook for hook in event.hooks
                                    if hook.namespace != namespace]

@@ -175,21 +175,21 @@ class TestSessions:
         self.session._check_idle()
         assert "idle" in self.session.flags
         assert "close" not in self.session.flags
-        assert (self.session._output_queue.popleft() ==
-                "You are whisked away into the void.\n")
+        assert (self.session._output_queue.popleft()
+                == "You are whisked away into the void.\n")
         # They came back.
         self.client._idle = 0
         self.session._check_idle()
         assert not self.session.flags.has_any("idle", "close")
-        assert (self.session._output_queue.popleft() ==
-                "You have returned from the void.\n")
+        assert (self.session._output_queue.popleft()
+                == "You have returned from the void.\n")
         assert self.session.active
         # Now they've been idle for a really long time.
         self.client._idle = settings.IDLE_TIME_MAX
         self.session._check_idle()
         assert self.session.flags.has("close")
-        assert (self.session._output_queue.popleft() ==
-                "^RDisconnecting due to inactivity. Goodbye!^~\n")
+        assert (self.session._output_queue.popleft()
+                == "^RDisconnecting due to inactivity. Goodbye!^~\n")
 
     def test_session_manager_poll(self):
         """Test that we can poll a session manager to poll all its sessions."""

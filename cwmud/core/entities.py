@@ -60,8 +60,8 @@ class EntityManager:
                            subclass of Entity
 
         """
-        if (not isinstance(entity, type) or
-                not issubclass(entity, Entity)):
+        if (not isinstance(entity, type)
+                or not issubclass(entity, Entity)):
             raise TypeError("must be subclass of Entity to register")
         name = entity.__name__
         if name in self._entities:
@@ -108,8 +108,8 @@ class _EntityMeta(HasFlagsMeta, HasWeaksMeta):
 
         # noinspection PyProtectedMember
         def _inner(blob_class):
-            if (not isinstance(blob_class, type) or
-                    not issubclass(blob_class, DataBlob)):
+            if (not isinstance(blob_class, type)
+                    or not issubclass(blob_class, DataBlob)):
                 raise TypeError("must be subclass of DataBlob to register")
             # noinspection PyUnresolvedReferences
             cls._base_blob._blobs[name] = blob_class
@@ -134,8 +134,8 @@ class _EntityMeta(HasFlagsMeta, HasWeaksMeta):
 
         # noinspection PyProtectedMember
         def _inner(attr_class):
-            if (not isinstance(attr_class, type) or
-                    not issubclass(attr_class, Attribute)):
+            if (not isinstance(attr_class, type)
+                    or not issubclass(attr_class, Attribute)):
                 raise TypeError("must be subclass of Attribute to register")
             # noinspection PyUnresolvedReferences
             cls._base_blob._attrs[name] = attr_class

@@ -131,8 +131,8 @@ class Session(HasFlags):
     @property
     def active(self):
         """Return whether this session is still active."""
-        return (not self.flags.has_any("closed", "dead") and
-                self._client and self._client.active)
+        return (not self.flags.has_any("closed", "dead")
+                and self._client and self._client.active)
 
     @property
     def host(self):
@@ -324,13 +324,12 @@ class Session(HasFlags):
         """Check if this session is idle."""
         idle = self._client.get_idle_time()
         if settings.IDLE_TIME and idle >= settings.IDLE_TIME:
-            if ((settings.IDLE_TIME_MAX and idle >= settings.IDLE_TIME_MAX) or
-                    not self._shell or
-                    self._shell.state < const.STATE_PLAYING):
+            if ((settings.IDLE_TIME_MAX and idle >= settings.IDLE_TIME_MAX)
+                    or not self._shell
+                    or self._shell.state < const.STATE_PLAYING):
                 # They've been idle long enough, dump them.  If they haven't
                 # even logged in yet, don't wait for the max idle time.
-                if (self.account and
-                        self.account.trust >= const.TRUST_BUILDER):
+                if (self.account and self.account.trust >= const.TRUST_BUILDER):
                     return
                 self.close("^RDisconnecting due to inactivity. Goodbye!^~",
                            log_msg=joins("Disconnecting idle ", self,
@@ -429,8 +428,8 @@ class Session(HasFlags):
 
         """
         # Do an initial state check.
-        if (("close" in self.flags or not self.active) and
-                "closed" not in self.flags and not output_only):
+        if (("close" in self.flags or not self.active)
+                and "closed" not in self.flags and not output_only):
             with EVENTS.fire("session_ended", self):
                 # Hooks to this event cannot send any output to the client,
                 # they've already had their last poll.
@@ -461,8 +460,8 @@ class Session(HasFlags):
                 self._send(output)
                 self._output_queue.clear()
             # Send them a prompt if there was any input or output.
-            if ((data is not None or output is not None) and self.active and
-                    "close" not in self.flags):
+            if ((data is not None or output is not None)
+                    and self.active and "close" not in self.flags):
                 self._send(joins("\n", self._get_prompt(), sep=""))
 
     def _close(self):

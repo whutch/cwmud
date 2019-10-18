@@ -140,9 +140,9 @@ class TestShells:
         """Test that we can add verbs to a shell's verb store."""
         assert not self.shell._verbs
         self.shell.add_verbs(self.ATestCommand, "test", "t", "!")
-        assert ("test" in self.shell._verbs and
-                "t" in self.shell._verbs and
-                "!" in self.shell._verbs)
+        assert ("test" in self.shell._verbs
+                and "t" in self.shell._verbs
+                and "!" in self.shell._verbs)
 
     def test_shell_add_verbs_not_command(self):
         """Test that trying to add verbs for a non-Command fails."""
@@ -193,8 +193,8 @@ class TestShells:
 
     def test_shell_one_argument(self):
         """Test that we can break off one argument from some client input."""
-        assert (self.shell._one_argument("this is 'a test'") ==
-                ("this", " is 'a test'"))
+        assert (self.shell._one_argument("this is 'a test'")
+                == ("this", " is 'a test'"))
         assert self.shell._one_argument("test") == ("test", "")
         assert self.shell._one_argument("") == ("", "")
         assert self.shell._one_argument("'test") == ("test", "")
@@ -205,21 +205,21 @@ class TestShells:
         assert next(args) == "this"
         assert next(args) == "is"
         assert next(args) == "a test"
-        assert (tuple(self.shell._iter_arguments("")) ==
-                tuple(self.shell._iter_arguments(" ")) == ())
+        assert (tuple(self.shell._iter_arguments(""))
+                == tuple(self.shell._iter_arguments(" ")) == ())
 
     def test_shell_get_arguments(self):
         """Test that we can parse arguments from input."""
         assert self.shell._get_arguments(" '' ") == []
         assert self.shell._get_arguments("test") == ["test"]
-        assert (self.shell._get_arguments('`testing` 1 ``2 "3"') ==
-                ["testing", "1", "2", "3"])
-        assert (self.shell._get_arguments("hi blah blah blah", max_args=1) ==
-                ["hi", " blah blah blah"])
-        assert (self.shell._get_arguments("this is 'a test'", max_args=50) ==
-                ["this", "is", "a test"])
-        assert (self.shell._get_arguments("test test test", max_args=0) ==
-                ["test test test"])
+        assert (self.shell._get_arguments('`testing` 1 ``2 "3"')
+                == ["testing", "1", "2", "3"])
+        assert (self.shell._get_arguments("hi blah blah blah", max_args=1)
+                == ["hi", " blah blah blah"])
+        assert (self.shell._get_arguments("this is 'a test'", max_args=50)
+                == ["this", "is", "a test"])
+        assert (self.shell._get_arguments("test test test", max_args=0)
+                == ["test test test"])
 
     def test_shell_parse(self):
         """Test that we can parse client input."""

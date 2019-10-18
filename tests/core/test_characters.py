@@ -113,25 +113,25 @@ class TestCharacters:
                       and_self=False)
         assert not character.session._output
         assert other_character.session._output
-        assert (other_character.session._output.pop() ==
-                "Unnamed explodes, hard.\n")
+        assert (other_character.session._output.pop()
+                == "Unnamed explodes, hard.\n")
         # Generate messages for the source and the target.
         character.act("{s} hit{ss} {t} in the face!", target=other_character)
-        assert (character.session._output.pop() ==
-                "You hit Unnamed in the face!\n")
-        assert (other_character.session._output.pop() ==
-                "Unnamed hits you in the face!\n")
+        assert (character.session._output.pop()
+                == "You hit Unnamed in the face!\n")
+        assert (other_character.session._output.pop()
+                == "Unnamed hits you in the face!\n")
         character.act("{s} speak{ss} gibberish for a moment.",
                       to=Character.all())
-        assert (character.session._output.pop() ==
-                "You speak gibberish for a moment.\n")
-        assert (other_character.session._output.pop() ==
-                "Unnamed speaks gibberish for a moment.\n")
+        assert (character.session._output.pop()
+                == "You speak gibberish for a moment.\n")
+        assert (other_character.session._output.pop()
+                == "Unnamed speaks gibberish for a moment.\n")
         character.act("{s} does something to {t}.", target=other_character,
                       to=Character.all(), and_self=False)
         assert not character.session._output
-        assert (other_character.session._output.pop() ==
-                "Unnamed does something to you.\n")
+        assert (other_character.session._output.pop()
+                == "Unnamed does something to you.\n")
 
     def test_character_show_room(self, character, room, other_room):
         """Test that we can generate a room display for a character."""
@@ -145,11 +145,13 @@ class TestCharacters:
         assert not character.session._output
         character.room = room
         character.show_room()
+        print(character.session._output)
         assert "An Unnamed Room" in character.session._output.popleft()
         assert character.session._output.popleft()  # The description
         assert "Exits:" in character.session._output.popleft()
         assert character.room is not other_room
         character.show_room(other_room)
+        print(character.session._output)
         assert "Another Room" in character.session._output.popleft()
         assert character.session._output.popleft()  # The description
         assert "Exits:" in character.session._output.popleft()

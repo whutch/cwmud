@@ -58,9 +58,9 @@ def test_class_name():
 
     instance = _TestClass()
 
-    assert (utils.class_name(_TestClass) ==
-            utils.class_name(instance) ==
-            "_TestClass")
+    assert (utils.class_name(_TestClass)
+            == utils.class_name(instance)
+            == "_TestClass")
 
 
 def test_can_be_index():

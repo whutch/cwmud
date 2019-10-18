@@ -9,6 +9,11 @@ import pytest
 from cwmud.core.server import EVENTS, SERVER
 
 
+# We need a dummy pid.
+if SERVER._pid is None:
+    SERVER._pid = 0
+
+
 def test_boot():
 
     """Test that we can initiate and boot the server."""

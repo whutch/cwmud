@@ -11,12 +11,12 @@ All Python code should follow the [PEP-8][pep8] specifications, unless otherwise
 
 Including (but not limited to):
  * 4 spaces per indentation level, no tabs.
- * Lines are limited to a width of 79 columns.
  * Two blank lines to separate module-level blocks, one line for class/function-level blocks.
  * Classes are CamelCase, functions and local variables are lower_case, and global variables (which should be constants) are UPPER_CASE. Never use mixedCase.
  * Comments should be in English, be complete sentences, and end in a period. A block of comments should have two spaces (or a new-line) after sentence-ending periods.
 
 With a few exceptions:
+ * Lines are limited to a width of 120 columns (though I still try to keep it under 80 wherever it doesn't look ridiculous).
  * Python modules should include an encoding declaration, even when using the Python 3 default UTF-8.
  * Modules within the `cwmud.core` package should use relative imports when importing other modules from `cwmud.core`.
 

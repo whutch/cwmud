@@ -102,11 +102,11 @@ class TestRequests:
         # Then test confirmation prompts.
         self.request._confirm = "yeah"
         self.request.confirm = Request.CONFIRM_YES
-        assert (self.request.get_prompt() ==
-                self.request.confirm_prompt_yn.format(data="yeah"))
+        assert (self.request.get_prompt()
+                == self.request.confirm_prompt_yn.format(data="yeah"))
         self.request.confirm = Request.CONFIRM_REPEAT
-        assert (self.request.get_prompt() ==
-                self.request.confirm_prompt_repeat)
+        assert (self.request.get_prompt()
+                == self.request.confirm_prompt_repeat)
         self.request.confirm = "bad confirm type"
         with pytest.raises(ValueError):
             self.request.get_prompt()
