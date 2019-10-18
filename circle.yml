@@ -3,6 +3,7 @@ jobs:
   build:
     docker:
       - image: circleci/python:3.7
+      - image: circleci/redis
     steps:
       - checkout
       - run:
