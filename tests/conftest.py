@@ -20,10 +20,10 @@ from cwmud import ROOT_DIR, settings  # noqa
 settings.TESTING = True
 
 # Change the log path during testing.
-settings.LOG_PATH = join(ROOT_DIR, "logs", "test.log")
+settings.LOG_PATH = join(ROOT_DIR, ".pytest_cache", "logs", "test.log")
 
 # Change the data path during testing.
-settings.DATA_DIR = join(ROOT_DIR, ".cache", "data")
+settings.DATA_DIR = join(ROOT_DIR, ".pytest_cache", "data")
 
 settings.DEFAULT_HOST = "localhost"
 # Use a different listen port, in case the tests are run while a
