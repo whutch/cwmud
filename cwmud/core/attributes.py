@@ -39,8 +39,8 @@ class _DataBlobMeta(HasWeaksMeta):
 
         # noinspection PyProtectedMember
         def _inner(blob_class):
-            if (not isinstance(blob_class, type) or
-                    not issubclass(blob_class, DataBlob)):
+            if (not isinstance(blob_class, type)
+                    or not issubclass(blob_class, DataBlob)):
                 raise TypeError("must be subclass of DataBlob to register")
             cls._blobs[name] = blob_class
             setattr(cls, name, property(lambda s: s._blobs[name]))
@@ -64,8 +64,8 @@ class _DataBlobMeta(HasWeaksMeta):
 
         # noinspection PyProtectedMember
         def _inner(attr_class):
-            if (not isinstance(attr_class, type) or
-                    not issubclass(attr_class, Attribute)):
+            if (not isinstance(attr_class, type)
+                    or not issubclass(attr_class, Attribute)):
                 raise TypeError("must be subclass of Attribute to register")
             cls._attrs[name] = attr_class
             getter = lambda s: s._get_attr_val(name)

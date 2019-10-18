@@ -14,7 +14,7 @@ import redis
 TEST_ROOT = dirname(abspath(__file__))
 sys.path.insert(0, dirname(TEST_ROOT))
 
-from cwmud import ROOT_DIR, settings
+from cwmud import ROOT_DIR, settings  # noqa
 
 
 settings.TESTING = True
@@ -39,7 +39,7 @@ settings.INCLUDE_MODULES = []
 
 
 # This needs to be imported after the settings are updated.
-from cwmud.core.logs import get_logger
+from cwmud.core.logs import get_logger  # noqa
 
 log = get_logger("tests")
 

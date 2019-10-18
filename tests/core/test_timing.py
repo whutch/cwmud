@@ -16,27 +16,28 @@ dtp = duration_to_pulses  # For brevity.
 
 def test_seconds_to_pulses():
     """Test converting seconds to pulses."""
-    assert (dtp("5s") == dtp("5sec") == dtp("5secs") ==
-            dtp("5 s") == dtp("5 sec") == dtp("5 secs") ==
-            dtp("5second") == dtp("5seconds") ==
-            dtp("5 second") == dtp("5 seconds") ==
-            5 * PULSE_PER_SECOND)
+    assert (dtp("5s") == dtp("5sec") == dtp("5secs")
+            == dtp("5 s") == dtp("5 sec") == dtp("5 secs")
+            == dtp("5second") == dtp("5seconds")
+            == dtp("5 second") == dtp("5 seconds")
+            == 5 * PULSE_PER_SECOND)
 
 
 def test_minutes_to_pulses():
     """Test converting minutes to pulses."""
-    assert (dtp("5m") == dtp("5min") == dtp("5mins") ==
-            dtp("5 m") == dtp("5 min") == dtp("5 mins") ==
-            dtp("5minute") == dtp("5minutes") ==
-            dtp("5 minute") == dtp("5 minutes") ==
-            5 * PULSE_PER_SECOND * 60)
+    assert (dtp("5m") == dtp("5min") == dtp("5mins")
+            == dtp("5 m") == dtp("5 min") == dtp("5 mins")
+            == dtp("5minute") == dtp("5minutes")
+            == dtp("5 minute") == dtp("5 minutes")
+            == 5 * PULSE_PER_SECOND * 60)
 
 
 def test_pulses_to_pulses():
     """Test converting pulses to.. pulses?"""
-    assert (dtp(5) == dtp("5") ==
-            dtp("5p") == dtp("5pulse") == dtp("5pulses") ==
-            dtp("5 p") == dtp("5 pulse") == dtp("5 pulses") == 5)
+    assert (dtp(5) == dtp("5")
+            == dtp("5p") == dtp("5pulse") == dtp("5pulses")
+            == dtp("5 p") == dtp("5 pulse") == dtp("5 pulses")
+            == 5)
     assert dtp("now") == 1
 
 
@@ -132,7 +133,7 @@ class TestTimerManager:
         """Test that the properties on a timer return something."""
         assert self.timer.live is True or self.timer.live is False
         assert self.timer.key is self.timer
-        assert self.timers["test"].key is "test"
+        assert self.timers["test"].key == "test"
         assert self.timer.count == 0
 
     def test_timer_pulse(self):

@@ -56,8 +56,8 @@ class CommandManager:
                            subclass of Command
 
         """
-        if (not isinstance(command, type) or
-                not issubclass(command, Command)):
+        if (not isinstance(command, type)
+                or not issubclass(command, Command)):
             raise TypeError("must be subclass of Command to register")
         name = command.__name__
         if name in self._commands:

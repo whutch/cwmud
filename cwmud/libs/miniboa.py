@@ -522,7 +522,7 @@ class TelnetClient(object):
         self.recv_buffer += byte
 
     def _echo_byte(self, byte):
-        """Echo a character back to the client and convert LF into CR\LF."""
+        """Echo a character back to the client and convert LF into CRLF."""
         if byte == '\n':
             self.send_buffer += '\r'
         if self.telnet_echo_password:
@@ -646,8 +646,8 @@ class TelnetClient(object):
                 if self._check_reply_pending(option):
                     self._note_reply_pending(option, False)
                     self._note_local_option(option, True)
-                elif (self._check_local_option(option) is False or
-                        self._check_local_option(option) is UNKNOWN):
+                elif (self._check_local_option(option) is False
+                        or self._check_local_option(option) is UNKNOWN):
                     self._note_local_option(option, True)
                     self._iac_will(option)
                     # Just nod unless setting echo
@@ -663,8 +663,8 @@ class TelnetClient(object):
                 if self._check_reply_pending(option):
                     self._note_reply_pending(option, False)
                     self._note_local_option(option, False)
-                elif (self._check_local_option(option) is True or
-                        self._check_local_option(option) is UNKNOWN):
+                elif (self._check_local_option(option) is True
+                        or self._check_local_option(option) is UNKNOWN):
                     self._note_local_option(option, False)
                     self._iac_wont(option)
                     # Just nod unless setting echo
@@ -685,8 +685,8 @@ class TelnetClient(object):
                 if self._check_reply_pending(option):
                     self._note_reply_pending(option, False)
                     self._note_remote_option(option, True)
-                elif (self._check_remote_option(option) is False or
-                        self._check_remote_option(option) is UNKNOWN):
+                elif (self._check_remote_option(option) is False
+                        or self._check_remote_option(option) is UNKNOWN):
                     self._note_remote_option(option, True)
                     self._iac_do(option)
                     # Client should respond with SB (for NAWS)
@@ -697,8 +697,8 @@ class TelnetClient(object):
                     # Tell them to send their terminal type
                     self.send("{}{}{}{}{}{}".format(IAC, SB, TTYPE,
                                                     SEND, IAC, SE))
-                elif (self._check_remote_option(TTYPE) is False or
-                        self._check_remote_option(TTYPE) is UNKNOWN):
+                elif (self._check_remote_option(TTYPE) is False
+                        or self._check_remote_option(TTYPE) is UNKNOWN):
                     self._note_remote_option(TTYPE, True)
                     self._iac_do(TTYPE)
         elif cmd == WONT:
@@ -712,8 +712,8 @@ class TelnetClient(object):
                 if self._check_reply_pending(option):
                     self._note_reply_pending(option, False)
                     self._note_remote_option(option, False)
-                elif (self._check_remote_option(option) is True or
-                        self._check_remote_option(option) is UNKNOWN):
+                elif (self._check_remote_option(option) is True
+                        or self._check_remote_option(option) is UNKNOWN):
                     self._note_remote_option(option, False)
                     self._iac_dont(option)
                 # Should TTYPE be below this?
@@ -849,11 +849,8 @@ class TelnetServer(object):
         if server_socket is None:
             server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            try:
-                server_socket.bind((address, port))
-                server_socket.listen(5)
-            except:
-                raise
+            server_socket.bind((address, port))
+            server_socket.listen(5)
         else:
             if server_socket == 0:
                 server_socket = None

@@ -20,8 +20,8 @@ class ExitsCommand(Command):
         if not char.room:
             self.session.send("You're not in a room!")
             return
-        char.show_exits(short=True if self.args and
-                        self.args[0] == "short" else False)
+        char.show_exits(short=True if self.args
+                        and self.args[0] == "short" else False)
 
 
 CharacterShell.add_verbs(ExitsCommand, "exits", "ex")

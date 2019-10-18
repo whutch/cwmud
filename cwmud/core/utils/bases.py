@@ -43,8 +43,8 @@ class Manager:
                 raise TypeError("can't register: {} is not an instance of {}"
                                 .format(item, self._managed_type))
         else:
-            if (not isinstance(item, type) or
-                    not issubclass(item, self._managed_type)):
+            if (not isinstance(item, type)
+                    or not issubclass(item, self._managed_type)):
                 raise TypeError("can't register: {} is not a subclass of {}"
                                 .format(item, self._managed_type))
         if key in self._items:

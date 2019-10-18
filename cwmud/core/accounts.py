@@ -85,8 +85,8 @@ class AccountEmail(Attribute):
 
     @classmethod
     def validate(cls, entity, new_value):
-        if (not isinstance(new_value, str) or
-                not cls._pattern.match(new_value)):
+        if (not isinstance(new_value, str)
+                or not cls._pattern.match(new_value)):
             raise ValueError("Invalid email address.")
         new_value = new_value.lower()
         if Account._store.has(new_value):
@@ -130,8 +130,8 @@ class AccountName(Attribute):
 
     @classmethod
     def validate(cls, entity, new_value):
-        if (not isinstance(new_value, str) or
-                not cls._valid_chars.match(new_value)):
+        if (not isinstance(new_value, str)
+                or not cls._valid_chars.match(new_value)):
             raise ValueError("Account names can only contain alphanumeric"
                              " characters and underscore.")
         name_len = len(new_value)
