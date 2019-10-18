@@ -1,21 +1,27 @@
-general:
-  artifacts:
-    - ".coverage-html/"
-
-machine:
-  python:
-    version: 3.4.2
-
-dependencies:
-  pre:
-    - sudo apt-get update; sudo apt-get install libffi-dev
-    - pip install -r requirements.txt
-    - pip install -r tests/requirements.txt
-    - pip install codecov
-
-test:
-  override:
-    - make test-strict
-    - make coverage
-  post:
-    - codecov
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.7
+    steps:
+      - checkout
+      - run:
+          name: Create virtual environment
+          command: |
+            python3 -m venv venv
+      - run:
+          name: Install requirements
+          command: |
+            . venv/bin/activate
+            pip install -r requirements.txt
+            pip install -r tests/requirements.txt
+            pip install codecov
+      - run:
+          name: Run tests
+          command: |
+            . venv/bin/activate
+            make test-strict
+            make coverage
+            codecov
+      - store_artifacts:
+          path: .coverage-html/
