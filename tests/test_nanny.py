@@ -11,7 +11,7 @@ import redis
 import cwmud.nanny as nanny
 
 
-class TestMain:
+class xTestMain:
 
     """A collection of tests for the server's nanny process."""
 
