@@ -21,3 +21,4 @@ build/
 data/
 logs/
 dump.rdb
+Pipfile.lock
