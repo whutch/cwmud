@@ -15,9 +15,8 @@ jobs:
       - run:
           name: Run tests
           command: |
-            pipenv shell
-            make test-strict
-            make coverage
-            codecov
+            pipenv run make test-strict
+            pipenv run make coverage
+            pipenv run codecov
       - store_artifacts:
           path: .coverage-html/
