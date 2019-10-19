@@ -20,18 +20,15 @@ def test_boot():
 
     array = []
 
-    # noinspection PyUnusedLocal
     # This one should not fire, as init is not pre-hookable.
     @EVENTS.hook("server_init", pre=True)
     def _init_pre_hook():
         array.append(0)
 
-    # noinspection PyUnusedLocal
     @EVENTS.hook("server_init")
     def _init_post_hook_1():
         array.append(1)
 
-    # noinspection PyUnusedLocal
     @EVENTS.hook("server_boot")
     def _init_post_hook_2():
         array.append(2)
@@ -47,7 +44,6 @@ def test_loop():
     class _DummyException(Exception):
         pass
 
-    # noinspection PyUnusedLocal
     @EVENTS.hook("server_loop")
     def _loop_hook():
         raise _DummyException()

@@ -110,7 +110,6 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
         if new_session is not None:
             self.init()
 
-    # noinspection PyMethodMayBeStatic
     def init(self):
         """Initialize this shell for the session.
 
@@ -120,7 +119,6 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
         """
         return
 
-    # noinspection PyMethodMayBeStatic
     def get_prompt(self):
         """Generate the current prompt for this shell."""
         return "^y>^~ "
@@ -325,7 +323,6 @@ class Shell(HasFlags, HasWeaks, HasParent, metaclass=_ShellMeta):
             else:
                 args = self._get_arguments(data)
             try:
-                # noinspection PyCallingNonCallable
                 instance = command(self.session, args)
                 instance.execute()
             except:  # noqa

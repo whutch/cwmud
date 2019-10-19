@@ -4,7 +4,6 @@
 # :copyright: (c) 2008 - 2017 Will Hutcheson
 # :license: MIT (https://github.com/whutch/cwmud/blob/master/LICENSE.txt)
 
-# noinspection PyUnresolvedReferences
 import cwmud.core.utils.decorators  # To satisfy test coverage.  # noqa
 
 

@@ -142,7 +142,6 @@ class PlayerName(Attribute):
         return name in cls.RESERVED
 
 
-# noinspection PyProtectedMember
 @REQUESTS.register
 class RequestNewPlayerName(Request):
 
@@ -171,7 +170,6 @@ class PlayerTitle(Attribute):
     _default = "the newbie"
 
 
-# noinspection PyUnresolvedReferences
 def create_player(session, callback, player=None):
     """Perform a series of requests to create a new player.
 

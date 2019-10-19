@@ -65,7 +65,6 @@ class Room(Entity):
         :returns None:
 
         """
-        # noinspection PyAttributeOutsideInit
         self.x, self.y, self.z = map(int, coord_str.split(","))
 
     @classmethod

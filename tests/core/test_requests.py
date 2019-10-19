@@ -18,7 +18,6 @@ class TestRequests:
     request_class = None
     request = None
 
-    # noinspection PyDocstring
     class _FakeSession:
 
         def __init__(self):
@@ -79,7 +78,6 @@ class TestRequests:
 
     def test_request_create(self):
         """Test that we can create a new request instance."""
-        # noinspection PyCallingNonCallable
         type(self).request = self.request_class(self.session, None)
         assert self.request
 

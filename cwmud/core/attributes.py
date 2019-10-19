@@ -15,7 +15,6 @@ from .utils.mixins import HasWeaks, HasWeaksMeta
 log = get_logger("attrs")
 
 
-# noinspection PyDocstring
 class _DataBlobMeta(HasWeaksMeta):
 
     def __init__(cls, name, bases, namespace):
@@ -37,7 +36,6 @@ class _DataBlobMeta(HasWeaksMeta):
         if hasattr(cls, name):
             raise AlreadyExists(name, getattr(cls, name))
 
-        # noinspection PyProtectedMember
         def _inner(blob_class):
             if (not isinstance(blob_class, type)
                     or not issubclass(blob_class, DataBlob)):
@@ -62,7 +60,6 @@ class _DataBlobMeta(HasWeaksMeta):
         if hasattr(cls, name):
             raise AlreadyExists(name, getattr(cls, name))
 
-        # noinspection PyProtectedMember
         def _inner(attr_class):
             if (not isinstance(attr_class, type)
                     or not issubclass(attr_class, Attribute)):
@@ -91,7 +88,6 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
         self._entity = entity
         self._attr_values = {}
         for key, attr in self._attrs.items():
-            # noinspection PyProtectedMember
             self._attr_values[key] = attr.get_default(entity)
         self._blobs = self._blobs.copy()
         for key, blob in self._blobs.items():
@@ -108,7 +104,6 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
     def _get_attr_val(self, name):
         return self._attr_values.get(name)
 
-    # noinspection PyProtectedMember
     def _set_attr_val(self, name, value, validate=True, raw=False):
         attr = self._attrs[name]
         old_value = self._attr_values.get(name)
@@ -163,7 +158,6 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
             if value is Unset:
                 value = "unset"
             else:
-                # noinspection PyProtectedMember
                 value = attr.serialize(self._entity, value)
             data[key] = value
         return data
@@ -183,7 +177,6 @@ class DataBlob(HasWeaks, metaclass=_DataBlobMeta):
                 if value == "unset":
                     value = Unset
                 else:
-                    # noinspection PyProtectedMember
                     value = self._attrs[key].deserialize(self._entity, value)
                 self._set_attr_val(key, value, validate=False, raw=True)
             elif key in self._blobs:

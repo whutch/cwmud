@@ -18,7 +18,6 @@ class TestShells:
     shell_class = None
     shell = None
 
-    # noinspection PyDocstring
     class _FakeSession:
 
         def __init__(self):
@@ -95,7 +94,6 @@ class TestShells:
 
     def test_shell_create(self):
         """Test that we can create a new shell instance."""
-        # noinspection PyCallingNonCallable
         type(self).shell = self.shell_class()
         assert self.shell
 

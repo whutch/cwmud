@@ -25,7 +25,6 @@ class MyClass(HasFlags, HasWeaks, metaclass=_MyClassMeta):
 """
 
 
-# noinspection PyProtectedMember
 class _FlagSet:
 
     """A set of flags on an object.  Used by the HasFlags mix-in.
@@ -126,7 +125,6 @@ class HasFlagsMeta(type):
         super().__init__(name, bases, namespace)
         cls._flag_set = _FlagSet()
 
-    # noinspection PyDocstring
     @property
     def flags(cls):
         """Return this class's flag set."""
@@ -151,7 +149,6 @@ class HasFlags(metaclass=HasFlagsMeta):
         """Return this instance's flag set."""
         return self._flag_set
 
-    # noinspection PyMethodMayBeStatic
     def _flags_changed(self):
         """Perform any callbacks for when the flag set has changed.
 
@@ -160,7 +157,6 @@ class HasFlags(metaclass=HasFlagsMeta):
         """
 
 
-# noinspection PyProtectedMember
 class _Tags(MutableMapping):
 
     """A mapping of tags on an object.  Used by the HasTags mix-in.
@@ -226,7 +222,6 @@ class HasTags:
         """Return this instance's tag collection."""
         return self._tags
 
-    # noinspection PyMethodMayBeStatic
     def _tags_changed(self):
         """Perform any callbacks for when the tag collection has changed.
 
@@ -290,7 +285,6 @@ class HasWeaks(metaclass=HasWeaksMeta):
             del self._weak_refs[name]
 
 
-# noinspection PyDocstring
 class HasParentMeta(type):
 
     """A metaclass to support arbitrary class lineages through `parent`."""

@@ -6,7 +6,6 @@
 
 import pytest
 
-# noinspection PyProtectedMember
 from cwmud.core.timing import (AlreadyExists, duration_to_pulses,
                                PULSE_PER_SECOND, _PULSE_TIME, TimerManager)
 
@@ -84,7 +83,6 @@ class TestTimerManager:
     def test_timer_call(self):
         """Test that trying to call a timer fails."""
         with pytest.raises(SyntaxError):
-            # noinspection PyCallingNonCallable
             self.timer()
 
     def test_create_timer_duplicate_name(self):
@@ -157,7 +155,6 @@ class TestTimerManager:
 
     def test_timer_manager_kill(self):
         """Test that we can kill a timer from its manager."""
-        # noinspection PyTypeChecker
         self.timers.kill(self.timer)
         assert not self.timer.live
         assert self.timer not in self.timers
@@ -239,7 +236,6 @@ class TestTimerManager:
 
     def test_timer_create_with_decorator(self):
         """Test that we can create a timer with a decorator."""
-        # noinspection PyUnusedLocal
         @self.timers.create(1, "decorated")
         def _timer():
             pass
