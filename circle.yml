@@ -9,18 +9,13 @@ jobs:
       - run:
           name: Create virtual environment
           command: |
-            python3 -m venv venv
-      - run:
-          name: Install requirements
-          command: |
-            . venv/bin/activate
-            pip install -r requirements.txt
-            pip install -r tests/requirements.txt
-            pip install codecov
+            python3 -m pip install pipenv
+            pipenv install --dev
+            pipenv install codecov
       - run:
           name: Run tests
           command: |
-            . venv/bin/activate
+            pipenv shell
             make test-strict
             make coverage
             codecov
