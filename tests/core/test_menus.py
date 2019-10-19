@@ -18,7 +18,6 @@ class TestMenus:
     menu_class = None
     menu = None
 
-    # noinspection PyDocstring
     class _FakeSession:
 
         def __init__(self):
@@ -74,6 +73,5 @@ class TestMenus:
 
     def test_menu_create(self):
         """Test that we can create a new menu instance."""
-        # noinspection PyCallingNonCallable
         type(self).menu = self.menu_class(self.session)
         assert self.menu

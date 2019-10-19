@@ -9,6 +9,7 @@ __pycache__/
 .coverage
 .coverage-html/
 .tox
+.vscode/
 
 # Building
 dist/
@@ -21,3 +22,4 @@ build/
 data/
 logs/
 dump.rdb
+Pipfile.lock

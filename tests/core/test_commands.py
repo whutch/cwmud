@@ -87,7 +87,6 @@ class TestCommands:
 
     def test_command_instance(self):
         """Test that we can create a command instance."""
-        # noinspection PyCallingNonCallable
         type(self).command = self.command_class(None, ())
         assert self.command
 

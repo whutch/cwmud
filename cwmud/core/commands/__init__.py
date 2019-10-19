@@ -105,7 +105,6 @@ class Command(HasFlags, HasWeaks, metaclass=_CommandMeta):
             return
         self._action()
 
-    # noinspection PyMethodMayBeStatic
     def _action(self):  # pragma: no cover
         """Do something; override this to add your functionality."""
 

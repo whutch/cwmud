@@ -53,7 +53,6 @@ class SessionManager:
 
         """
         for session in self._sessions.values():
-            # noinspection PyProtectedMember
             if session._client is client:
                 return session
 

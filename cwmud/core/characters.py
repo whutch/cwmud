@@ -223,7 +223,6 @@ class Character(Entity):
         if self.room and depart_msg:
             self.act(depart_msg, depart_context, to=self.room.chars)
         had_chars = bool(room.chars)
-        # noinspection PyAttributeOutsideInit
         self.room = room
         if had_chars and arrive_msg:
             self.act(arrive_msg, arrive_context,

@@ -19,7 +19,6 @@ class TestSessions:
     session = None
     prompt = ""
 
-    # noinspection PyDocstring
     class _FakeClient:
 
         def __init__(self, port):

@@ -58,7 +58,6 @@ class MenuManager:
         return menu
 
 
-# noinspection PyDocstring
 class _MenuMeta(HasWeaksMeta):
 
     def __init__(cls, name, bases, namespace):
@@ -181,7 +180,6 @@ class Menu(HasWeaks, metaclass=_MenuMeta):
         """
         self._set_weak("session", new_session)
 
-    # noinspection PyMethodMayBeStatic
     def _init(self):
         """Prepare this menu after instantiation.
 

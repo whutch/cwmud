@@ -253,7 +253,6 @@ class TestHasWeaks:
         self._TestClass._set_weak("test", instance)
         assert self._TestClass._get_weak("test")
         self._TestClass._set_weak("test", None)
-        # noinspection PyUnresolvedReferences
         assert "test" not in self._TestClass._weak_refs
         del instance
         gc.collect()

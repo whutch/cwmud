@@ -72,7 +72,6 @@ class Account(Entity):
                 self.active = False
 
 
-# noinspection PyProtectedMember
 @Account.register_attr("email")
 class AccountEmail(Attribute):
 
@@ -94,7 +93,6 @@ class AccountEmail(Attribute):
         return new_value
 
 
-# noinspection PyProtectedMember
 @REQUESTS.register
 class RequestNewAccountEmail(Request):
 
@@ -157,7 +155,6 @@ class AccountName(Attribute):
         return name in cls.RESERVED
 
 
-# noinspection PyProtectedMember
 @REQUESTS.register
 class RequestNewAccountName(Request):
 
@@ -201,7 +198,6 @@ class AccountPassword(Attribute):
         return generate_hash(new_value)
 
 
-# noinspection PyProtectedMember
 @REQUESTS.register
 class RequestNewAccountPassword(Request):
 
@@ -251,7 +247,6 @@ class AccountOptionsReader(Attribute):
         return new_value
 
 
-# noinspection PyProtectedMember
 @REQUESTS.register
 class RequestAccountOptionsReader(Request):
 
@@ -280,7 +275,6 @@ class AccountOptionsColor(Attribute):
         return new_value
 
 
-# noinspection PyProtectedMember
 @REQUESTS.register
 class RequestAccountOptionsColor(Request):
 
@@ -309,7 +303,6 @@ class AccountOptionsWidth(Attribute):
         return new_value
 
 
-# noinspection PyProtectedMember
 @REQUESTS.register
 class RequestAccountOptionsWidth(Request):
 
@@ -328,7 +321,6 @@ class RequestAccountOptionsWidth(Request):
                                            " than zero.")
 
 
-# noinspection PyUnresolvedReferences
 def create_account(session, callback, account=None):
     """Perform a series of requests to create a new account.
 
@@ -400,7 +392,6 @@ def authenticate_account(session, success=None, fail=None, account=None):
             if not _account:
                 # Account not found, recursing with the account email string
                 # as the account will ensure that the password check fails.
-                # noinspection PyTypeChecker
                 authenticate_account(_session, fail, fail, account_email)
             else:
                 authenticate_account(_session, success, fail, _account)

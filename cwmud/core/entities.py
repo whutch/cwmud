@@ -73,7 +73,6 @@ class EntityManager:
         """Save the dirty instances of all registered entities."""
         count = 0
         for entity in self._entities.values():
-            # noinspection PyProtectedMember
             for instance in entity._instances.values():
                 if instance.is_savable and instance.is_dirty:
                     instance.save()
@@ -82,7 +81,6 @@ class EntityManager:
             log.debug("Saved %s dirty entities.", count)
 
 
-# noinspection PyDocstring
 class _EntityMeta(HasFlagsMeta, HasWeaksMeta):
 
     def __init__(cls, name, bases, namespace):
@@ -90,7 +88,6 @@ class _EntityMeta(HasFlagsMeta, HasWeaksMeta):
         cls._base_blob = type(name + "BaseBlob", (DataBlob,), {})
         cls._instances = WeakValueDictionary()
         cls._caches = {}
-        # noinspection PyUnresolvedReferences
         cls.register_cache("uid")
 
     def register_blob(cls, name):
@@ -106,12 +103,10 @@ class _EntityMeta(HasFlagsMeta, HasWeaksMeta):
         if hasattr(cls, name):
             raise AlreadyExists(name, getattr(cls, name))
 
-        # noinspection PyProtectedMember
         def _inner(blob_class):
             if (not isinstance(blob_class, type)
                     or not issubclass(blob_class, DataBlob)):
                 raise TypeError("must be subclass of DataBlob to register")
-            # noinspection PyUnresolvedReferences
             cls._base_blob._blobs[name] = blob_class
             prop = property(lambda s: s._base_blob._blobs[name])
             setattr(cls, name, prop)
@@ -132,12 +127,10 @@ class _EntityMeta(HasFlagsMeta, HasWeaksMeta):
         if hasattr(cls, name):
             raise AlreadyExists(name, getattr(cls, name))
 
-        # noinspection PyProtectedMember
         def _inner(attr_class):
             if (not isinstance(attr_class, type)
                     or not issubclass(attr_class, Attribute)):
                 raise TypeError("must be subclass of Attribute to register")
-            # noinspection PyUnresolvedReferences
             cls._base_blob._attrs[name] = attr_class
             getter = lambda s: s._base_blob._get_attr_val(name)
             setter = (lambda s, v: s._base_blob._set_attr_val(name, v)
@@ -221,7 +214,6 @@ class Entity(HasFlags, HasTags, HasWeaks, metaclass=_EntityMeta):
                 # because we're abusing the mutability of default arguments.
             if issubclass(cls, Entity):
                 if cls not in checked:  # pragma: no cover
-                    # noinspection PyProtectedMember
                     blob._update(cls._base_blob(self))
                     checked.add(cls)
             return blob

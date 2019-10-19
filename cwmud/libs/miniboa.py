@@ -947,7 +947,6 @@ class TelnetServer(object):
                 try:
                     sock, addr_tup = self.server_socket.accept()
                 except socket.error as err:
-                    # noinspection PyUnresolvedReferences
                     logging.error("ACCEPT socket error '{}:{}'."
                                   .format(err[0], err[1]))
                     continue
